@@ -1,0 +1,2 @@
+org.springframework.context.ApplicationListener=br.tech.desiderati.common.configuration.LiquibaseSystemPropertiesInitializer
+org.springframework.context.ApplicationContextInitializer= br.tech.desiderati.common.configuration.ExternalPropertiesFileValidationInitializer

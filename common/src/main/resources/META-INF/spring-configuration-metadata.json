@@ -1,0 +1,53 @@
+{
+  "groups": [
+    {
+      "name": "app.multitenancy",
+      "type": "br.tech.desiderati.common.configuration.MultiTenancyProperties",
+      "sourceType": "br.tech.desiderati.common.configuration.AppProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.system-id",
+      "type": "java.util.UUID",
+      "description": "System Id"
+    },
+    {
+      "name": "app.api-base-path",
+      "type": "java.lang.String",
+      "description": "Default prefix used by all RESTs",
+      "defaultValue": "/api"
+    },
+    {
+      "name": "app.database.username",
+      "type": "java.lang.String",
+      "description": "The owner of database",
+      "defaultValue": "app"
+    },
+    {
+      "name": "app.database.ddl-create-schema",
+      "type": "java.lang.String",
+      "description": "The DDL for schema creation",
+      "defaultValue": "CREATE SCHEMA ${schemaName}"
+    },
+    {
+      "name": "app.database.ddl-change-schema",
+      "type": "java.lang.String",
+      "description": "The DDL for schema change",
+      "defaultValue": "SET SCHEMA ''${schemaName}''"
+    },
+    {
+      "name": "app.multitenancy.defaultTenantIdentifier",
+      "type": "java.lang.String",
+      "description": "Default Tenant Identifier",
+      "defaultValue": "public"
+    },
+    {
+      "name": "app.multitenancy.type",
+      "type": "br.tech.desiderati.common.configuration.MultiTenancyProperties$Type",
+      "description": "Multitenancy Type",
+      "defaultValue": "NONE"
+    }
+  ]
+}
+

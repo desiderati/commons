@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!--
+            Resolvemos deixar como <layout> ao invés de <encoder> pois assim conseguimos ver as
+            mensagens de configuração do LogBack durante o bootstrap da aplicação.
+        -->
+        <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <layout>
+            <pattern>%yellow(%d{HH:mm:ss.SSS}) %highlight([%-5level]) %cyan(%-40.40logger{39}) : %white(%m%n)</pattern>
+        </layout>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

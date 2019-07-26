@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>br.tech.desiderati.common</groupId>
+        <artifactId>common-parent-info</artifactId>
+        <version>1.2.0-SNAPSHOT</version>
+        <relativePath>./common-parent-info</relativePath>
+    </parent>
+    <artifactId>commons</artifactId>
+    <packaging>pom</packaging>
+
+    <scm>
+        <url>${github.server-url}/commons.git</url>
+        <connection>scm:git:${github.server-url}/commons.git</connection>
+        <developerConnection>scm:git:${github.server-url}/commons.git</developerConnection>
+    </scm>
+
+    <modules>
+        <module>./common</module>
+        <module>./common-data-mongodb</module>
+        <module>./common-google</module>
+        <module>./common-jms</module>
+        <module>./common-logging</module>
+        <module>./common-logging-test</module>
+        <module>./common-notification</module>
+        <module>./common-parent</module>
+        <module>./common-parent-info</module>
+        <module>./common-parent-static</module>
+        <module>./common-parent-swagger</module>
+        <module>./common-scanner</module>
+        <module>./common-security</module>
+        <module>./common-starter</module>
+        <module>./common-starter-swagger</module>
+        <module>./common-test</module>
+    </modules>
+
+</project>

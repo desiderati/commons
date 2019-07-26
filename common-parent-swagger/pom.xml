@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>br.tech.desiderati.common</groupId>
+        <artifactId>common-parent</artifactId>
+        <version>1.2.0-SNAPSHOT</version>
+        <relativePath>../common-parent</relativePath>
+    </parent>
+    <artifactId>common-parent-swagger</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!--
+            Fine control. Each project can decide where to use or not the Swagger API.
+            By default it is disabled!
+        -->
+        <swagger.disabled>true</swagger.disabled>
+        <swagger.api.package>io.swagger.client.api</swagger.api.package>
+        <swagger.model.package>io.swagger.client.api.model</swagger.model.package>
+        <swagger.invoker.package>io.swagger.client</swagger.invoker.package>
+        <swagger.output.dir>generated-sources/swagger</swagger.output.dir>
+        <swagger.generated.source.dir>src/main/java</swagger.generated.source.dir>
+        <swagger.generated.source.test.dir>src/test/java</swagger.generated.source.test.dir>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-generated-swagger-sources-dir</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${swagger.output.dir}/${swagger.generated.source.dir}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <!-- For now, there is no need to add test directory to the classpath.
+                    <execution>
+                        <id>add-generated-swagger-test-sources-dir</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${swagger.output.dir}/${swagger.generated.source.test.dir}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    -->
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+            It was created a profile just to generate the Swagger Files, avoiding this task
+            being executed on each build.
+        -->
+        <profile>
+            <id>generate-swagger-sources</id>
+            <activation>
+                <property>
+                    <name>swagger.json.files</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.soebes.maven.plugins</groupId>
+                        <artifactId>iterator-maven-plugin</artifactId>
+                        <version>0.5.1</version>
+                        <executions>
+                            <execution>
+                                <id>generate-swagger-sources</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>iterator</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${swagger.disabled}</skip>
+                                    <content>${swagger.json.files}</content>
+                                    <pluginExecutors>
+                                        <pluginExecutor>
+                                            <plugin>
+                                                <groupId>io.swagger</groupId>
+                                                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                                                <version>2.2.2</version>
+                                            </plugin>
+                                            <goal>generate</goal>
+                                            <configuration>
+                                                <!--suppress MavenModelInspection-->
+                                                <inputSpec>${project.basedir}/src/main/resources/@item@</inputSpec>
+                                                <output>${project.basedir}/${swagger.output.dir}</output>
+                                                <language>java</language>
+                                                <configOptions>
+                                                    <sourceFolder>${swagger.generated.source.dir}</sourceFolder>
+                                                </configOptions>
+                                                <apiPackage>${swagger.api.package}</apiPackage>
+                                                <modelPackage>${swagger.model.package}</modelPackage>
+                                                <invokerPackage>${swagger.invoker.package}</invokerPackage>
+                                            </configuration>
+                                        </pluginExecutor>
+                                    </pluginExecutors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.basedir}/${swagger.output.dir}</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <!-- To run Swagger Client Api -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>logging-interceptor</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
