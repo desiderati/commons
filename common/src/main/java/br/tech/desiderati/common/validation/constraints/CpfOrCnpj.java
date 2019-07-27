@@ -50,7 +50,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @SuppressWarnings("unused")
 public @interface CpfOrCnpj {
 
-    String message() default "{CpfOrCnpj.message}";
+    String message() default "{br.tech.desiderati.common.validation.constraints.CpfOrCnpj.message}";
 
     Class<?>[] groups() default {};
 

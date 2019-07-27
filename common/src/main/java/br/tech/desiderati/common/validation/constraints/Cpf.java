@@ -48,7 +48,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @SuppressWarnings("unused")
 public @interface Cpf {
 
-    String message() default "{Cpf.message}";
+    String message() default "{br.tech.desiderati.common.validation.constraints.Cpf.message}";
 
     Class<?>[] groups() default {};
 

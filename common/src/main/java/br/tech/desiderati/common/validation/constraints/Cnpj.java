@@ -36,7 +36,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @SuppressWarnings("unused")
 public @interface Cnpj {
 
-    String message() default "{Cnpj.message}";
+    String message() default "{br.tech.desiderati.common.validation.constraints.Cnpj.message}";
 
     Class<?>[] groups() default {};
 

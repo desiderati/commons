@@ -13,7 +13,7 @@ import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 /**
  * Neccessário definir a propriedade:
  * <p>
- * spring.jpa.hibernate.naming.physical-strategy=DefaultPhysicalNamingStrategy
+ * spring.jpa.hibernate.naming.physical-strategy=br.tech.desiderati.common.data.jpa.DefaultPhysicalNamingStrategy
  * <p>
  * Dentro do arquivo <b>application.properties</b>. Esta classe pode ser estendida caso desejemos
  * personalizar o prefixo a ser utilizado.

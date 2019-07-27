@@ -16,7 +16,7 @@ import java.util.Locale;
 /**
  * Neccessário definir a propriedade:
  * <p>
- * spring.jpa.hibernate.naming.implicit-strategy=DefaultImplicityNamingStrategy
+ * spring.jpa.hibernate.naming.implicit-strategy=br.tech.desiderati.common.data.jpa.DefaultImplicityNamingStrategy
  * <p>
  * Dentro do arquivo <b>application.properties</b>.
  */
