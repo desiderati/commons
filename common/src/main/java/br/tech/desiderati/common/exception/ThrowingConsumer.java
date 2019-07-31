@@ -14,7 +14,7 @@ public interface ThrowingConsumer<T> {
 
     void apply(T t) throws Exception;
 
-    static <T> Consumer<T> unchecked(ThrowingConsumer<T> f) {
+    static <T> Consumer<T> uncheckedConsumer(ThrowingConsumer<T> f) {
         return t -> {
             try {
                 f.apply(t);
@@ -25,7 +25,7 @@ public interface ThrowingConsumer<T> {
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends Exception> void sneakyThrow(Exception t) throws T {
-        throw (T) t;
+    static <E extends Exception> void sneakyThrow(Exception e) throws E {
+        throw (E) e;
     }
 }

@@ -6,26 +6,24 @@
  */
 package br.tech.desiderati.common.exception;
 
-import java.util.function.Function;
-
 @FunctionalInterface
 @SuppressWarnings("unused")
-public interface ThrowingFunction<T, R> {
+public interface ThrowingRunnable {
 
-    R apply(T t) throws Exception;
+    void run() throws Exception;
 
-    static <T, R> Function<T, R> uncheckedFunction(ThrowingFunction<T, R> f) {
-        return t -> {
+    static Runnable uncheckedRunnable(ThrowingRunnable f) {
+        return () -> {
             try {
-                return f.apply(t);
+                f.run();
             } catch (Exception ex) {
-                return ThrowingFunction.sneakyThrow(ex);
+                ThrowingRunnable.sneakyThrow(ex);
             }
         };
     }
 
     @SuppressWarnings("unchecked")
-    static <E extends Exception, R> R sneakyThrow(Exception e) throws E {
+    static <E extends Exception> void sneakyThrow(Exception e) throws E {
         throw (E) e;
     }
 }
