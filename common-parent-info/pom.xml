@@ -10,9 +10,6 @@
         <name>Felipe Desiderati</name>
         <url>https://www.linkedin.com/in/felipedesiderati/</url>
     </organization>
-    <prerequisites>
-        <maven>${maven.version}</maven>
-    </prerequisites>
 
     <properties>
         <!-- Basic configuration. -->
