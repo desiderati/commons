@@ -69,8 +69,6 @@
         <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
         <json-path.version>2.4.0</json-path.version>
         <junit-engine.version>5.2.0</junit-engine.version>
-        <liquibase.version>3.6.2-fix3192</liquibase.version>
-        <liquibase-hibernate5.version>3.6-fix176</liquibase-hibernate5.version>
         <logback.version>1.2.3</logback.version>
         <lombok.version>1.18.0</lombok.version>
         <mockito-core.version>2.23.0</mockito-core.version>
@@ -150,74 +148,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <!--
-                Generates a diff between the specified database and the domain classes.
-            -->
-            <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>${liquibase.version}</version>
-                <configuration>
-                    <propertyFileWillOverride>true</propertyFileWillOverride>
-                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-                    <changeSetAuthor>maven</changeSetAuthor>
-                    <changeLogFile>${liquibase.changelog-dir}/${liquibase.initial-schema-file}</changeLogFile>
-                    <outputChangeLogFile>${liquibase.changelog-dir}/${liquibase.initial-schema-file}</outputChangeLogFile>
-                    <diffChangeLogFile>${liquibase.changelog-dir}/${liquibase.changelog-file}</diffChangeLogFile>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.liquibase.ext</groupId>
-                        <artifactId>liquibase-hibernate5</artifactId>
-                        <version>${liquibase-hibernate5.version}</version>
-                        <!-- To ensure that we are using the same Hibernate version. -->
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.hibernate</groupId>
-                                <artifactId>hibernate-core</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.hibernate</groupId>
-                                <artifactId>hibernate-entitymanager</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.hibernate</groupId>
-                                <artifactId>hibernate-envers</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-beans</artifactId>
-                        <version>${spring.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-core</artifactId>
-                        <version>${spring.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-context</artifactId>
-                        <version>${spring.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.springframework.data</groupId>
-                        <artifactId>spring-data-jpa</artifactId>
-                        <version>${spring-data-jpa.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.hibernate</groupId>
-                        <artifactId>hibernate-entitymanager</artifactId>
-                        <version>${hibernate.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.hibernate.validator</groupId>
-                        <artifactId>hibernate-validator</artifactId>
-                        <version>${hibernate-validator.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
