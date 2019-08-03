@@ -35,23 +35,17 @@ public class MultiTenancyConnectionProvider extends AbstractMultiTenantConnectio
 
     private final transient DatabaseProperties databaseProperties;
     private final transient HikariDatasourceConnectionProvider datasourceConnectionProvider;
-    private final transient LiquibaseMultiTenancyDatabaseMigration liquibaseMultiTenancyDatabaseMigration;
 
     @Autowired
     public MultiTenancyConnectionProvider(DatabaseProperties databaseProperties,
-                                          HikariDatasourceConnectionProvider datasourceConnectionProvider,
-                                          LiquibaseMultiTenancyDatabaseMigration liquibaseMultiTenancyDatabaseMigration) {
+                                          HikariDatasourceConnectionProvider datasourceConnectionProvider) {
 
         this.databaseProperties = databaseProperties;
         this.datasourceConnectionProvider = datasourceConnectionProvider;
-        this.liquibaseMultiTenancyDatabaseMigration = liquibaseMultiTenancyDatabaseMigration;
     }
 
     @Override
     public Connection getConnection(String tenantIdentifier) throws SQLException {
-        // Garantir que as regras do Liquibase estão sendo aplicadas a novos clientes.
-        liquibaseMultiTenancyDatabaseMigration.migrateDatabase(tenantIdentifier);
-
         Connection connection = super.getConnection(tenantIdentifier);
         try (Statement statement = connection.createStatement()) {
             StringSubstitutor stringSubstitutor = getStringSubstitutor(tenantIdentifier);

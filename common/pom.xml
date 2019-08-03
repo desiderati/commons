@@ -241,12 +241,6 @@
             <artifactId>joda-time</artifactId>
         </dependency>
 
-        <!-- Liquibase -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-
         <!-- Swagger -->
         <dependency>
             <groupId>io.swagger.core.v3</groupId>

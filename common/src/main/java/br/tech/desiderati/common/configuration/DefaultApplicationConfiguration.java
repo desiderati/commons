@@ -6,7 +6,6 @@
  */
 package br.tech.desiderati.common.configuration;
 
-import liquibase.integration.spring.SpringLiquibase;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,13 +48,5 @@ public class DefaultApplicationConfiguration {
         MethodValidationPostProcessor methodValidationPostProcessor = new MethodValidationPostProcessor();
         methodValidationPostProcessor.setValidatorFactory(validatorFactory);
         return methodValidationPostProcessor;
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", havingValue = "false", matchIfMissing = true)
-    public SpringLiquibase liquibase() {
-        SpringLiquibase springLiquibase = new SpringLiquibase();
-        springLiquibase.setShouldRun(false);
-        return springLiquibase;
     }
 }
