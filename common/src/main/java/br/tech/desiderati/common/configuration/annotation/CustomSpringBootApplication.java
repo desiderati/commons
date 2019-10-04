@@ -37,7 +37,7 @@ public @interface CustomSpringBootApplication {
     String[] propertySource() default {"classpath:application.properties"};
 
     @AliasFor(annotation = ComponentScan.class, attribute = "value")
-    String[] componentScan() default {"br.tech.desiderati.common", "br.tech.desiderati.ms"};
+    String[] componentScan() default {"br.tech.desiderati.common", "br.tech.desiderati.sample", "br.tech.desiderati.ms"};
 
 }
 

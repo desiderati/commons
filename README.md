@@ -1,5 +1,7 @@
 # Changelog
 
+Para maiores informações veja o projeto: [Commons](common/README.md)
+
 Todas as mudanças deste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)

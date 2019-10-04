@@ -78,7 +78,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
                 request, (javax.validation.ConstraintViolationException) rootCause);
         }
 
-        String errorCode = "http_error_" + DEFAULT_HTTP_STATUS;
+        String errorCode = "http_error_" + DEFAULT_HTTP_STATUS.value();
         String errorMsg = getMessage(errorCode, DEFAULT_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(DEFAULT_HTTP_STATUS).body(

@@ -72,10 +72,10 @@ public class AtmosphereWebApplicationInitializer extends ContainerInitializer
             registration.setLoadOnStartup(0);
             registration.setAsyncSupported(true);
 
-            atmosphereFramework = servlet.framework();
+            onStartup(Collections.emptySet(), servletContext);
+            atmosphereFramework = (AtmosphereFramework) servletContext.getAttribute("atmosphere");
             atmosphereFramework.addInitParameter(BROADCASTER_SHARABLE_THREAD_POOLS, "true");
             atmosphereFramework.addInitParameter(ANNOTATION_PACKAGE, "br.tech.desiderati.common.notification");
-            onStartup(Collections.emptySet(), servletContext);
         }
     }
 
