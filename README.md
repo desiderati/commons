@@ -10,6 +10,7 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 ### [Unreleased]
 
 ##### Added
+- Suporte Spring Data Rest.
 - Suporte ao Java 11.
 - Criação das classes **ThrowingRunnable**.
 - Criada anotação para testes na camada de serviço.

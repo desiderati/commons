@@ -21,9 +21,12 @@ import org.springframework.context.MessageSourceAware;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.TransactionException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -42,7 +45,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
-@ControllerAdvice(annotations = RestController.class)
+@ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
 @SuppressWarnings("unused")
 public class ExceptionHandlingController implements MessageSourceAware {
 
