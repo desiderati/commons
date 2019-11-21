@@ -10,11 +10,13 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 ### [Unreleased]
 
 ##### Added
+- Melhorias na classe **ExceptionHandlingController**: tratamento de novas exceções.
+- Adicionada a licença MIT.
 - Criação das classes **CustomRepositoryRestConfiguration**.
 - Suporte Spring Data Rest.
 - Suporte ao Java 11.
 - Criação das classes **ThrowingRunnable**.
-- Criada anotação para testes na camada de serviço.
+- Criação da anotação para testes na camada de serviço.
 - Implementação do recurso de _Multi Tenancy_.
 - Criação das classes **ThrowingConsumer** e **ThrowingFunction**.
 - Criação do módulo **common-parent-static**.

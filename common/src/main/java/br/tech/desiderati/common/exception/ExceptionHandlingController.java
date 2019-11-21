@@ -21,12 +21,11 @@ import org.springframework.context.MessageSourceAware;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.TransactionException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -69,7 +68,6 @@ public class ExceptionHandlingController implements MessageSourceAware {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseExceptionDTO> handleException(HttpServletRequest request, Exception ex) {
-
         ResponseEntity<ResponseExceptionDTO> responseEntity = handleApiExceptionCopycat(request, ex);
         if (responseEntity != null) {
             return responseEntity;
@@ -92,7 +90,6 @@ public class ExceptionHandlingController implements MessageSourceAware {
      * Para casos em que a exceção ApiException está em outro pacote senão o padrão.
      */
     private ResponseEntity<ResponseExceptionDTO> handleApiExceptionCopycat(HttpServletRequest request, Exception ex) {
-
         if (!(ex instanceof ApiException) && ex.getClass().getName().endsWith("ApiException")) {
             ApiException apiException = modelMapper.map(ex, ApiException.class);
             if (apiException.getCode() != 0 && apiException.getResponseBody() != null
@@ -108,51 +105,38 @@ public class ExceptionHandlingController implements MessageSourceAware {
     @ExceptionHandler({IllegalArgumentApplicationException.class, IllegalStateApplicationException.class})
     public ResponseEntity<ResponseExceptionDTO> handleIllegalArgumentStateApplicationException(
             HttpServletRequest request, ApplicationException ex) {
-
         return handleApplicationException(request, HttpStatus.NOT_ACCEPTABLE, ex);
     }
 
     @ExceptionHandler({SecurityApplicationException.class})
     public ResponseEntity<ResponseExceptionDTO> handleSecurityApplicationException(
             HttpServletRequest request, ApplicationException ex) {
-
         return handleApplicationException(request, HttpStatus.UNAUTHORIZED, ex);
     }
 
     @ExceptionHandler(ResourceNotFoundApplicationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundApplicationException(
             HttpServletRequest request, ResourceNotFoundApplicationException ex) {
-
         return handleApplicationException(request, HttpStatus.NOT_FOUND, ex);
     }
 
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleApplicationException(
             HttpServletRequest request, ApplicationException ex) {
-
         return handleApplicationException(request, DEFAULT_HTTP_STATUS, ex);
     }
 
     @NonNull
-    private ResponseEntity<ResponseExceptionDTO> handleApplicationException(HttpServletRequest request,
-                                                                            HttpStatus httpStatus,
-                                                                            ApplicationException ex) {
-        String errorCode = ex.getMessage();
-        String errorMsg = getMessage(errorCode, DEFAULT_MESSAGE, ex.getArgs());
-        UUID uuid = logMessage(request, errorMsg, ex);
-        return ResponseEntity.status(httpStatus).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
+    private ResponseEntity<ResponseExceptionDTO> handleApplicationException(
+            HttpServletRequest request, HttpStatus httpStatus, ApplicationException ex) {
+        return handleException(request, httpStatus, ex, ex.getArgs());
     }
 
     @ExceptionHandler(RestApiException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleRestApiException(HttpServletRequest request,
-                                                                       RestApiException ex) {
+    public ResponseEntity<ResponseExceptionDTO> handleRestApiException(
+            HttpServletRequest request, RestApiException ex) {
         HttpStatus httpStatus = getHttpStatus(ex);
-        String errorCode = ex.getMessage();
-        String errorMsg = getMessage(errorCode, DEFAULT_MESSAGE, ex.getArgs());
-        UUID uuid = logMessage(request, errorMsg, ex);
-        return ResponseEntity.status(httpStatus).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
+        return handleException(request, httpStatus, ex, ex.getArgs());
     }
 
     @ExceptionHandler(ApiException.class)
@@ -183,7 +167,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
 
         try {
             if (ex.getResponseBody() != null) {
-                TypeReference<ResponseExceptionDTO> typeRef = new TypeReference<ResponseExceptionDTO>() {};
+                TypeReference<ResponseExceptionDTO> typeRef = new TypeReference<>() {};
                 ObjectMapper mapper = new ObjectMapper();
                 ResponseExceptionDTO responseException = mapper.readValue(ex.getResponseBody(), typeRef);
                 // Não podemos usar instaceOf pois caso o corpo da ApiException tenha pelo menos uma propriedade
@@ -254,7 +238,6 @@ public class ExceptionHandlingController implements MessageSourceAware {
     @ExceptionHandler(TransactionException.class)
     public ResponseEntity<ResponseExceptionDTO> handleTransactionException(HttpServletRequest request,
                                                                            TransactionException ex) {
-
         ConstraintViolationException constraintEx = getConstraintViolationException(ex.getCause());
         if (constraintEx != null) {
             return handleConstraintViolationException(request, constraintEx);
@@ -283,6 +266,21 @@ public class ExceptionHandlingController implements MessageSourceAware {
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, HttpStatus.CONFLICT.value()));
+    }
+
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleEmptyResultDataAccessException(
+            HttpServletRequest request, EmptyResultDataAccessException ex) {
+        return handleException(request, HttpStatus.NOT_FOUND, ex);
+    }
+
+    private ResponseEntity<ResponseExceptionDTO> handleException(HttpServletRequest request, HttpStatus httpStatus,
+                                                                 Exception ex, Serializable... args) {
+        String errorCode = ex.getMessage();
+        String errorMsg = getMessage(errorCode, DEFAULT_MESSAGE, args);
+        UUID uuid = logMessage(request, errorMsg, ex);
+        return ResponseEntity.status(httpStatus).body(
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
     }
 
     private UUID logMessage(HttpServletRequest request, String errorMessage, Exception ex) {
