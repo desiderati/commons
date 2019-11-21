@@ -10,6 +10,7 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 ### [Unreleased]
 
 ##### Added
+- Criação das classes **CustomRepositoryRestConfiguration**.
 - Suporte Spring Data Rest.
 - Suporte ao Java 11.
 - Criação das classes **ThrowingRunnable**.
@@ -54,8 +55,8 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 - Adicionado suporte ao _Framework_ de _Templates_: Thymeleaf.
 - Adicionado suporte ao _Framework_ Swagger.
 - Adicionado suporte à configuração padronizada de aplicações via Spring Boot.
-- Adicionado suporte ao _Framework_  Liquibase.
-- Adicionado suporte ao _Framework_  Atmosphere.
+- Adicionado suporte ao _Framework_ Liquibase.
+- Adicionado suporte ao _Framework_ Atmosphere.
 - Adicionado suporte à gerenciamento de filas.
 - Adicionado suporte à configuração padronizada de arquivos de _Log_.
 - Adicionado suporte à leitores QR Code.

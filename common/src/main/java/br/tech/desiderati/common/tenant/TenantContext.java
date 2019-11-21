@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.UUID;
 
 /**
- * Classe responsável por armazenar o identiifcador do cliente (Tenant).
+ * Classe responsável por armazenar o identificador do cliente (Tenant).
  */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

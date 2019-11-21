@@ -14,6 +14,9 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Type;
 
+/**
+ * Forces the Spring Data Rest to return the Id of the object being handled.
+ */
 @Configuration
 public class CustomRepositoryRestConfiguration implements RepositoryRestConfigurer {
 

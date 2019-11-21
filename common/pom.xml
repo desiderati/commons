@@ -186,6 +186,12 @@
             <artifactId>logging-interceptor</artifactId>
         </dependency>
 
+        <!-- Liquibase -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+
         <!-- Databases -->
         <dependency>
             <groupId>org.hsqldb</groupId>
