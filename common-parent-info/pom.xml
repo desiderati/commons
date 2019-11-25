@@ -18,6 +18,14 @@
         <url>https://www.linkedin.com/in/felipedesiderati/</url>
     </organization>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Desiderati Commons Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/desiderati/commons</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <!-- Basic configuration. -->
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
