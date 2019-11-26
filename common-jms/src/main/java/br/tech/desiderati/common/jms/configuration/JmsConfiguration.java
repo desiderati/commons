@@ -56,6 +56,7 @@ import java.net.URI;
 @ComponentScan("br.tech.desiderati.common.jms")
 public class JmsConfiguration {
 
+    @SuppressWarnings("WeakerAccess") // Must be public!
     public static final String TYPE_ID_PROPERTY_NAME = "_type";
 
     @Bean

@@ -33,12 +33,13 @@ import org.springframework.jms.annotation.JmsListener;
 public abstract class AbstractMessageListener<M extends Message> {
 
     @JmsListener(destination = "${jms.default-queue.name}")
-    public void recieve(M message) throws Exception {
+    public void receive(M message) throws Exception {
         log.info("Message {} received!", message.getId());
         log.debug("{}", message);
         doReceive(message);
         log.info("Message {} received and processed with success!", message.getId());
     }
 
+    @SuppressWarnings("WeakerAccess") // Must be protected!
     protected abstract void doReceive(M message) throws Exception;
 }

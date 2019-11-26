@@ -19,6 +19,7 @@
 package br.tech.desiderati.common.jms;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
@@ -27,7 +28,7 @@ import org.springframework.util.ErrorHandler;
 public class JmsErrorHandler implements ErrorHandler {
 
     @Override
-    public void handleError(Throwable t) {
+    public void handleError(@NotNull Throwable t) {
         log.error("An error occured while processing JMS message!", t);
     }
 }
