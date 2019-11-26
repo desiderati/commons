@@ -85,6 +85,10 @@
         <!-- Turn on filtering by default for application properties. -->
         <resources>
             <resource>
+                <directory>${generated-resources.dir}</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
@@ -100,10 +104,6 @@
                     <exclude>**/application*.yaml</exclude>
                     <exclude>**/application*.properties</exclude>
                 </excludes>
-            </resource>
-            <resource>
-                <directory>${generated-resources.dir}</directory>
-                <filtering>true</filtering>
             </resource>
         </resources>
 

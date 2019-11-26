@@ -182,6 +182,16 @@
                                 <ignoredResourcePattern>i18n/exceptions(.*).properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>jwt.properties</ignoredResourcePattern>
                             </ignoredResourcePatterns>
+                            <ignoredDependencies>
+                                <dependency>
+                                    <groupId>org.apache.logging.log4j</groupId>
+                                    <artifactId>log4j-api</artifactId>
+                                </dependency>
+                                <dependency>
+                                    <groupId>net.bytebuddy</groupId>
+                                    <artifactId>byte-buddy</artifactId>
+                                </dependency>
+                            </ignoredDependencies>
                         </configuration>
                     </execution>
                 </executions>
