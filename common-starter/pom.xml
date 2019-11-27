@@ -12,6 +12,10 @@
     <artifactId>common-starter</artifactId>
     <packaging>pom</packaging>
 
+    <properties>
+        <spring.devtools.disabled>false</spring.devtools.disabled>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -28,6 +32,7 @@
                 <configuration>
                     <classifier>exec</classifier>
                     <mainClass>${start-class}</mainClass>
+                    <excludeDevtools>${spring.devtools.disabled}</excludeDevtools>
                 </configuration>
             </plugin>
         </plugins>

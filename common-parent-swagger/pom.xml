@@ -85,6 +85,7 @@
                                 </goals>
                                 <configuration>
                                     <skip>${swagger.disabled}</skip>
+                                    <!--suppress MavenModelInspection-->
                                     <content>${swagger.json.files}</content>
                                     <pluginExecutors>
                                         <pluginExecutor>
