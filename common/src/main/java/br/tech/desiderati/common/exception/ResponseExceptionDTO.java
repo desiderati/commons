@@ -26,6 +26,7 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
+@SuppressWarnings("WeakerAccess") // Must be public!
 public class ResponseExceptionDTO implements Serializable {
 
     /**

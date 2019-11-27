@@ -50,6 +50,7 @@ public class LiquibaseMultiTenancyDatabaseMigration {
     private final Set<String> databases;
 
     @Autowired
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public LiquibaseMultiTenancyDatabaseMigration(DataSource dataSource,
                                                   LiquibaseProperties liquibaseProperties,
                                                   ResourceLoader resourceLoader) {

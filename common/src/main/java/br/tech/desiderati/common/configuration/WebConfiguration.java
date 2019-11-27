@@ -56,6 +56,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     /**
      * @return O caminho raiz da aplicação.
      */
+    @SuppressWarnings("WeakerAccess") // Must be public!
     public String getDefaultApiBasePath() {
         if (!apiBasePath.startsWith("/")) {
             apiBasePath = "/" + apiBasePath;

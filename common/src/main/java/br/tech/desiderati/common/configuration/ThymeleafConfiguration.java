@@ -38,6 +38,7 @@ import java.util.Collections;
 public class ThymeleafConfiguration {
 
     @Bean
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public SpringTemplateEngine templateEngine(ITemplateResolver defaultResolver) {
         // Default Resolver.
         final SpringTemplateEngine templateEngine = new SpringTemplateEngine();

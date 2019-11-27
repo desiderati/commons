@@ -69,6 +69,7 @@ public abstract class AbstractPersistableIdentity<I extends Serializable> implem
     }
 
     @Override
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     public boolean equals(Object obj) {
         if (null == obj) {
             return false;

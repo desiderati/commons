@@ -52,6 +52,7 @@ public class MultiTenancySchemaConfiguration {
     private final MultiTenancyDatabaseMigrationInitializer multiTenancyDatabaseMigrationInitializer;
 
     @Autowired
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public MultiTenancySchemaConfiguration(LiquibaseMultiTenancyDatabaseMigration liquibaseMultiTenancyDatabaseMigration,
                                            MultiTenancyDatabaseMigrationInitializer multiTenancyDatabaseMigrationInitializer) {
 

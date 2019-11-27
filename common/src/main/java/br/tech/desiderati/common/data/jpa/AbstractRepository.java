@@ -79,6 +79,7 @@ public abstract class AbstractRepository<E extends Persistable<?>> {
         return createNativeQuery(sql, null);
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected Query createNativeQuery(String sql, Map<String, Object> parameters) {
         Query sqlQuery = entityManager.createNativeQuery(sql);
         if (parameters != null) {

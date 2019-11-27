@@ -41,6 +41,7 @@ public class HikariDatasourceConnectionProvider implements ConnectionProvider, S
     private final DataSource dataSource;
 
     @Autowired
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public HikariDatasourceConnectionProvider(DataSource dataSource) {
         this.dataSource = dataSource;
     }

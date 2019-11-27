@@ -35,6 +35,7 @@ public class CustomRepositoryRestConfiguration implements RepositoryRestConfigur
     private final EntityManager entityManager;
 
     @Autowired
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public CustomRepositoryRestConfiguration(EntityManager entityManager) {
         this.entityManager = entityManager;
     }

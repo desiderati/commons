@@ -47,6 +47,7 @@ public abstract class AbstractWebApplicationInitializer extends SpringBootServle
         return applicationBuilder.sources(getWebApplicationClass());
     }
 
+    @SuppressWarnings("WeakerAccess") // Must be protected!
     protected String getExternalPropertiesFile() {
         return null;
     }

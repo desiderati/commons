@@ -37,6 +37,7 @@ public class DatabaseService {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public DatabaseService(DatabaseProperties databaseProperties, JdbcTemplate jdbcTemplate) {
         this.databaseProperties = databaseProperties;
         this.jdbcTemplate = jdbcTemplate;
