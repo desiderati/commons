@@ -95,6 +95,7 @@
                     <include>**/application*.yml</include>
                     <include>**/application*.yaml</include>
                     <include>**/application*.properties</include>
+                    <include>**/banner.txt</include>
                 </includes>
             </resource>
             <resource>
@@ -103,33 +104,12 @@
                     <exclude>**/application*.yml</exclude>
                     <exclude>**/application*.yaml</exclude>
                     <exclude>**/application*.properties</exclude>
+                    <exclude>**/banner.txt</exclude>
                 </excludes>
             </resource>
         </resources>
 
         <plugins>
-            <!--
-                It copies the project banner which will be used to log the project name and version!
-            -->
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-project-banner</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                            <type>jar</type>
-                            <includeArtifactIds>common</includeArtifactIds>
-                            <includes>banner.txt</includes>
-                            <outputDirectory>${generated-resources.dir}</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!--
                 Generates a diff between the specified database and the domain classes.
             -->
@@ -232,6 +212,43 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>generate-banner.txt-file</id>
+            <activation>
+                <file>
+                    <missing>src/main/resources/banner.txt</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <!--
+                        It copies the project banner which will be used to log the project name and version!
+                    -->
+                    <plugin>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-project-banner</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>unpack-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <overWriteIfNewer>true</overWriteIfNewer>
+                                    <type>jar</type>
+                                    <includeArtifactIds>common</includeArtifactIds>
+                                    <includes>banner.txt</includes>
+                                    <outputDirectory>${generated-resources.dir}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
