@@ -70,11 +70,6 @@
         -->
         <profile>
             <id>generate-swagger-sources</id>
-            <activation>
-                <property>
-                    <name>swagger.json.files</name>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
