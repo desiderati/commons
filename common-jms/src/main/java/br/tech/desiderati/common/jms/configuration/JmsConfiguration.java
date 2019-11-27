@@ -50,7 +50,7 @@ import java.net.URI;
 
 @Slf4j
 @EnableJms
-@EnableAutoConfiguration
+@EnableAutoConfiguration // Without it, ConnectionFactory will not be wired within IntelliJ.
 @SpringBootConfiguration
 @PropertySource("classpath:jms.properties")
 @ComponentScan("br.tech.desiderati.common.jms")

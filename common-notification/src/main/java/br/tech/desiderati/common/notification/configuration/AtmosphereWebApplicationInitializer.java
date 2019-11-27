@@ -41,7 +41,7 @@ import static org.atmosphere.cpr.ApplicationConfig.ANNOTATION_PACKAGE;
 import static org.atmosphere.cpr.ApplicationConfig.BROADCASTER_SHARABLE_THREAD_POOLS;
 
 @Slf4j
-@EnableAutoConfiguration
+@EnableAutoConfiguration // TODO Felipe Desiderati: Can we remove it?
 @SpringBootConfiguration
 @ComponentScan("br.tech.desiderati.common.notification")
 public class AtmosphereWebApplicationInitializer extends ContainerInitializer
