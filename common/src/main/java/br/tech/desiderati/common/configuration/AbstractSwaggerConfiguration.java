@@ -18,12 +18,12 @@
  */
 package br.tech.desiderati.common.configuration;
 
-import com.google.common.base.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
@@ -32,10 +32,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Utilizar esta configuração sempre que precisar expor os controladores
- * ({@link org.springframework.web.bind.annotation.RestController}) da
+ * ({@link RestController}) da
  * aplicação via Swagger.
  */
 @EnableSwagger2
@@ -51,7 +52,7 @@ public abstract class AbstractSwaggerConfiguration {
             .protocols(protocols())
             .select()
             .apis(RequestHandlerSelectors.basePackage(packagesToScan()))
-            .paths(pathsToExpose())
+            .paths(pathsToExpose()::test)
             .build();
     }
 
@@ -62,13 +63,15 @@ public abstract class AbstractSwaggerConfiguration {
         return protocols;
     }
 
+    @SuppressWarnings("WeakerAccess") // Must be protected!
     protected Predicate<String> pathsToExpose() {
         if (StringUtils.isBlank(pathToExpose())) {
-            return PathSelectors.any();
+            return PathSelectors.any()::apply;
         }
-        return PathSelectors.regex(pathToExpose());
+        return PathSelectors.regex(pathToExpose())::apply;
     }
 
+    @SuppressWarnings("WeakerAccess") // Must be protected!
     protected String pathToExpose() {
         return null;
     }
