@@ -50,7 +50,6 @@ public class DatabaseService {
 
         StringSubstitutor strSubstitutor = new StringSubstitutor(values);
         String createQuery = strSubstitutor.replace(databaseProperties.getDdlCreateSchema());
-
         jdbcTemplate.execute(createQuery);
     }
 }

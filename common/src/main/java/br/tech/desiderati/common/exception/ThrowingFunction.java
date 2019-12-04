@@ -20,6 +20,9 @@ package br.tech.desiderati.common.exception;
 
 import java.util.function.Function;
 
+/**
+ * @see ThrowingConsumer
+ */
 @FunctionalInterface
 @SuppressWarnings("unused")
 public interface ThrowingFunction<T, R> {

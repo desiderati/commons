@@ -18,31 +18,29 @@
  */
 package br.tech.desiderati.common.exception;
 
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
- * Using the ThrowingConsumer Functional Interface allow us to handle lambda functions
- * which throws checked exceptions, and whit this, we didn't have to declare a specific
- * Consumer which handles such checked exception.
+ * @see ThrowingConsumer
  */
 @FunctionalInterface
 @SuppressWarnings("unused")
-public interface ThrowingConsumer<T> {
+public interface ThrowingSupplier<R> {
 
-    void accept(T t) throws Exception;
+    R get() throws Exception;
 
-    static <T> Consumer<T> uncheckedConsumer(ThrowingConsumer<T> f) {
-        return t -> {
+    static <R> Supplier<R> uncheckedRunnable(ThrowingSupplier<R> f) {
+        return () -> {
             try {
-                f.accept(t);
+                return f.get();
             } catch (Exception ex) {
-                ThrowingConsumer.sneakyThrow(ex);
+                return ThrowingSupplier.sneakyThrow(ex);
             }
         };
     }
 
     @SuppressWarnings("unchecked")
-    static <E extends Exception> void sneakyThrow(Exception e) throws E {
+    static <E extends Exception, R> R sneakyThrow(Exception e) throws E {
         throw (E) e;
     }
 }

@@ -18,6 +18,9 @@
  */
 package br.tech.desiderati.common.exception;
 
+/**
+ * @see ThrowingConsumer
+ */
 @FunctionalInterface
 @SuppressWarnings("unused")
 public interface ThrowingRunnable {
