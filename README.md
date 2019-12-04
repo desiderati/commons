@@ -10,6 +10,7 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 ### [Unreleased]
 
 ##### Added
+- Implementação do recurso de cálculo de CRC16.
 - Melhorias na classe **ExceptionHandlingController**: tratamento de novas exceções.
 - Adicionada a licença MIT.
 - Criação das classes **CustomRepositoryRestConfiguration**.
@@ -18,7 +19,7 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 - Criação das classes **ThrowingRunnable**.
 - Criação da anotação para testes na camada de serviço.
 - Implementação do recurso de _Multi Tenancy_.
-- Criação das classes **ThrowingConsumer** e **ThrowingFunction**.
+- Criação das classes **ThrowingConsumer**, **ThrowingSupplier** e **ThrowingFunction**.
 - Criação do módulo **common-parent-static**.
 - Adição das páginas padronizadas de erro. (**40X.html** e **50X.html**)
 
