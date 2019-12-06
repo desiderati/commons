@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2019 - Felipe Desiderati
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction,
+  ~ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  ~ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+  ~ subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  ~ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
@@ -13,10 +32,42 @@
     <artifactId>common-parent-info</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <name>Desiderati Commons Parent Info POM</name>
+    <description>Parent POM providing plugin management for applications built with Maven.</description>
+
     <organization>
         <name>Felipe Desiderati</name>
-        <url>https://www.linkedin.com/in/felipedesiderati/</url>
+        <url>${github.server-url}</url>
     </organization>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Felipe Desiderati</name>
+            <email>felipedesiderati@gmail.com</email>
+            <organization>Felipe Desiderati</organization>
+            <organizationUrl>${github.server-url}</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/desiderati/commons.git</connection>
+        <developerConnection>scm:git:ssh://github.com:desiderati/commons.git</developerConnection>
+        <url>http://github.com/desiderati/commons/tree/master</url>
+    </scm>
+
+    <issueManagement>
+        <url>https://github.com/desiderati/commons/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
 
     <distributionManagement>
         <repository>
@@ -30,7 +81,7 @@
         <!-- Basic configuration. -->
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <maven.version>3.6.0</maven.version>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
 
         <!--
             There is no need to use Javadoc in our projects.

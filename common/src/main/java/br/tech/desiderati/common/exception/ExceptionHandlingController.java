@@ -179,7 +179,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
 
         try {
             if (ex.getResponseBody() != null) {
-                TypeReference<ResponseExceptionDTO> typeRef = new TypeReference<>() {};
+                TypeReference<ResponseExceptionDTO> typeRef = new TypeReference<ResponseExceptionDTO>() {};
                 ObjectMapper mapper = new ObjectMapper();
                 ResponseExceptionDTO responseException = mapper.readValue(ex.getResponseBody(), typeRef);
                 // Não podemos usar instaceOf pois caso o corpo da ApiException tenha pelo menos uma propriedade
