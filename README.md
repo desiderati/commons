@@ -10,6 +10,7 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 ### [Unreleased]
 
 ##### Added
+- Better files generation available or Swagger Clients. Now it is possible to download the JSON file directly from Thin Server.
 - Implementação do recurso de cálculo de CRC16.
 - Melhorias na classe **ExceptionHandlingController**: tratamento de novas exceções.
 - Adicionada a licença MIT.
