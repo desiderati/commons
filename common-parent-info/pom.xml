@@ -230,7 +230,9 @@
                                 <ignoredResourcePattern>banner.txt</ignoredResourcePattern>
                                 <ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
                                 <ignoredResourcePattern>i18n/exceptions(.*).properties</ignoredResourcePattern>
+                                <ignoredResourcePattern>i18n/validation-messages(.*).properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>jwt.properties</ignoredResourcePattern>
+                                <ignoredResourcePattern>mime.types</ignoredResourcePattern>
                             </ignoredResourcePatterns>
                             <ignoredDependencies>
                                 <dependency>
@@ -310,6 +312,21 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
+                It disables the spring-boot-maven-plugin because the Parent Swagger POM defines it and
+                we don't want to use the repackage goal.
+                The repackage goal must be defined only on the Starters POMs.
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>
