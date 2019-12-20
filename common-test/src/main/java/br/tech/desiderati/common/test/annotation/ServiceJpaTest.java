@@ -37,7 +37,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @SuppressWarnings("unused")
-public @interface ServiceTest {
+public @interface ServiceJpaTest {
 
     @AliasFor(annotation = Sql.class, attribute = "scripts")
     String[] sqlScripts() default "";
