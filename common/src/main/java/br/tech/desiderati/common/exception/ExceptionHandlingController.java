@@ -30,7 +30,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -50,10 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
@@ -92,14 +88,14 @@ public class ExceptionHandlingController implements MessageSourceAware {
         }
 
         String errorCode = "http_error_" + DEFAULT_HTTP_STATUS.value();
-        String errorMsg = getMessage(errorCode, DEFAULT_MESSAGE);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(DEFAULT_HTTP_STATUS).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, DEFAULT_HTTP_STATUS.value()));
     }
 
     /**
-     * Para casos em que a exceção ApiException está em outro pacote senão o padrão.
+     * Cases where the ApiException is in another package than the default.
      */
     private ResponseEntity<ResponseExceptionDTO> handleApiExceptionCopycat(HttpServletRequest request, Exception ex) {
         if (!(ex instanceof ApiException) && ex.getClass().getName().endsWith("ApiException")) {
@@ -120,7 +116,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
         return handleApplicationException(request, HttpStatus.NOT_ACCEPTABLE, ex);
     }
 
-    @ExceptionHandler({SecurityApplicationException.class})
+    @ExceptionHandler(SecurityApplicationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleSecurityApplicationException(
             HttpServletRequest request, ApplicationException ex) {
         return handleApplicationException(request, HttpStatus.UNAUTHORIZED, ex);
@@ -172,7 +168,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
             remoteException.append(responseBody);
         }
 
-        // Apenas logamos o retorno da chamada Swagger, caso haja conteúdo.
+        // We only log the return of the Swagger request, if there is a content.
         if (remoteExceptionWasLogged) {
             log.error("Remote Exception: " + remoteException.toString());
         }
@@ -182,8 +178,10 @@ public class ExceptionHandlingController implements MessageSourceAware {
                 TypeReference<ResponseExceptionDTO> typeRef = new TypeReference<ResponseExceptionDTO>() {};
                 ObjectMapper mapper = new ObjectMapper();
                 ResponseExceptionDTO responseException = mapper.readValue(ex.getResponseBody(), typeRef);
-                // Não podemos usar instaceOf pois caso o corpo da ApiException tenha pelo menos uma propriedade
-                // igual a uma das propriedades da classe ResponseExceptionDTO, o objeto desserializado será válido.
+
+                // We cannot use instaceOf because if the ApiException body has at least one property equal
+                // to one of the properties of the ResponseExceptionDTO class, the deserialized object will
+                // be valid.
                 if (responseException.getType().equals(ResponseExceptionDTO.class.getName())) {
                     String errorCode = responseException.getErrorCode();
                     String errorMsg = responseException.getMessage();
@@ -196,20 +194,20 @@ public class ExceptionHandlingController implements MessageSourceAware {
             log.warn("Is was not possible deserialize API exception body to response exception!", ioex);
         }
 
-        // Indiferente do status de retorno da chamada Swagger, iremos gerar o mesmo erro padrão
-        // para os nossos clientes.
+        // Regardless of the return status of the Swagger request, we will generate the same standard error
+        // for our clients.
         return handleException(request, ex);
     }
 
     /**
-     * Disparado quando usado com a anotação @{@link org.springframework.validation.annotation.Validated}.
+     * Throwed when used the @{@link org.springframework.validation.annotation.Validated} annotation.
      */
     @ExceptionHandler(javax.validation.ConstraintViolationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleJavaxConstraintViolationException(
             HttpServletRequest request, javax.validation.ConstraintViolationException ex) {
 
         String errorCode = "validation_error_msg";
-        String errorMsg = getMessage(errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, null);
         List<String> errors = new ArrayList<>();
         for (final ConstraintViolation constraintViolation : ex.getConstraintViolations()) {
@@ -225,14 +223,14 @@ public class ExceptionHandlingController implements MessageSourceAware {
     }
 
     /**
-     * Disparado quando usado com a anotação @{@link javax.validation.Valid}.
+     * Throwed when used the  @{@link javax.validation.Valid} annotation.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ResponseExceptionDTO> handleMethodArgumentNotValidException(
             HttpServletRequest request, MethodArgumentNotValidException ex) {
 
         String errorCode = "validation_error_msg";
-        String errorMsg = getMessage(errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, null);
         List<String> errors = new ArrayList<>();
         for (final FieldError error : ex.getBindingResult().getFieldErrors()) {
@@ -274,7 +272,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
             HttpServletRequest request, ConstraintViolationException ex) {
 
         String errorCode = getConstraintViolationErrorCode(ex);
-        String errorMsg = getMessage(errorCode, DEFAULT_MESSAGE);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, HttpStatus.CONFLICT.value()));
@@ -289,7 +287,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
     private ResponseEntity<ResponseExceptionDTO> handleException(HttpServletRequest request, HttpStatus httpStatus,
                                                                  Exception ex, Serializable... args) {
         String errorCode = ex.getMessage();
-        String errorMsg = getMessage(errorCode, DEFAULT_MESSAGE, args);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE, args);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
@@ -338,9 +336,9 @@ public class ExceptionHandlingController implements MessageSourceAware {
         }
     }
 
-    private String getMessage(String code, String defaultMessage, Serializable...args) {
+    private String getMessage(Locale locale, String code, String defaultMessage, Serializable...args) {
         return messageSource != null
-            ? messageSource.getMessage(code, args, defaultMessage, LocaleContextHolder.getLocale())
+            ? messageSource.getMessage(code, args, defaultMessage, locale)
                 : defaultMessage;
     }
 }
