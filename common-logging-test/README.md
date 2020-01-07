@@ -8,7 +8,7 @@ informações de Log serão gravadas seguindo um mesmo padrão de formatação. 
 <dependencies>
     ...
     <dependency>
-        <groupId>br.tech.desiderati.common</groupId>
+        <groupId>io.herd.common</groupId>
         <artifactId>common-logging-test</artifactId>
         <version>{INSERIR ÚLTIMA VERSÃO DISPONÍVEL}</version>
         <scope>test</scope>

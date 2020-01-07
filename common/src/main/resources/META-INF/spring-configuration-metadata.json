@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "app.multitenancy",
-      "type": "br.tech.desiderati.common.configuration.MultiTenancyProperties",
-      "sourceType": "br.tech.desiderati.common.configuration.AppProperties"
+      "type": "io.herd.common.configuration.MultiTenancyProperties",
+      "sourceType": "io.herd.common.configuration.AppProperties"
     }
   ],
   "properties": [
@@ -44,7 +44,7 @@
     },
     {
       "name": "app.multitenancy.type",
-      "type": "br.tech.desiderati.common.configuration.MultiTenancyProperties$Type",
+      "type": "io.herd.common.configuration.MultiTenancyProperties$Type",
       "description": "Multitenancy Type",
       "defaultValue": "NONE"
     }

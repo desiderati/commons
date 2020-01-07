@@ -1,1 +1,1 @@
-org.springframework.context.ApplicationContextInitializer= br.tech.desiderati.common.configuration.ExternalPropertiesFileValidationInitializer
+org.springframework.context.ApplicationContextInitializer= io.herd.common.configuration.ExternalPropertiesFileValidationInitializer
