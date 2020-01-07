@@ -42,7 +42,7 @@
         <swagger.thin-server.start-class/>
 
         <swagger.json-file.download.disabled>true</swagger.json-file.download.disabled>
-        <swagger.json-file.download.url>http://localhost:10000</swagger.json-file.download.url>
+        <swagger.json-file.download.url>http://localhost:12345</swagger.json-file.download.url>
         <swagger.json-file/>
 
         <!--
@@ -103,7 +103,7 @@
                                 <configuration>
                                     <skip>${swagger.thin-server.disabled}</skip>
                                     <mainClass>${swagger.thin-server.start-class}</mainClass>
-                                    <arguments>--spring.main.banner-mode=off,--server.port=10000</arguments>
+                                    <arguments>--spring.main.banner-mode=off,--server.port=12345</arguments>
                                 </configuration>
                             </execution>
                         </executions>
