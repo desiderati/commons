@@ -30,7 +30,7 @@
     <artifactId>common-parent-static</artifactId>
     <packaging>pom</packaging>
 
-    <name>Desiderati Commons Parent Static POM</name>
+    <name>Commons Herd.io Parent Static POM</name>
     <description>Parent POM providing plugin management for static applications built with Maven.</description>
 
     <properties>

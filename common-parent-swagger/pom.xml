@@ -30,7 +30,7 @@
     <artifactId>common-parent-swagger</artifactId>
     <packaging>pom</packaging>
 
-    <name>Desiderati Commons Parent Swagger POM</name>
+    <name>Commons Herd.io Parent Swagger POM</name>
     <description>Parent POM providing plugin management to enable Swagger support.</description>
 
     <properties>

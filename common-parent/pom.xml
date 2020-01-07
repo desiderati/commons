@@ -30,7 +30,7 @@
     <artifactId>common-parent</artifactId>
     <packaging>pom</packaging>
 
-    <name>Desiderati Commons Parent POM</name>
+    <name>Commons Herd.io Parent POM</name>
     <description>Parent POM providing dependency and plugin management for applications built with Maven.</description>
 
     <properties>
