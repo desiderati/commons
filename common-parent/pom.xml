@@ -37,6 +37,10 @@
         <!-- Directory where resources will be generated. -->
         <generated-resources.dir>generated-resources/src/main/resources</generated-resources.dir>
 
+        <!-- Artifact containing the banner.txt file to be copied into the projects. -->
+        <banner.txt-group-id>io.herd.common</banner.txt-group-id>
+        <banner.txt-artifact-id>common</banner.txt-artifact-id>
+
         <!-- Liquibase Configuration. -->
         <liquibase.changelog-dir>src/main/resources/db/changelog</liquibase.changelog-dir>
         <liquibase.changelog-file>${maven.build.timestamp}-changelog.xml</liquibase.changelog-file>
@@ -262,7 +266,8 @@
                                 <configuration>
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <type>jar</type>
-                                    <includeArtifactIds>common</includeArtifactIds>
+                                    <includeGroupIds>${banner.txt-group-id}</includeGroupIds>
+                                    <includeArtifactIds>${banner.txt-artifact-id}</includeArtifactIds>
                                     <includes>banner.txt</includes>
                                     <outputDirectory>${generated-resources.dir}</outputDirectory>
                                 </configuration>

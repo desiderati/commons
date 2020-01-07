@@ -203,7 +203,7 @@
             <!--
                 A Maven plugin to find and flag duplicate classes and
                 resources on the java classpath.
-                This ensures stability and reproducability of a maven build
+                This ensures stability and reproducibility of a maven build
                 and will flag possible problems or conflicts with
                 dependencies in a project.
             -->

@@ -192,7 +192,7 @@
     </profiles>
 
     <dependencies>
-        <!-- Needed if we are going to run the Thin Server. -->
+        <!-- Needed if we are going to run the Thin Server to download the JSON file. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-undertow</artifactId>
