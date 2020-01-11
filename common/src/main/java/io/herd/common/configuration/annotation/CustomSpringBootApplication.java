@@ -19,6 +19,7 @@
 package io.herd.common.configuration.annotation;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.PropertySource;
@@ -32,7 +33,9 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @EnableAspectJAutoProxy
+
 @EnableJpaRepositories
+@EntityScan
 
 // NOTE Felipe Desiderati: Não definir a anotação abaixo senão o Spring Boot não irá
 // configurar os Proxies corretamente. O gerenciamento de transação é configurado
@@ -44,6 +47,12 @@ import java.lang.annotation.*;
 @SpringBootApplication
 @SuppressWarnings("unused")
 public @interface CustomSpringBootApplication {
+
+    @AliasFor(annotation = EnableJpaRepositories.class, attribute = "value")
+    String[] jpaRepositoryScan() default {};
+
+    @AliasFor(annotation = EntityScan.class, attribute = "value")
+    String[] entityScan() default {};
 
     @AliasFor(annotation = PropertySource.class, attribute = "value")
     String[] propertySource() default {"classpath:application.properties"};
