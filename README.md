@@ -7,7 +7,12 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-### [Unreleased]
+### [2.0.1] - 2020-01-11
+
+##### Changed
+- Now it is possible to configure the EntityScan and JpaRepositotyScan.
+
+### [2.0.0] - 2020-01-10
 
 ##### Added
 - Better files generation available or Swagger Clients. Now it is possible to download the JSON file directly from Thin Server.
