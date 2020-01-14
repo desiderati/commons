@@ -1,0 +1,14 @@
+{
+  "name": "commons-herd.io",
+  "version": "1.0.0",
+  "scripts": {
+    "mvn:deploy": "mvn -B -e -Dmaven.wagon.http.pool=false clean deploy"
+  },
+  "engines": {
+    "node": ">=12.13.10"
+  },
+  "keywords": [
+    "node",
+    "maven"
+  ]
+}
