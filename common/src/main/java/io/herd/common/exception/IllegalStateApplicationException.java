@@ -21,9 +21,9 @@ package io.herd.common.exception;
 import java.io.Serializable;
 
 /**
- * Não usamos a classe @{@link IllegalStateException} pois a mesma não
- * aceita mensagens internacionalizadas.
- * Esta exceção será tratada como um @{@link org.springframework.http.HttpStatus#NOT_ACCEPTABLE}.
+ * We do not use the {@link IllegalStateException} class as it does not accept internationalized messages.
+ * <p>
+ * This exception will be treated as {@link org.springframework.http.HttpStatus#NOT_ACCEPTABLE}.
  */
 @SuppressWarnings("unused")
 public class IllegalStateApplicationException extends ApplicationException {

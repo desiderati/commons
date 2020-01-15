@@ -27,6 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.multitenancy")
 public class MultiTenancyProperties {
 
+    @SuppressWarnings("unused")
     public enum Type {
         NONE, SCHEMA, DATABASE, IDENTIFIER
     }

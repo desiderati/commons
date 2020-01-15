@@ -22,6 +22,7 @@ package io.herd.common.crc;
 /**
  * Copied from http://crccalc.com/
  */
+@SuppressWarnings("unused")
 public class CrcCalculator {
 
     private CrcAlgorithm crcAlgorithm;

@@ -67,6 +67,7 @@ public class CnpjValidator implements ConstraintValidator<Cnpj, CharSequence> {
 
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext context) {
+        // noinspection DuplicatedCode
         if (value == null) {
             return true;
         }

@@ -45,7 +45,7 @@ public class NullSafeJpaRepository {
         }
 
         Object obj = args[0];
-        if (obj == null || (obj instanceof Iterable && !((Iterable) obj).iterator().hasNext())) {
+        if (obj == null || (obj instanceof Iterable && !((Iterable<?>) obj).iterator().hasNext())) {
             return null;
         }
 

@@ -38,7 +38,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 public class DefaultApplicationConfiguration {
 
     @Bean
-    @Scope("prototype") // Para que possa redefinir as configurações sem afetar os demais.
+    @Scope("prototype") // So you can reset the settings without affecting the others.
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration()

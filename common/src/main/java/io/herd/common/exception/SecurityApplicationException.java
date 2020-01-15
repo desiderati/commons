@@ -21,7 +21,7 @@ package io.herd.common.exception;
 import java.io.Serializable;
 
 /**
- * Esta exceção será tratada como um @{@link org.springframework.http.HttpStatus#UNAUTHORIZED}.
+ * This exception will be treated as {@link org.springframework.http.HttpStatus#UNAUTHORIZED}.
  */
 @SuppressWarnings("unused")
 public class SecurityApplicationException extends ApplicationException {

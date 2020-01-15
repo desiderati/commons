@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - Felipe Desiderati
+ * Copyright (c) 2020 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,7 @@ package io.swagger.client;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class ApiException extends Exception {
 
     private int code = 0;

@@ -21,7 +21,7 @@ package io.herd.common.exception;
 import java.io.Serializable;
 
 /**
- *  Esta exceção será tratada como um @{@link org.springframework.http.HttpStatus#NOT_FOUND}.
+ *  This exception will be treated as {@link org.springframework.http.HttpStatus#NOT_FOUND}.
  */
 @SuppressWarnings("unused")
 public class ResourceNotFoundApplicationException extends ApplicationException {

@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.UUID;
 
 /**
- * Classe responsável por armazenar o identificador do cliente (Tenant).
+ * Class responsible for storing the customer identifier (Tenant).
  */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -50,10 +50,12 @@ public class TenantContext {
         return currentTenantId.get();
     }
 
+    @SuppressWarnings("unused")
     public static UUID getUUID() {
         return currentTenantUUID.get();
     }
 
+    @SuppressWarnings("unused")
     public static void clear() {
         currentTenantId.remove();
         currentTenantUUID.remove();

@@ -25,7 +25,6 @@ import java.io.Serializable;
 
 @Getter
 @NoArgsConstructor
-@SuppressWarnings("WeakerAccess")
 public class RestApiException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;

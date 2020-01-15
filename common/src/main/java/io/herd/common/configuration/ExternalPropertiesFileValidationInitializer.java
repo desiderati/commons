@@ -29,8 +29,8 @@ import java.io.File;
 import java.nio.file.Paths;
 
 @Slf4j
-@Order(Ordered.HIGHEST_PRECEDENCE) // Primeiro a ser executado!
-public class ExternalPropertiesFileValidationInitializer implements ApplicationContextInitializer {
+@Order(Ordered.HIGHEST_PRECEDENCE) // First to be executed!
+public class ExternalPropertiesFileValidationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     @Override
     public void initialize(@NotNull ConfigurableApplicationContext applicationContext) {
