@@ -18,6 +18,7 @@
  */
 package io.herd.common.configuration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandi
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -36,27 +40,32 @@ import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import javax.persistence.EntityManager;
+import javax.persistence.metamodel.Type;
 import java.lang.reflect.Method;
 
 @SpringBootConfiguration
 @ConditionalOnWebApplication
 @ConditionalOnSingleCandidate(WebConfiguration.class)
-public class WebConfiguration implements WebMvcConfigurer {
+public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
 
     @Value("${app.api-base-path:/api}")
     private String apiBasePath;
 
     private LocalValidatorFactoryBean validatorFactory;
 
+    private final EntityManager entityManager;
+
     @Autowired
-    public WebConfiguration(@Qualifier("localValidatorFactoryBean") LocalValidatorFactoryBean validatorFactory) {
+    public WebConfiguration(@Qualifier("localValidatorFactoryBean") LocalValidatorFactoryBean validatorFactory,
+                            EntityManager entityManager) {
         this.validatorFactory = validatorFactory;
+        this.entityManager = entityManager;
     }
 
     /**
      * @return O caminho raiz da aplicação.
      */
-    @SuppressWarnings("WeakerAccess") // Must be public!
     public String getDefaultApiBasePath() {
         if (!apiBasePath.startsWith("/")) {
             apiBasePath = "/" + apiBasePath;
@@ -120,5 +129,26 @@ public class WebConfiguration implements WebMvcConfigurer {
                 };
             }
         };
+    }
+
+    @Override
+    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration repositoryRestConfiguration) {
+        // Forces the Spring Data Rest to return the Id of the object being handled.
+        repositoryRestConfiguration.exposeIdsFor(
+            entityManager.getMetamodel().getEntities().stream()
+                .map(Type::getJavaType)
+                .toArray(Class[]::new));
+
+        // Only repositories annotated with @RepositoryRestResource are exposed, unless their exported flag
+        // is set to false.
+        repositoryRestConfiguration.setRepositoryDetectionStrategy(
+            RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
+
+        // FIXME Felipe Desiderati: Spring Data Rest should allow to define the complete path
+        //  on annotation @RepositoryRestResource
+        // Configures the Base Path. It can be redefined using property: spring.data.rest.base-path
+        if (StringUtils.isBlank(repositoryRestConfiguration.getBasePath().getPath())) {
+            repositoryRestConfiguration.setBasePath(getDefaultApiBasePath() + "/v1");
+        }
     }
 }
