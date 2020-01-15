@@ -7,10 +7,22 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.0.2] - 2020-01-14
+
+##### Added
+- Now the base path configuration is also applied to Spring Data Rest Repositories.
+  Fixed Bug: [The configuration of the default path ("/api") is not working while using Spring Data Rest](https://github.com/desiderati/commons/issues/2)
+- New Spring Boot Version 2.2.2.
+- Some translation and minor fixes.
+- Better Swagger support. Now it will be available by default.
+  Fixed Bug: [Swagger auto configuration not working with Spring Data Rest](https://github.com/desiderati/commons/issues/4)
+- Support to new exceptions: **ResourceNotFoundException** and **HttpRequestMethodNotSupportedException**.
+- Added support to Spring Actuator to all Spring Web applications.
+
 ### [2.0.1] - 2020-01-11
 
 ##### Changed
-- Now it is possible to configure the EntityScan and JpaRepositotyScan.
+- Now it is possible to configure the **EntityScan** and **JpaRepositotyScan**.
 
 ### [2.0.0] - 2020-01-10
 
