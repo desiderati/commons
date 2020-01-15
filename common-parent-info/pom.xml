@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.7.RELEASE</version>
+        <version>2.2.2.RELEASE</version>
         <relativePath/>
     </parent>
     <groupId>io.herd.common</groupId>
@@ -73,11 +73,20 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>jfrog-snapshots</id>
+            <name>jfrog-snapshots</name>
+            <url>http://oss.jfrog.org/oss-snapshot-local</url>
+        </repository>
+    </repositories>
+
     <properties>
         <!-- Basic configuration. -->
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <maven.version>3.6.0</maven.version>
         <java.version>1.8</java.version>
+        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
 
         <!--
             There is no need to use Javadoc in our projects.
@@ -240,6 +249,10 @@
                                 <dependency>
                                     <groupId>net.bytebuddy</groupId>
                                     <artifactId>byte-buddy</artifactId>
+                                </dependency>
+                                <dependency>
+                                    <groupId>net.bytebuddy</groupId>
+                                    <artifactId>byte-buddy-agent</artifactId>
                                 </dependency>
                             </ignoredDependencies>
                         </configuration>

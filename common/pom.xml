@@ -85,23 +85,6 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
 
-        <!--
-            Since version 11 you need to manually add below
-            JAXB Maven dependencies to your project.
-        -->
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-        </dependency>
-
         <!-- Apache Commons and others libs like Guava -->
         <dependency>
             <groupId>org.reflections</groupId>
@@ -191,6 +174,14 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-data-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-bean-validators</artifactId>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
