@@ -21,38 +21,51 @@ package io.herd.common.configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.data.rest.configuration.SpringDataRestConfiguration;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Utilizar esta configuração sempre que precisar expor os controladores
- * ({@link RestController}) da
- * aplicação via Swagger.
+ * Use this configuration whenever you need to expose application controllers ({@link RestController}) via Swagger.
  */
-@EnableSwagger2
+@EnableSwagger2WebMvc
 @SpringBootConfiguration
 @PropertySource("classpath:swagger.properties")
-@SuppressWarnings("unused")
-public abstract class AbstractSwaggerConfiguration {
+@EnableAutoConfiguration // Without it, IntelliJ will not use auto detection.
+@Import({SpringDataRestConfiguration.class, BeanValidatorPluginsConfiguration.class})
+public class SwaggerConfiguration {
+
+    // I dont't know why but the default value is not being recognized.
+    @Value("${springfox.swagger.enabled:true}")
+    private boolean enabled;
+
+    @Value("${springfox.swagger.package-to-scan:}")
+    private String packagesToScan;
+
+    @Value("${springfox.swagger.paths-to-expose:/api/v1/.*}")
+    private String pathsToExpose;
 
     @Bean
-    public Docket api(@Value("${swagger.enabled}") boolean enabled) {
+    public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
             .enable(enabled)
             .protocols(protocols())
             .select()
-            .apis(RequestHandlerSelectors.basePackage(packagesToScan()))
-            .paths(pathsToExpose()::test)
+            .apis(RequestHandlerSelectors.basePackage(packagesToScan))
+            .paths(pathsToExpose(pathsToExpose))
             .build();
     }
 
@@ -63,18 +76,19 @@ public abstract class AbstractSwaggerConfiguration {
         return protocols;
     }
 
-    @SuppressWarnings("WeakerAccess") // Must be protected!
-    protected Predicate<String> pathsToExpose() {
-        if (StringUtils.isBlank(pathToExpose())) {
-            return PathSelectors.any()::apply;
+    protected Predicate<String> pathsToExpose(String pathsToExpose) {
+        if (StringUtils.isBlank(pathsToExpose)) {
+            return PathSelectors.any();
         }
-        return PathSelectors.regex(pathToExpose())::apply;
+        String[] pathsToExposeArr = pathsToExpose.split(",");
+        Predicate<String> pathSelector = null;
+        for (String pathToExpose : pathsToExposeArr) {
+            if (pathSelector == null) {
+                pathSelector = PathSelectors.regex(pathToExpose);
+            } else {
+                pathSelector = pathSelector.or(PathSelectors.regex(pathToExpose));
+            }
+        }
+        return pathSelector;
     }
-
-    @SuppressWarnings("WeakerAccess") // Must be protected!
-    protected String pathToExpose() {
-        return null;
-    }
-
-    protected abstract String packagesToScan();
 }

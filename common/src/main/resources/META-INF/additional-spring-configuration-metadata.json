@@ -1,0 +1,70 @@
+{
+  "groups": [
+    {
+      "name": "app.multitenancy",
+      "type": "io.herd.common.configuration.MultiTenancyProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.system-id",
+      "type": "java.util.UUID",
+      "description": "System Id."
+    },
+    {
+      "name": "app.api-base-path",
+      "type": "java.lang.String",
+      "description": "Default prefix used by all RESTs.",
+      "defaultValue": "/api"
+    },
+    {
+      "name": "app.database.username",
+      "type": "java.lang.String",
+      "description": "The owner of database.",
+      "defaultValue": "app"
+    },
+    {
+      "name": "app.database.ddl-create-schema",
+      "type": "java.lang.String",
+      "description": "The DDL for schema creation.",
+      "defaultValue": "CREATE SCHEMA ${schemaName}"
+    },
+    {
+      "name": "app.database.ddl-change-schema",
+      "type": "java.lang.String",
+      "description": "The DDL for schema change.",
+      "defaultValue": "SET SCHEMA ''${schemaName}''"
+    },
+    {
+      "name": "app.multitenancy.defaultTenantIdentifier",
+      "type": "java.lang.String",
+      "description": "Default Tenant Identifier.",
+      "defaultValue": "public"
+    },
+    {
+      "name": "app.multitenancy.type",
+      "type": "io.herd.common.configuration.MultiTenancyProperties$Type",
+      "description": "Multitenancy Type.",
+      "defaultValue": "NONE"
+    },
+    {
+      "name": "springfox.swagger.enabled",
+      "type": "java.lang.Boolean",
+      "description": "It defines if Swagger will be enabled or not.",
+      "defaultValue": true
+    },
+    {
+      "name": "springfox.swagger.package-to-scan",
+      "type": "java.lang.String",
+      "description": "Package that will be scanned to retrieve all endpoints to be exposed.",
+      "defaultValue": ""
+    },
+    {
+      "name": "springfox.swagger.paths-to-expose",
+      "type": "java.lang.String",
+      "description": "Only the paths defined here will be exposed on Swagger UI.",
+      "defaultValue": "/api/v1/.*"
+    }
+  ]
+}
+
