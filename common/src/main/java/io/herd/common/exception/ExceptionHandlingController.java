@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -34,11 +35,13 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.TransactionException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,7 +56,6 @@ import java.util.*;
 
 @Slf4j
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
-@SuppressWarnings("unused")
 public class ExceptionHandlingController implements MessageSourceAware {
 
     private static final String DEFAULT_MESSAGE =
@@ -87,11 +89,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
                 request, (javax.validation.ConstraintViolationException) rootCause);
         }
 
-        String errorCode = "http_error_" + DEFAULT_HTTP_STATUS.value();
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
-        UUID uuid = logMessage(request, errorMsg, ex);
-        return ResponseEntity.status(DEFAULT_HTTP_STATUS).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, DEFAULT_HTTP_STATUS.value()));
+        return handleException(request, DEFAULT_HTTP_STATUS, ex);
     }
 
     /**
@@ -101,7 +99,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
         if (!(ex instanceof ApiException) && ex.getClass().getName().endsWith("ApiException")) {
             ApiException apiException = modelMapper.map(ex, ApiException.class);
             if (apiException.getCode() != 0 && apiException.getResponseBody() != null
-                    && !apiException.getResponseHeaders().isEmpty()) {
+                && !apiException.getResponseHeaders().isEmpty()) {
 
                 log.info("Transforming " + ex.getClass().getName() + " into " + ApiException.class.getName());
                 return handleApiException(request, apiException);
@@ -149,7 +147,6 @@ public class ExceptionHandlingController implements MessageSourceAware {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ResponseExceptionDTO> handleApiException(HttpServletRequest request, ApiException ex) {
-
         StringBuilder remoteException = new StringBuilder(ex.getMessage());
         boolean remoteExceptionWasLogged = false;
         if (ex.getResponseHeaders() != null) {
@@ -175,7 +172,8 @@ public class ExceptionHandlingController implements MessageSourceAware {
 
         try {
             if (ex.getResponseBody() != null) {
-                TypeReference<ResponseExceptionDTO> typeRef = new TypeReference<ResponseExceptionDTO>() {};
+                TypeReference<ResponseExceptionDTO> typeRef = new TypeReference<ResponseExceptionDTO>() {
+                };
                 ObjectMapper mapper = new ObjectMapper();
                 ResponseExceptionDTO responseException = mapper.readValue(ex.getResponseBody(), typeRef);
 
@@ -210,7 +208,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, null);
         List<String> errors = new ArrayList<>();
-        for (final ConstraintViolation constraintViolation : ex.getConstraintViolations()) {
+        for (final ConstraintViolation<?> constraintViolation : ex.getConstraintViolations()) {
             String fieldErrorMsg = constraintViolation.getPropertyPath() + ":" + constraintViolation.getMessage();
             errors.add(fieldErrorMsg);
             log.error("Validation: " + fieldErrorMsg);
@@ -246,8 +244,9 @@ public class ExceptionHandlingController implements MessageSourceAware {
     }
 
     @ExceptionHandler(TransactionException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleTransactionException(HttpServletRequest request,
-                                                                           TransactionException ex) {
+    public ResponseEntity<ResponseExceptionDTO> handleTransactionException(
+            HttpServletRequest request, TransactionException ex) {
+
         ConstraintViolationException constraintEx = getConstraintViolationException(ex.getCause());
         if (constraintEx != null) {
             return handleConstraintViolationException(request, constraintEx);
@@ -278,16 +277,40 @@ public class ExceptionHandlingController implements MessageSourceAware {
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, HttpStatus.CONFLICT.value()));
     }
 
+    private ResponseEntity<ResponseExceptionDTO> handleException(
+            HttpServletRequest request, HttpStatus httpStatus, Exception ex, Serializable... args) {
+
+        String errorCode = ex.getMessage();
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE, args);
+        UUID uuid = logMessage(request, errorMsg, ex);
+        return ResponseEntity.status(httpStatus).body(
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
+    }
+
     @ExceptionHandler(EmptyResultDataAccessException.class)
     public ResponseEntity<ResponseExceptionDTO> handleEmptyResultDataAccessException(
             HttpServletRequest request, EmptyResultDataAccessException ex) {
         return handleException(request, HttpStatus.NOT_FOUND, ex);
     }
 
-    private ResponseEntity<ResponseExceptionDTO> handleException(HttpServletRequest request, HttpStatus httpStatus,
-                                                                 Exception ex, Serializable... args) {
-        String errorCode = ex.getMessage();
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE, args);
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundException(
+            HttpServletRequest request, ResourceNotFoundException ex) {
+        return handleException(request, HttpStatus.NOT_FOUND, ex);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleHttpRequestMethodNotSupportedException(
+            HttpServletRequest request, HttpRequestMethodNotSupportedException ex) {
+        return handleException(request, HttpStatus.METHOD_NOT_ALLOWED, ex);
+    }
+
+    @NotNull
+    private ResponseEntity<ResponseExceptionDTO> handleException(
+            HttpServletRequest request, HttpStatus httpStatus, Exception ex) {
+
+        String errorCode = "http_error_" + httpStatus.value();
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
@@ -305,8 +328,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
             AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
         if (responseStatus != null) {
             return responseStatus.code();
-        }
-        else if (ex.getCause() instanceof Exception) {
+        } else if (ex.getCause() instanceof Exception) {
             ex = (Exception) ex.getCause();
             return getHttpStatus(ex);
         }
@@ -332,13 +354,13 @@ public class ExceptionHandlingController implements MessageSourceAware {
                 return "unique_" + ex.getConstraintName() + "_exception";
 
             default:
-                return "http_error_" + HttpStatus.CONFLICT;
+                return "http_error_" + HttpStatus.CONFLICT.value();
         }
     }
 
-    private String getMessage(Locale locale, String code, String defaultMessage, Serializable...args) {
+    private String getMessage(Locale locale, String code, String defaultMessage, Serializable... args) {
         return messageSource != null
             ? messageSource.getMessage(code, args, defaultMessage, locale)
-                : defaultMessage;
+            : defaultMessage;
     }
 }
