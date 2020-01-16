@@ -12,7 +12,7 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 ##### Added
 - Now the base path configuration is also applied to Spring Data Rest Repositories.
   Fixed Bug: [The configuration of the default path ("/api") is not working while using Spring Data Rest](https://github.com/desiderati/commons/issues/2)
-- New Spring Boot Version 2.2.2.
+- New Spring Boot Version 5.2.2.
 - Some translation and minor fixes.
 - Better Swagger support. Now it will be available by default.
   Fixed Bug: [Swagger auto configuration not working with Spring Data Rest](https://github.com/desiderati/commons/issues/4)

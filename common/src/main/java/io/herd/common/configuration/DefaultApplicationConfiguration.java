@@ -24,6 +24,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 @SpringBootConfiguration
+@EnableAutoConfiguration // Without it, IntelliJ will not use auto detection.
 @ComponentScan("io.herd.common")
 @AutoConfigureBefore(WebConfiguration.class)
 public class DefaultApplicationConfiguration {

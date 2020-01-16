@@ -21,7 +21,6 @@ package io.herd.common.configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
@@ -44,7 +43,6 @@ import java.util.function.Predicate;
 @EnableSwagger2WebMvc
 @SpringBootConfiguration
 @PropertySource("classpath:swagger.properties")
-@EnableAutoConfiguration // Without it, IntelliJ will not use auto detection.
 @Import({SpringDataRestConfiguration.class, BeanValidatorPluginsConfiguration.class})
 public class SwaggerConfiguration {
 
