@@ -40,7 +40,6 @@ import java.util.Base64;
 
 @Slf4j
 @Service
-@SuppressWarnings("unused")
 public class JwtService {
 
     private final JwtProperties jwtProperties;
@@ -76,15 +75,15 @@ public class JwtService {
             if (StringUtils.isBlank(jwtProperties.getPublicKey())) {
                 throw new IllegalStateException("Empty public key");
             }
-            byte[] econdedPublicKey = Base64.getDecoder().decode(jwtProperties.getPublicKey());
-            X509EncodedKeySpec pkeySpec = new X509EncodedKeySpec(econdedPublicKey);
+            byte[] encodedPublicKey = Base64.getDecoder().decode(jwtProperties.getPublicKey());
+            X509EncodedKeySpec pkeySpec = new X509EncodedKeySpec(encodedPublicKey);
             return KeyFactory.getInstance("RSA").generatePublic(pkeySpec);
         } catch (Exception e) {
             throw new JwtException("Unable to load public key", e);
         }
     }
 
-    public String generateToken(JwtTokenPayloadConfigurer configurer) {
+    public String generateToken(JwtTokenConfigurer configurer) {
         Claims tokenPayload = Jwts.claims();
         configurer.configure(tokenPayload);
         return Jwts.builder()
@@ -93,7 +92,7 @@ public class JwtService {
             .compact();
     }
 
-    public <T> T extractTokenPayload(String token, JwtTokenPayloadExtractor<T> extractor) {
+    public <T> T extractTokenPayload(String token, JwtTokenExtractor<T> extractor) {
         PublicKey innerPublicKey = getPublicKey();
         Claims tokenPayload = Jwts.parser()
             .setSigningKey(innerPublicKey)

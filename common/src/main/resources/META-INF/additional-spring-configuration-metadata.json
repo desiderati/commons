@@ -1,6 +1,10 @@
 {
   "groups": [
     {
+      "name": "app.datasource",
+      "type": "io.herd.common.configuration.DatabaseProperties"
+    },
+    {
       "name": "app.multitenancy",
       "type": "io.herd.common.configuration.MultiTenancyProperties"
     }
@@ -36,7 +40,7 @@
       "defaultValue": "SET SCHEMA ''${schemaName}''"
     },
     {
-      "name": "app.multitenancy.defaultTenantIdentifier",
+      "name": "app.multitenancy.default-tenant-identifier",
       "type": "java.lang.String",
       "description": "Default Tenant Identifier.",
       "defaultValue": "public"

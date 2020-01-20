@@ -28,11 +28,11 @@ import java.util.Locale;
 /**
  * Neccessário definir a propriedade:
  * <p>
- * spring.jpa.hibernate.naming.implicit-strategy=DefaultImplicityNamingStrategy
+ * spring.jpa.hibernate.naming.implicit-strategy=DefaultImplicitNamingStrategy
  * <p>
  * Dentro do arquivo <b>application.properties</b>.
  */
-public class DefaultImplicityNamingStrategy extends SpringImplicitNamingStrategy {
+public class DefaultImplicitNamingStrategy extends SpringImplicitNamingStrategy {
 
     private interface ColumnNameTransformer {
 

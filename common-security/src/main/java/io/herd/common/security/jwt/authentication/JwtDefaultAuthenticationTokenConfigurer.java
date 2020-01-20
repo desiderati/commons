@@ -16,12 +16,22 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.security.jwt;
+package io.herd.common.security.jwt.authentication;
 
-import io.jsonwebtoken.Claims;
+import io.herd.common.security.jwt.JwtTokenConfigurer;
+import org.joda.time.DateTime;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 
-public interface JwtTokenPayloadExtractor<T> {
+import javax.servlet.http.HttpServletRequest;
 
-    T extract(Claims tokenPayload);
+public class JwtDefaultAuthenticationTokenConfigurer implements JwtAuthenticationTokenConfigurer {
 
+    @Override
+    public JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication auth) {
+        return tokenPayload -> {
+            tokenPayload.setSubject(((User) auth.getPrincipal()).getUsername());
+            tokenPayload.setExpiration(DateTime.now().plusHours(1).toDate());
+        };
+    }
 }

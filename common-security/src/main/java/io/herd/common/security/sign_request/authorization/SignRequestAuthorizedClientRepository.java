@@ -16,13 +16,13 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.security.jwt;
+package io.herd.common.security.sign_request.authorization;
 
-import io.jsonwebtoken.Claims;
+import java.util.Optional;
+import java.util.UUID;
 
-@FunctionalInterface
-public interface JwtTokenPayloadConfigurer {
+public interface SignRequestAuthorizedClientRepository {
 
-    void configure(Claims tokenPayload);
+    Optional<SignRequestAuthorizedClient> findById(UUID id);
 
 }

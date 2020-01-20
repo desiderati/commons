@@ -21,7 +21,6 @@ package io.herd.common.scanner;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -29,7 +28,6 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = "image")
-@Document(collection = "qrCodes")
 public class QRCode implements Serializable {
 
     private static final long serialVersionUID = 1L;
