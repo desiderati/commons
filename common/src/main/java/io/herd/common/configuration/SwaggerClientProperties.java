@@ -16,34 +16,32 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.exception;
+package io.herd.common.configuration;
 
 import lombok.Getter;
+import lombok.Setter;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
+import java.util.Base64;
 
 @Getter
-public class ApplicationException extends RuntimeException {
+@Setter // Nunca esquecer de colocar os setXXX(..) para arquivos de configuração!
+@Component
+@PropertySource("classpath:swagger-client.properties")
+@SuppressWarnings("unused")
+public class SwaggerClientProperties {
 
-    private static final long serialVersionUID = 5046859219775779815L;
+    private String host;
+    private String basepath;
+    private String authUser;
+    private String authPass;
 
-    private Serializable[] args = null;
-
-    public ApplicationException(String message) {
-        super(message);
-    }
-
-    public ApplicationException(String message, Serializable...args) {
-        super(message);
-        this.args = args;
-    }
-
-    public ApplicationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ApplicationException(String message, Throwable cause, Serializable...args) {
-        super(message, cause);
-        this.args = args;
+    public String getBasicAuthorizationHeader() {
+        if (authUser != null && authPass != null) {
+            return "Basic " + new String(Base64.getEncoder().encode(
+                (authUser + ":" + authPass).getBytes()));
+        }
+        return null;
     }
 }

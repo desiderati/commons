@@ -29,7 +29,7 @@
     </parent>
     <groupId>io.herd.common</groupId>
     <artifactId>common-parent-info</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -82,11 +82,14 @@
     </repositories>
 
     <properties>
+        <!-- Major versions. -->
+        <common.version>2.1.1</common.version>
+        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+
         <!-- Basic configuration. -->
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <maven.version>3.6.0</maven.version>
         <java.version>1.8</java.version>
-        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
 
         <!--
             There is no need to use Javadoc in our projects.
@@ -239,6 +242,7 @@
                                 <ignoredResourcePattern>i18n/exceptions(.*).properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>i18n/validation-messages(.*).properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>jwt.properties</ignoredResourcePattern>
+                                <ignoredResourcePattern>liquibase.properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>mime.types</ignoredResourcePattern>
                             </ignoredResourcePatterns>
                             <ignoredDependencies>

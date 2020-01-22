@@ -7,6 +7,18 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.1.1] - 2020-01-22
+
+##### Added
+- Added support to default properties.
+- Added dependency with Spring Cloud Starter.
+
+##### Changed
+- Minor changes.
+- Improved the Swagger client properties configuration. Now there is no need of extending the **SwaggerClientProperties** class.
+- Changed the **DefaultPhysicalNamingStrategy** class. Now there is no need of extending it, just to configure the property 'app.database.table-prefix'.
+- Better messages while handling authorization and authentication.
+
 ### [2.1.0] - 2020-01-16
 
 ##### Added

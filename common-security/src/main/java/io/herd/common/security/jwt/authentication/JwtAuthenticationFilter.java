@@ -64,7 +64,8 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
         super(new AntPathRequestMatcher(loginUrl, "POST"));
         setAuthenticationSuccessHandler((request, response, authentication) -> {
             String token =
-                jwtService.generateToken(jwtAuthenticationTokenConfigurer.retrieveJwtTokenConfigurer(request, authentication));
+                jwtService.generateToken(
+                    jwtAuthenticationTokenConfigurer.retrieveJwtTokenConfigurer(request, authentication));
             response.addHeader(HEADER_AUTHORIZATION, TOKEN_BEARER + token);
         });
     }

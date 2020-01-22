@@ -1,8 +1,8 @@
 Instruções de Uso
 =================
  
-Suporte ao JWT
---------------
+Suporte ao Autenticação/Autorização JWT 
+---------------------------------------
  
 Será necessário criar o arquivo `jwt.properties` dentro do diretório `/src/main/resources` da sua aplicação, 
 alterando os valores de suas propriedades de acordo com a necessidade, conforme exemplo abaixo:
@@ -33,5 +33,5 @@ Geração do identificador e da chave de acesso à API
 **API Id:** UUID que será utilizado para identificar a aplicação cliente.
 (https://www.uuidgenerator.net/)
 
-**API Secret:** Chave randômica de 40 caracteres utilizada para assinar as requisões e verificar a assinatura.
-(https://randomkeygen.com/)
+**API Secret:** Chave randômica de 512-bit utilizada para assinar as requisões e verificar a assinatura.
+(https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx)

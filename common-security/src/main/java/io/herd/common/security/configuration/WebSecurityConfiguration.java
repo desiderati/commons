@@ -53,7 +53,7 @@ import org.springframework.security.web.firewall.HttpFirewall;
 @EnableWebSecurity
 @SpringBootConfiguration
 @EnableAutoConfiguration
-@PropertySource("classpath:application-security.properties")
+@PropertySource("classpath:application-common-security.properties")
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -105,12 +105,15 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             authorizeRequests.anyRequest().permitAll();
 
         } else {
-            // We enable all Swagger RESTs.
             authorizeRequests = authorizeRequests
+                // We enable all Swagger RESTs.
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
                 .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
+
+                // We enable all Actuator RESTs.
+                .antMatchers("/actuator/**").permitAll()
 
                 // It enables all calls to the public API.
                 .antMatchers("/api/v1/public/**").permitAll();

@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.herd.common</groupId>
         <artifactId>common-parent-info</artifactId>
-        <version>2.1.0</version>
+        <version>2.1.1</version>
         <relativePath>../common-parent-info</relativePath>
     </parent>
     <artifactId>common-parent</artifactId>
@@ -48,7 +48,7 @@
             I've tried to use ${project.parent.version}, but when using this property,
             it occurs this error: Fail to load artifact version...
         -->
-        <common-logging-test.version>2.1.0</common-logging-test.version>
+        <common-logging-test.version>${common.version}</common-logging-test.version>
 
         <activemq.version>5.15.9</activemq.version>
         <atmosphere.version>2.5.4</atmosphere.version>
@@ -96,6 +96,7 @@
         <postgresql.version>42.2.6</postgresql.version>
         <reflections.version>0.9.11</reflections.version>
         <spring.version>5.2.2.RELEASE</spring.version>
+        <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
         <spring-security-test.version>5.2.1.RELEASE</spring-security-test.version>
         <springfox-swagger2.version>3.0.0-SNAPSHOT</springfox-swagger2.version>
         <swagger-core.version>2.0.2</swagger-core.version>
@@ -230,7 +231,11 @@
                     <dependency>
                         <groupId>io.herd.common</groupId>
                         <artifactId>common</artifactId>
-                        <version>${project.parent.version}</version>
+                        <!--
+                            I've tried to use ${project.parent.version}, but when using this property,
+                            it occurs this error: Fail to load artifact version...
+                        -->
+                        <version>${common.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -290,6 +295,13 @@
                 <artifactId>spring-boot-devtools</artifactId>
                 <version>${spring-boot.version}</version>
                 <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- Javax -->

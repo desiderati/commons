@@ -72,12 +72,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                                     @NotNull FilterChain filterChain) throws ServletException, IOException {
 
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            Authentication authentication;
+            Authentication authentication = null;
             try {
                 authentication = jwtAuthorizationService.verifyAuthentication(servletRequest);
-            } catch (AuthenticationServiceException e) {
-                handleAuthenticationException(servletResponse, e);
-                return;
+            } catch (AuthenticationServiceException failed) {
+                log.error("Authorization Failed: " + failed.getMessage(), failed);
             }
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
@@ -86,12 +85,5 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 + SecurityContextHolder.getContext().getAuthentication() + "'");
         }
         filterChain.doFilter(servletRequest, servletResponse);
-    }
-
-    private void handleAuthenticationException(HttpServletResponse servletResponse,
-                                               AuthenticationServiceException failed) throws IOException {
-        log.error("Authentication Failed: " + failed.getMessage(), failed);
-        servletResponse.sendError(
-            HttpServletResponse.SC_FORBIDDEN, "Authentication Failed: " + failed.getMessage());
     }
 }

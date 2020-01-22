@@ -54,6 +54,7 @@ public class SignRequestAuthorizationService {
 
     // TODO Felipe Desiderati: Externalize???
     private static final int VALID_TIME_WINDOW = 15; // Minutes
+    private static final String DEFAULT_AUTHORIZATION_ERROR_MSG = "Unable to authorize the request due to: ";
 
     private final SignRequestAuthorizationClientProperties signRequestAuthorizationClientProperties;
 
@@ -113,23 +114,31 @@ public class SignRequestAuthorizationService {
                     return new UsernamePasswordAuthenticationToken("API_USER", null,
                         AuthorityUtils.createAuthorityList(
                             authorizedClient.getRoles().stream().map(role -> "ROLE_" + role).toArray(String[]::new)));
+                } else {
+                    log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Invalid signed request!");
                 }
             }
             return null;
         } catch (Exception e) {
-            throw new AuthenticationServiceException("Unable to authenticate the request due to: " + e.getMessage(), e);
+            throw new AuthenticationServiceException(DEFAULT_AUTHORIZATION_ERROR_MSG + e.getMessage(), e);
         }
     }
 
     private boolean verifyDate(HttpServletRequest request) {
         if (request.getHeader(HEADER_DATE) == null) {
+            log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Request date header not informed!");
             return false;
         }
 
-        ZonedDateTime date =
+        ZonedDateTime currentDate = ZonedDateTime.now();
+        ZonedDateTime requestDate =
             ZonedDateTime.ofInstant(Instant.ofEpochMilli(request.getDateHeader(HEADER_DATE)), ZoneId.of("UTC"));
-        boolean dateOutOfRange = date.isBefore(ZonedDateTime.now().minus(VALID_TIME_WINDOW, ChronoUnit.MINUTES))
-            || date.isAfter(ZonedDateTime.now().plus(VALID_TIME_WINDOW, ChronoUnit.MINUTES));
+        boolean dateOutOfRange = requestDate.isBefore(currentDate.minus(VALID_TIME_WINDOW, ChronoUnit.MINUTES))
+            || requestDate.isAfter(currentDate.plus(VALID_TIME_WINDOW, ChronoUnit.MINUTES));
+        if (dateOutOfRange) {
+            log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Request out of date! " +
+                "Current time: " + currentDate + ", Request Date: " + requestDate);
+        }
         return !dateOutOfRange;
     }
 }

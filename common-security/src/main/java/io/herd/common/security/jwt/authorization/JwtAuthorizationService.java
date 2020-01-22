@@ -55,7 +55,7 @@ public class JwtAuthorizationService {
         try {
             return getAuthenticationFromTokenPayload(request);
         } catch (Exception e) {
-            throw new AuthenticationServiceException("Unable to authenticate the request due to: " + e.getMessage(), e);
+            throw new AuthenticationServiceException("Unable to authorize the request due to: " + e.getMessage(), e);
         }
     }
 
@@ -63,10 +63,10 @@ public class JwtAuthorizationService {
      * Extract the authenticated user (contained inside the TOKEN).
      */
     private Authentication getAuthenticationFromTokenPayload(HttpServletRequest request) {
-        String token = request.getHeader(HEADER_AUTHORIZATION);
-        if (token != null && token.startsWith(TOKEN_BEARER)) {
+        String auth = request.getHeader(HEADER_AUTHORIZATION);
+        if (auth != null && auth.startsWith(TOKEN_BEARER)) {
             return jwtService.extractTokenPayload(
-                token.replace(TOKEN_BEARER, ""), jwtTokenExtractor);
+                auth.replace(TOKEN_BEARER, ""), jwtTokenExtractor);
         }
         return null;
     }

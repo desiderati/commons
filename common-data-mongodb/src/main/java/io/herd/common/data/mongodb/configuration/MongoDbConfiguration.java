@@ -16,28 +16,17 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.configuration;
+package io.herd.common.data.mongodb.configuration;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
 
-import java.util.Base64;
+@EnableAutoConfiguration // Without it, ConnectionFactory will not be wired within IntelliJ.
+@SpringBootConfiguration
+@PropertySource("classpath:application-common-data-mongodb.properties")
+@ComponentScan("io.herd.common.data.mongodb")
+public class MongoDbConfiguration {
 
-@Getter
-@Setter // Nunca esquecer de colocar os setXXX(..) para arquivos de configuração!
-@SuppressWarnings("unused")
-public abstract class AbstractSwaggerClientProperties {
-
-    private String host;
-    private String basepath;
-    private String authUser;
-    private String authPass;
-
-    public String getBasicAuthorizationHeader() {
-        if (authUser != null && authPass != null) {
-            return "Basic " + new String(Base64.getEncoder().encode(
-                (authUser + ":" + authPass).getBytes()));
-        }
-        return null;
-    }
 }

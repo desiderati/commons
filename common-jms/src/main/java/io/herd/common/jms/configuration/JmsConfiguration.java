@@ -52,7 +52,7 @@ import java.net.URI;
 @EnableJms
 @EnableAutoConfiguration // Without it, ConnectionFactory will not be wired within IntelliJ.
 @SpringBootConfiguration
-@PropertySource("classpath:jms.properties")
+@PropertySource({"classpath:application-common-jms.properties", "classpath:jms.properties"})
 @ComponentScan("io.herd.common.jms")
 public class JmsConfiguration {
 

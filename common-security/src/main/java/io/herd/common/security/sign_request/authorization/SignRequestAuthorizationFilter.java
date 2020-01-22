@@ -73,12 +73,11 @@ public class SignRequestAuthorizationFilter extends OncePerRequestFilter {
 
         HttpServletRequest signServletRequest = new SignRequestWrapper(servletRequest);
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            Authentication authentication;
+            Authentication authentication = null;
             try {
                 authentication = signRequestAuthorizationService.verifySignature(signServletRequest);
-            } catch (AuthenticationServiceException e) {
-                handleAuthenticationException(servletResponse, e);
-                return;
+            } catch (AuthenticationServiceException failed) {
+                log.error("Authorization Failed: " + failed.getMessage(), failed);
             }
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
@@ -87,12 +86,5 @@ public class SignRequestAuthorizationFilter extends OncePerRequestFilter {
                 + SecurityContextHolder.getContext().getAuthentication() + "'");
         }
         filterChain.doFilter(signServletRequest, servletResponse);
-    }
-
-    private void handleAuthenticationException(HttpServletResponse servletResponse,
-                                               AuthenticationServiceException failed) throws IOException {
-        log.error("Authentication Failed: " + failed.getMessage(), failed);
-        servletResponse.sendError(
-            HttpServletResponse.SC_FORBIDDEN, "Authentication Failed: " + failed.getMessage());
     }
 }
