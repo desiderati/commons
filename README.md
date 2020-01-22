@@ -7,6 +7,11 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.1.2] - 2020-01-22
+
+##### Changed
+- Fixed a bug related to refreshing properties and local validation. 
+
 ### [2.1.1] - 2020-01-22
 
 ##### Added
