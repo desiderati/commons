@@ -11,6 +11,7 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 
 ##### Added
 - Added support to default properties.
+- Added support to refreshable properties.
 - Added dependency with Spring Cloud Starter.
 
 ##### Changed
