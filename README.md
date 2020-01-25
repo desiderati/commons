@@ -7,11 +7,6 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-### [2.1.4] - 2020-01-24
-
-##### Changed
-- Fixed a problem while searching for change logs files. Now only XML files will be discovered.
-
 ### [2.1.3] - 2020-01-24
 
 ##### Added
