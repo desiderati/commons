@@ -17,15 +17,31 @@
   ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   -->
-<configuration debug="true">
+<configuration>
     <conversionRule conversionWord="wEx"
                     converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
 
-    <property name="CONSOLE_LOG_PATTERN"
-              value="%yellow(%d{HH:mm:ss.SSS}) %highlight([%-5level]) %cyan(%-40.40logger{39}) : %white(%m%n%wEx)" />
-    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/app.log}"/>
+    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%t] %-40.40c{39} : %m%n%wEx"/>
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
 
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-    </root>
+    <springProfile name="!dev &amp; !develop &amp; !development &amp; !hom &amp; !homolog &amp; !homologation &amp; !prd &amp; !prod &amp; !production">
+        <property name="CONSOLE_LOG_PATTERN"
+                  value="%yellow(%d{HH:mm:ss.SSS}) %highlight([%-5level]) %cyan(%-40.40logger{39}) : %white(%m%n%wEx)" />
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="dev | develop | development | hom | homolog | homologation | prd | prod | production">
+        <property name="CONSOLE_LOG_PATTERN" value="${FILE_LOG_PATTERN}" />
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
 </configuration>
