@@ -48,7 +48,7 @@
             I've tried to use ${project.parent.version}, but when using this property,
             it occurs this error: Fail to load artifact version...
         -->
-        <common-logging-test.version>${common.version}</common-logging-test.version>
+        <common-logging-test.version>${commons-herd.io.version}</common-logging-test.version>
 
         <activemq.version>5.15.9</activemq.version>
         <atmosphere.version>2.5.4</atmosphere.version>
@@ -235,7 +235,7 @@
                             I've tried to use ${project.parent.version}, but when using this property,
                             it occurs this error: Fail to load artifact version...
                         -->
-                        <version>${common.version}</version>
+                        <version>${commons-herd.io.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

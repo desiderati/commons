@@ -83,7 +83,7 @@
 
     <properties>
         <!-- Major versions. -->
-        <common.version>2.1.7</common.version>
+        <commons-herd.io.version>2.1.7</commons-herd.io.version>
         <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
 
         <!-- Basic configuration. -->

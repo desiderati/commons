@@ -10,7 +10,8 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 ### [2.1.7] - 2020-01-30
 
 ##### Changed
-- Fixed some Sonarlint issues. Better Hikari configuration.
+- Fixed some **Sonarlint** issues. Better **Hikari** configuration.
+- Better name for property: **commons-herd.io.version**.
 
 ### [2.1.6] - 2020-01-27
 
