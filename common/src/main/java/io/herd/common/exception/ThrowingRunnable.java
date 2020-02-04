@@ -25,6 +25,7 @@ package io.herd.common.exception;
 @SuppressWarnings("unused")
 public interface ThrowingRunnable {
 
+    @SuppressWarnings("squid:S00112")
     void run() throws Exception;
 
     static Runnable uncheckedRunnable(ThrowingRunnable f) {

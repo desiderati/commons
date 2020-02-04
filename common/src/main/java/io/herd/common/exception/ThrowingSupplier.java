@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 @SuppressWarnings("unused")
 public interface ThrowingSupplier<R> {
 
+    @SuppressWarnings("squid:S00112")
     R get() throws Exception;
 
     static <R> Supplier<R> uncheckedRunnable(ThrowingSupplier<R> f) {

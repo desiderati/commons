@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -41,7 +42,7 @@ public class PathMatchingReloadableResourceBundleMessageSource extends Reloadabl
     @NotNull
     @Override
     protected PropertiesHolder refreshProperties(@NotNull String filename, PropertiesHolder propHolder) {
-        if (filename.startsWith(PathMatchingResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)) {
+        if (filename.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)) {
             return refreshClassPathProperties(filename, propHolder);
         } else {
             return super.refreshProperties(filename, propHolder);

@@ -66,9 +66,9 @@ public class DefaultPhysicalNamingStrategy extends SpringPhysicalNamingStrategy 
             for (Resource resource : resources) {
                 InputStream is = resource.getInputStream();
                 prop.load(is);
-                String prefix = prop.getProperty("app.database.table-prefix");
-                if (StringUtils.isNotBlank(prefix)) {
-                    return prefix;
+                String prefixTmp = prop.getProperty("app.database.table-prefix");
+                if (StringUtils.isNotBlank(prefixTmp)) {
+                    return prefixTmp;
                 }
             }
             return null;

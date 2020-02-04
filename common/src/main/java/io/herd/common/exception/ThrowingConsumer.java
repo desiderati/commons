@@ -29,6 +29,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("unused")
 public interface ThrowingConsumer<T> {
 
+    @SuppressWarnings("squid:S00112")
     void accept(T t) throws Exception;
 
     static <T> Consumer<T> uncheckedConsumer(ThrowingConsumer<T> f) {

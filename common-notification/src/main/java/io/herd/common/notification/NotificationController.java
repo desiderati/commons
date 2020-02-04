@@ -28,11 +28,8 @@ import javax.inject.Inject;
 
 // Não pode ser Singleton!!!
 @Slf4j
-@SuppressWarnings("unused")
 @ManagedService(path = "/{notification}/{user}")
 public class NotificationController {
-
-    private String notificationControllerPathName;
 
     /**
      * link https://github.com/Atmosphere/atmosphere/wiki/Injecting-Atmosphere-components-and-factories-using-the-javax.inject.Inject

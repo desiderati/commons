@@ -21,7 +21,7 @@ package io.swagger.client;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "squid:S1165"})
 public class ApiException extends Exception {
 
     private int code = 0;

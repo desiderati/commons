@@ -27,6 +27,7 @@ import java.util.function.Function;
 @SuppressWarnings("unused")
 public interface ThrowingFunction<T, R> {
 
+    @SuppressWarnings("squid:S00112")
     R apply(T t) throws Exception;
 
     static <T, R> Function<T, R> uncheckedFunction(ThrowingFunction<T, R> f) {

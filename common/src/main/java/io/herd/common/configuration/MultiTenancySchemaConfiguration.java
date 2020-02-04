@@ -23,7 +23,7 @@ import io.herd.common.tenant.MultiTenancyConnectionProvider;
 import io.herd.common.tenant.MultiTenancyDatabaseMigrationInitializer;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.MultiTenancyStrategy;
-import org.hibernate.cfg.Environment;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -74,9 +74,9 @@ public class MultiTenancySchemaConfiguration {
     public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(MultiTenancyConnectionProvider multiTenancyConnectionProvider,
                                                                        CurrentTenantIdentifierResolver tenantIdentifierResolver) {
         return hibernateProperties -> {
-            hibernateProperties.put(Environment.MULTI_TENANT, MultiTenancyStrategy.SCHEMA);
-            hibernateProperties.put(Environment.MULTI_TENANT_CONNECTION_PROVIDER, multiTenancyConnectionProvider);
-            hibernateProperties.put(Environment.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantIdentifierResolver);
+            hibernateProperties.put(AvailableSettings.MULTI_TENANT, MultiTenancyStrategy.SCHEMA);
+            hibernateProperties.put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenancyConnectionProvider);
+            hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantIdentifierResolver);
         };
     }
 }

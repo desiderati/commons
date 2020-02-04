@@ -40,6 +40,6 @@ public abstract class AbstractMessageListener<M extends Message> {
         log.info("Message {} received and processed with success!", message.getId());
     }
 
-    @SuppressWarnings("WeakerAccess") // Must be protected!
+    @SuppressWarnings({"WeakerAccess", "squid:S00112"}) // Must be protected!
     protected abstract void doReceive(M message) throws Exception;
 }

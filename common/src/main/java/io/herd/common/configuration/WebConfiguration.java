@@ -66,6 +66,7 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
     /**
      * @return O caminho raiz da aplicação.
      */
+    @SuppressWarnings("squid:S1075")
     public String getDefaultApiBasePath() {
         if (!apiBasePath.startsWith("/")) {
             apiBasePath = "/" + apiBasePath;
@@ -102,10 +103,12 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
      * Usar as versões /v1,/v2,... dentro dos próprios {@link RestController}.
      */
     @Bean
+
     public WebMvcRegistrations webMvcRegistrationsHandlerMapping() {
         return new WebMvcRegistrations() {
 
             @Override
+            @SuppressWarnings("squid:MaximumInheritanceDepth")
             public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
                 return new RequestMappingHandlerMapping() {
 
@@ -144,8 +147,8 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
         repositoryRestConfiguration.setRepositoryDetectionStrategy(
             RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
 
-        // FIXME Felipe Desiderati: Spring Data Rest should allow to define the complete path
-        //  on annotation @RepositoryRestResource
+        // Felipe Desiderati: Spring Data Rest should allow to define the complete path
+        // on annotation @RepositoryRestResource.
         // Configures the Base Path. It can be redefined using property: spring.data.rest.base-path
         if (StringUtils.isBlank(repositoryRestConfiguration.getBasePath().getPath())) {
             repositoryRestConfiguration.setBasePath(getDefaultApiBasePath() + "/v1");

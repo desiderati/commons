@@ -29,6 +29,7 @@ public class RestApiException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
+    @SuppressWarnings("squid:S1165")
     private Serializable[] args;
 
     public RestApiException(String message) {

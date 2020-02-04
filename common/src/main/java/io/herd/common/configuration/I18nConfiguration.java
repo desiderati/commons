@@ -62,7 +62,6 @@ public class I18nConfiguration implements EnvironmentAware {
         log.info("Loading i18n files: " + Arrays.toString(i18nAllFiles));
         PathMatchingReloadableResourceBundleMessageSource source =
             new PathMatchingReloadableResourceBundleMessageSource();
-        // TODO Felipe Desiderati: Should we enable and externalize this property?
         //source.setCacheSeconds(300); // Reload messages every 5 minutes
         source.setBasenames(i18nAllFiles);
         source.setDefaultEncoding(StandardCharsets.UTF_8.toString());

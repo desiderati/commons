@@ -27,6 +27,7 @@ public class ApplicationException extends RuntimeException {
 
     private static final long serialVersionUID = 5046859219775779815L;
 
+    @SuppressWarnings("squid:S1165")
     private Serializable[] args = null;
 
     public ApplicationException(String message) {

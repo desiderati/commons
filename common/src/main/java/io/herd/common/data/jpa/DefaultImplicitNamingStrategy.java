@@ -40,6 +40,7 @@ public class DefaultImplicitNamingStrategy extends SpringImplicitNamingStrategy 
 
     }
 
+    @SuppressWarnings("squid:S1135")
     // TODO Felipe Desiderati: Configurar o tamanho de acordo com o banco de dados.
     private static final int MAX_IDENTIFIER_LENGTH = 63;
 

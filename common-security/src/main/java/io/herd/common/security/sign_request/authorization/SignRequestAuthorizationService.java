@@ -52,7 +52,6 @@ public class SignRequestAuthorizationService {
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String TOKEN_SIGNED_REQUEST = "SIGNED_REQUEST";
 
-    // TODO Felipe Desiderati: Externalize???
     private static final int VALID_TIME_WINDOW = 15; // Minutes
     private static final String DEFAULT_AUTHORIZATION_ERROR_MSG = "Unable to authorize the request due to: ";
 

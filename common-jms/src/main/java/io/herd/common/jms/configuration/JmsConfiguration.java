@@ -138,6 +138,7 @@ public class JmsConfiguration {
         configurer.configure(factory, connectionFactory);
         factory.setErrorHandler(errorHandler);
 
+        @SuppressWarnings("squid:S1135")
         // TODO Felipe Desiderati: Expor estas configurações via arquivo de propriedades quando for necessário modificá-las!
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setBackOffMultiplier(3);

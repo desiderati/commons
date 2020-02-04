@@ -38,7 +38,7 @@ public class HikariDatasourceConnectionProvider implements ConnectionProvider, S
 
     private static final long serialVersionUID = 4199561413714268076L;
 
-    private final DataSource dataSource;
+    private final transient DataSource dataSource;
 
     @Autowired
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
