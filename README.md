@@ -7,6 +7,11 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.1.8] - 2020-01-27
+
+##### Added
+- Added the class **AwsExtendedThrowableProxyConverter** which is responsible for grouping the stack trace in just one message while using the AWS Cloud Watch.
+
 ### [2.1.7] - 2020-01-30
 
 ##### Changed
