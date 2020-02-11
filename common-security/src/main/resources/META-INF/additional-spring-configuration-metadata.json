@@ -19,6 +19,12 @@
       "type": "java.lang.String"
     },
     {
+      "defaultValue": 1,
+      "name": "security.jwt.authentication.expiration-period",
+      "description": "The period of time in which the JWT token expires or terminates (In Hours).",
+      "type": "java.lang.Integer"
+    },
+    {
       "defaultValue": false,
       "name": "security.jwt.authorization.enabled",
       "description": "It defines if JWT Authorization will be enabled or not.",

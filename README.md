@@ -7,7 +7,16 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-### [2.1.8] - 2020-01-27
+### [2.1.9] - 2020-02-11
+
+##### Added
+- Added the class **SecurityExceptionHandlingController**.
+
+##### Changed
+- Added support to authorities and credentials on JWT Authentication/Authorization Component.
+- Now it is possible to configure the expiration period while generating the JWT Token.  
+
+### [2.1.8] - 2020-01-31
 
 ##### Added
 - Added the class **AwsExtendedThrowableProxyConverter** which is responsible for grouping the stack trace in just one message while using the AWS Cloud Watch.

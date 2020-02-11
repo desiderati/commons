@@ -18,12 +18,14 @@
  */
 package io.herd.common.security.jwt.authentication;
 
+import io.herd.common.security.jwt.JwtService;
 import io.herd.common.security.jwt.JwtTokenConfigurer;
-import org.joda.time.DateTime;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.stream.Collectors;
 
 public class JwtDefaultAuthenticationTokenConfigurer implements JwtAuthenticationTokenConfigurer {
 
@@ -31,7 +33,9 @@ public class JwtDefaultAuthenticationTokenConfigurer implements JwtAuthenticatio
     public JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication auth) {
         return tokenPayload -> {
             tokenPayload.setSubject(((User) auth.getPrincipal()).getUsername());
-            tokenPayload.setExpiration(DateTime.now().plusHours(1).toDate());
+            tokenPayload.put(JwtService.CREDENTIALS_ATTRIBUTE, auth.getCredentials());
+            tokenPayload.put(JwtService.AUTHORITIES_ATTRIBUTE,
+                auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
         };
     }
 }

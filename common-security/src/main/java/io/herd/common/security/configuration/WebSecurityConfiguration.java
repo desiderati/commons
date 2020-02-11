@@ -120,8 +120,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
             if (jwtAuthenticationEnabled) {
                 // Login API.
-                authorizeRequests = authorizeRequests
-                    .antMatchers(HttpMethod.POST, loginUrl).permitAll();
+                authorizeRequests = authorizeRequests.antMatchers(HttpMethod.POST, loginUrl).permitAll();
                 httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
             }
 

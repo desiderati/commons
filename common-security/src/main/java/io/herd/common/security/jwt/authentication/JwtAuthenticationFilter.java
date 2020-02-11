@@ -60,6 +60,8 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Autowired
     public JwtAuthenticationFilter(JwtService jwtService,
                                    @Value("${security.jwt.authentication.login-url:/api/v1/login}") String loginUrl) {
+
+        // Indicates whether this filter should attempt to process a login request.
         super(new AntPathRequestMatcher(loginUrl, "POST"));
         setAuthenticationSuccessHandler((request, response, authentication) -> {
             String token =
@@ -71,7 +73,8 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
     @Override
     public void afterPropertiesSet() {
-        // AuthenticationManager will be configured after the method afterPropertiesSet()
+        // Disabling default behavior because the authentication manager will be configured
+        // after the method afterPropertiesSet().
     }
 
     @Override

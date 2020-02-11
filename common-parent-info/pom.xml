@@ -29,7 +29,7 @@
     </parent>
     <groupId>io.herd.common</groupId>
     <artifactId>common-parent-info</artifactId>
-    <version>2.1.8</version>
+    <version>2.1.9</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -83,7 +83,7 @@
 
     <properties>
         <!-- Major versions. -->
-        <commons-herd.io.version>2.1.8</commons-herd.io.version>
+        <commons-herd.io.version>2.1.9</commons-herd.io.version>
         <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
 
         <!-- Basic configuration. -->
@@ -238,6 +238,7 @@
                                 <ignoredResourcePattern>application.properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>banner.txt</ignoredResourcePattern>
                                 <ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
+                                <ignoredResourcePattern>com/amazonaws/xray/sdk.properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>i18n.properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>i18n/exceptions(.*).properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>i18n/validation-messages(.*).properties</ignoredResourcePattern>

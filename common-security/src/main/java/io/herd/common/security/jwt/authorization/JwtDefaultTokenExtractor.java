@@ -18,17 +18,25 @@
  */
 package io.herd.common.security.jwt.authorization;
 
+import io.herd.common.security.jwt.JwtService;
 import io.herd.common.security.jwt.JwtTokenExtractor;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class JwtDefaultTokenExtractor implements JwtTokenExtractor<Authentication> {
 
     @Override
+    @SuppressWarnings("unchecked")
     public Authentication extract(Claims tokenPayload) {
-        return new UsernamePasswordAuthenticationToken(tokenPayload.getSubject(), null, new ArrayList<>());
+        return new UsernamePasswordAuthenticationToken(
+            tokenPayload.getSubject(),
+            tokenPayload.get(JwtService.CREDENTIALS_ATTRIBUTE),
+            ((List<String>) tokenPayload.get(JwtService.AUTHORITIES_ATTRIBUTE))
+                .stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
     }
 }

@@ -20,6 +20,7 @@ package io.herd.common.security.jwt.authentication;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+/**
+ * Class used for retrieving the user/password from the request. This information will be
+ * used by the {@link AuthenticationManager} to authenticate the user.
+ */
 public class JwtDefaultAuthenticationConverter implements AuthenticationConverter {
 
     @Override

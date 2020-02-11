@@ -26,7 +26,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyFactory;
@@ -42,7 +44,13 @@ import java.util.Base64;
 @Service
 public class JwtService {
 
+    public static final String AUTHORITIES_ATTRIBUTE = "authorities";
+    public static final String CREDENTIALS_ATTRIBUTE = "credentials";
+
     private final JwtProperties jwtProperties;
+
+    @Value("${security.jwt.authentication.expiration-period:1}")
+    private int expirationPeriod;
 
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
     private final PrivateKey privateKey = loadPrivateKey();
@@ -86,6 +94,7 @@ public class JwtService {
     public String generateToken(JwtTokenConfigurer configurer) {
         Claims tokenPayload = Jwts.claims();
         configurer.configure(tokenPayload);
+        tokenPayload.setExpiration(DateTime.now().plusHours(expirationPeriod).toDate());
         return Jwts.builder()
             .setClaims(tokenPayload)
             .signWith(SignatureAlgorithm.RS256, getPrivateKey())
