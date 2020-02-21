@@ -9,6 +9,14 @@ e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 
 ### [2.1.10] - 2020-02-20
 
+##### Added
+- Added the class **MockSignRequestAuthorizedClient**.
+
+##### Changed
+- Fixed some minor bugs regarding the **JwtAuthorizationService** class instantiation.  
+
+### [2.1.10] - 2020-02-20
+
 ##### Changed
 - Changed the **ExceptionHandlingController** class to add support to **HttpStatusCodeException**.
 - Better logger information while printing exceptions handled by the Swagger Client.

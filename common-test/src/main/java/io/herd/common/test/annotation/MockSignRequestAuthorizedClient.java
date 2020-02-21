@@ -16,24 +16,26 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.security.sign_request.authorization;
+package io.herd.common.test.annotation;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.herd.common.test.MockSignRequestAuthorizedClientSecurityContextFactory;
+import org.springframework.security.test.context.support.WithSecurityContext;
 
-import java.util.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class SignRequestAuthorizedClient {
+@Retention(RetentionPolicy.RUNTIME)
+@WithSecurityContext(factory = MockSignRequestAuthorizedClientSecurityContextFactory.class)
+public @interface MockSignRequestAuthorizedClient {
 
-    private UUID id;
-    private String secretKey;
-    private List<String> roles = new ArrayList<>();
-    private Map<String, Object> additionalProperties = new HashMap<>();
+    /**
+     * @return The bean name registered in the context.
+     */
+    String beanName() default "signRequestAuthorizedClient";
+
+    /**
+     * Always with prefix "ROLE_".
+     */
+    String role() default "ROLE_ADMIN";
 
 }

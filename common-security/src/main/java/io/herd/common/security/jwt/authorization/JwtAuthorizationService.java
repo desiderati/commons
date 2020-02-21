@@ -38,12 +38,18 @@ public class JwtAuthorizationService {
     private static final String TOKEN_BEARER = "Bearer ";
 
     private final JwtService jwtService;
-    private final JwtTokenExtractor<Authentication> jwtTokenExtractor;
+    private JwtTokenExtractor<Authentication> jwtTokenExtractor;
 
     @Autowired
-    public JwtAuthorizationService(JwtService jwtService,
-                                   JwtTokenExtractor<Authentication> jwtTokenExtractor) {
+    public JwtAuthorizationService(JwtService jwtService) {
         this.jwtService = jwtService;
+    }
+
+    /**
+     * Avoid circular dependency!
+     */
+    @Autowired
+    public void setJwtTokenExtractor(JwtTokenExtractor<Authentication> jwtTokenExtractor) {
         this.jwtTokenExtractor = jwtTokenExtractor;
     }
 

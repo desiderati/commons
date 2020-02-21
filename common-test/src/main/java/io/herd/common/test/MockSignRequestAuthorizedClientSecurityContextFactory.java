@@ -18,7 +18,10 @@
  */
 package io.herd.common.test;
 
-import io.herd.common.test.annotation.WithMockJwtUser;
+import io.herd.common.test.annotation.MockSignRequestAuthorizedClient;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -26,24 +29,23 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-/**
- * Adiciona suporte à autenticação durante a execução dos testes. Será necessário anotar a classe
- * contendo os testes da seguinte forma:
- * <pre>
- * &#064;TestExecutionListeners({WithSecurityContextTestExecutionListener.class, ...})
- * public class MyTestClass extends AbstractTestNGSpringContextTests {
- *    ...
- * }</pre>
- *
- * Veja mais em: https://docs.spring.io/spring-security/site/docs/4.0.x/reference/htmlsingle/#test-method-withsecuritycontext
- */
-public class WithMockJwtUserSecurityContextFactory implements WithSecurityContextFactory<WithMockJwtUser> {
+public class MockSignRequestAuthorizedClientSecurityContextFactory
+        implements WithSecurityContextFactory<MockSignRequestAuthorizedClient>, ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
 
     @Override
-    public SecurityContext createSecurityContext(WithMockJwtUser jwtUser) {
+    public void setApplicationContext(@NotNull ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public SecurityContext createSecurityContext(MockSignRequestAuthorizedClient signRequestAuthorizedClientAnnotation) {
+        Object signRequestAuthorizedClient =
+            applicationContext.getBean(signRequestAuthorizedClientAnnotation.beanName());
         Authentication auth =
-            new UsernamePasswordAuthenticationToken(jwtUser.username(),
-                null, AuthorityUtils.createAuthorityList(jwtUser.role()));
+            new UsernamePasswordAuthenticationToken(signRequestAuthorizedClient,
+                null, AuthorityUtils.createAuthorityList(signRequestAuthorizedClientAnnotation.role()));
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);

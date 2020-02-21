@@ -58,7 +58,7 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
 
     @Autowired
     public WebConfiguration(@Qualifier("localValidatorFactoryBean") LocalValidatorFactoryBean validatorFactory,
-                            EntityManager entityManager) {
+                            @Autowired(required = false) EntityManager entityManager) {
         this.validatorFactory = validatorFactory;
         this.entityManager = entityManager;
     }
@@ -137,10 +137,12 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration repositoryRestConfiguration) {
         // Forces the Spring Data Rest to return the Id of the object being handled.
-        repositoryRestConfiguration.exposeIdsFor(
-            entityManager.getMetamodel().getEntities().stream()
-                .map(Type::getJavaType)
-                .toArray(Class[]::new));
+        if (entityManager != null) {
+            repositoryRestConfiguration.exposeIdsFor(
+                entityManager.getMetamodel().getEntities().stream()
+                    .map(Type::getJavaType)
+                    .toArray(Class[]::new));
+        }
 
         // Only repositories annotated with @RepositoryRestResource are exposed, unless their exported flag
         // is set to false.

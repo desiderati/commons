@@ -18,24 +18,24 @@
  */
 package io.herd.common.test.annotation;
 
-import io.herd.common.test.WithMockJwtUserSecurityContextFactory;
+import io.herd.common.test.MockJwtAuthorizedUserSecurityContextFactory;
 import org.springframework.security.test.context.support.WithSecurityContext;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Adiciona suporte à autenticação durante a execução dos testes. Será necessário anotar a classe ou métodos
- * contendo os testes, indicando assim o usuário que está sendo autenticado.
+ * Adds support to authentication while running tests. It will be necessary to annotate the classes
+ * or methods containing the tests, indicating the user being authenticated.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@WithSecurityContext(factory = WithMockJwtUserSecurityContextFactory.class)
-public @interface WithMockJwtUser {
+@WithSecurityContext(factory = MockJwtAuthorizedUserSecurityContextFactory.class)
+public @interface MockJwtAuthorizedUser {
 
     String username() default "admin";
 
     /**
-     * Sempre com o prefixo "ROLE_".
+     * Always with prefix "ROLE_".
      */
     String role() default "ROLE_ADMIN";
 
