@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.herd.common</groupId>
         <artifactId>common-parent</artifactId>
-        <version>2.1.9</version>
+        <version>2.1.10</version>
         <relativePath>../common-parent</relativePath>
     </parent>
     <artifactId>common-parent-swagger</artifactId>
@@ -51,6 +51,13 @@
         -->
         <swagger.generation.disabled>true</swagger.generation.disabled>
         <swagger.generation.language>java</swagger.generation.language>
+
+        <!-- Supported values: okhttp-gson, resttemplate -->
+        <swagger.generation.library>okhttp-gson</swagger.generation.library>
+
+        <!-- See: https://generator.swagger.io/api/gen/clients/java (dateLibrary) -->
+        <swagger.generation.date-library>java8</swagger.generation.date-library>
+
         <swagger.generation.package.api>io.swagger.client.api</swagger.generation.package.api>
         <swagger.generation.package.model>io.swagger.client.api.model</swagger.generation.package.model>
         <swagger.generation.package.invoker>io.swagger.client</swagger.generation.package.invoker>
@@ -139,8 +146,17 @@
                                                 <inputSpec>${project.basedir}/src/main/resources/@item@</inputSpec>
                                                 <output>${project.basedir}/${swagger.generation.output-dir}</output>
                                                 <language>${swagger.generation.language}</language>
+                                                <!--
+                                                    Complete list of options:
+                                                     * https://generator.swagger.io/api/gen/clients/java
+                                                     * https://github.com/swagger-api/swagger-codegen/issues/7795
+                                                -->
                                                 <configOptions>
+                                                    <dateLibrary>${swagger.generation.date-library}</dateLibrary>
+                                                    <library>${swagger.generation.library}</library>
                                                     <sourceFolder>${swagger.generation.source-dir}</sourceFolder>
+                                                    <!-- Use Java8 classes instead of third party equivalents. -->
+                                                    <java8>true</java8>
                                                 </configOptions>
                                                 <apiPackage>${swagger.generation.package.api}</apiPackage>
                                                 <modelPackage>${swagger.generation.package.model}</modelPackage>
@@ -184,17 +200,50 @@
                     </plugin>
                     <plugin>
                         <artifactId>maven-clean-plugin</artifactId>
-                        <configuration>
-                            <filesets>
-                                <fileset>
-                                    <directory>${project.basedir}/${swagger.generation.output-dir}</directory>
-                                    <includes>
-                                        <include>**/*</include>
-                                    </includes>
-                                    <followSymlinks>false</followSymlinks>
-                                </fileset>
-                            </filesets>
-                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>clear-old-swagger-generated-files</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <configuration>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${project.basedir}/${swagger.generation.output-dir}</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <followSymlinks>false</followSymlinks>
+                                        </fileset>
+                                    </filesets>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>clear-superfluous-swagger-generated-files</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <configuration>
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${project.basedir}/${swagger.generation.output-dir}</directory>
+                                            <excludes>
+                                                <exclude>.swagger-codegen-ignore</exclude>
+                                                <exclude>.swagger-codegen/**</exclude>
+                                                <exclude>docs/**</exclude>
+                                                <exclude>src/main/java/**</exclude>
+                                                <exclude>SwaggerClient-php/docs/**</exclude>
+                                                <exclude>SwaggerClient-php/lib/**</exclude>
+                                            </excludes>
+                                            <followSymlinks>false</followSymlinks>
+                                        </fileset>
+                                    </filesets>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -215,7 +264,7 @@
             </exclusions>
         </dependency>
 
-        <!-- To run Swagger Client Api -->
+        <!-- To run Swagger Client Api. Only if choose 'okhttp-gson' library. -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

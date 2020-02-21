@@ -7,6 +7,16 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.1.10] - 2020-02-20
+
+##### Changed
+- Changed the **ExceptionHandlingController** class to add support to **HttpStatusCodeException**.
+- Better logger information while printing exceptions handled by the Swagger Client.
+- Fixed a Bug while reading the **swagger-client.properties** file. Prefix was not specified.
+- Changed the library used to generate the Swagger Clients. Nos we are using Spring Rest Template instead of **OkHttp**.
+- Now the class **SignRequestAuthorizationService** is enabled by default, as it can be used to sign requests when used by a Swagger client.
+- Now it is possible to add additional properties to the **SignRequestAuthorizedClient**.
+
 ### [2.1.9] - 2020-02-11
 
 ##### Added

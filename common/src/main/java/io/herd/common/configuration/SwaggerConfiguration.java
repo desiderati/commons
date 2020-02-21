@@ -43,7 +43,6 @@ import java.util.function.Predicate;
 @EnableSwagger2WebMvc
 @SpringBootConfiguration
 @PropertySource("classpath:swagger.properties")
-//@EnableConfigurationProperties(SwaggerClientProperties.class)
 @Import({SpringDataRestConfiguration.class, BeanValidatorPluginsConfiguration.class})
 public class SwaggerConfiguration {
 

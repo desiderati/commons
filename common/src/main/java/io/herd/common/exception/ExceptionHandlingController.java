@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
@@ -89,7 +90,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
                 request, (javax.validation.ConstraintViolationException) rootCause);
         }
 
-        return handleException(request, DEFAULT_HTTP_STATUS, ex);
+        return handleHttpErrorException(request, DEFAULT_HTTP_STATUS, ex);
     }
 
     /**
@@ -108,6 +109,64 @@ public class ExceptionHandlingController implements MessageSourceAware {
         return null;
     }
 
+    @ExceptionHandler(HttpStatusCodeException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleHttpStatusCodeException(HttpServletRequest request,
+                                                                               HttpStatusCodeException  ex) {
+        return handleSwaggerException(request, ex, ex.getRawStatusCode() + " " + ex.getStatusText(),
+            ex.getResponseBodyAsString(), ex.getResponseHeaders());
+    }
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleApiException(HttpServletRequest request, ApiException ex) {
+        return handleSwaggerException(request, ex, ex.getMessage(), ex.getResponseBody(), ex.getResponseHeaders());
+    }
+
+    private ResponseEntity<ResponseExceptionDTO> handleSwaggerException(HttpServletRequest request, Exception exception,
+            // We had to extract these parameters because the exceptions don't inherit the same parent class.
+            String exceptionMessage,
+            String responseBody,
+            Map<String, List<String>> responseHeaders) {
+
+        StringBuilder remoteException = new StringBuilder(exceptionMessage);
+        if (responseHeaders != null) {
+            remoteException.append(System.lineSeparator()).append("Headers:").append(System.lineSeparator());
+            for (final Map.Entry<String, List<String>> entry : responseHeaders.entrySet()) {
+                remoteException.append("  ").append(entry.getKey()).append(": ")
+                    .append(StringUtils.join(entry.getValue(), ", ")).append(System.lineSeparator());
+            }
+        }
+
+        ValidationResponseExceptionDTO responseException = null;
+        if (responseBody != null) {
+            remoteException.append("Body:").append(System.lineSeparator());
+            try {
+                TypeReference<ValidationResponseExceptionDTO> typeRef = new TypeReference<ValidationResponseExceptionDTO>(){};
+                ObjectMapper mapper = new ObjectMapper();
+                responseException = mapper.readValue(responseBody, typeRef);
+                String prettyPrintedResponseBody =
+                    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseException);
+                remoteException.append(prettyPrintedResponseBody);
+            } catch (IOException ioex) {
+                log.warn("Is was not possible deserialize API exception body to response exception!", ioex);
+                remoteException.append(responseBody);
+            }
+        }
+
+        // We cannot use instaceOf because if the ApiException body has at least one property equal to one of
+        // the properties of the ResponseExceptionDTO class, the deserialized object will be valid.
+        if (responseException != null && responseException.getType().equals(ResponseExceptionDTO.class.getName())) {
+            String errorCode = responseException.getErrorCode();
+            String errorMsg = responseException.getMessage();
+            UUID uuid = logMessage(request, remoteException.toString());
+            return ResponseEntity.status(responseException.getStatus()).body(
+                new ResponseExceptionDTO(uuid, errorCode, errorMsg, responseException.getStatus()));
+        }
+
+        // Regardless of the return status of the Swagger request, we will generate the same standard error
+        // for our clients.
+        return handleException(request, exception);
+    }
+
     @ExceptionHandler({IllegalArgumentApplicationException.class, IllegalStateApplicationException.class})
     public ResponseEntity<ResponseExceptionDTO> handleIllegalArgumentStateApplicationException(
             HttpServletRequest request, ApplicationException ex) {
@@ -116,7 +175,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
 
     @ExceptionHandler(SecurityApplicationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleSecurityApplicationException(
-            HttpServletRequest request, ApplicationException ex) {
+        HttpServletRequest request, SecurityApplicationException ex) {
         return handleApplicationException(request, HttpStatus.UNAUTHORIZED, ex);
     }
 
@@ -143,58 +202,6 @@ public class ExceptionHandlingController implements MessageSourceAware {
             HttpServletRequest request, RestApiException ex) {
         HttpStatus httpStatus = getHttpStatus(ex);
         return handleException(request, httpStatus, ex, ex.getArgs());
-    }
-
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleApiException(HttpServletRequest request, ApiException ex) {
-        StringBuilder remoteException = new StringBuilder(ex.getMessage());
-        boolean remoteExceptionWasLogged = false;
-        if (ex.getResponseHeaders() != null) {
-            remoteExceptionWasLogged = true;
-            remoteException.append(System.lineSeparator()).append("Headers:").append(System.lineSeparator());
-            for (final Map.Entry<String, List<String>> entry : ex.getResponseHeaders().entrySet()) {
-                remoteException.append("  ").append(entry.getKey()).append(": ")
-                    .append(StringUtils.join(entry.getValue(), ", ")).append(System.lineSeparator());
-            }
-        }
-
-        if (ex.getResponseBody() != null) {
-            remoteExceptionWasLogged = true;
-            remoteException.append("Body:").append(System.lineSeparator());
-            String responseBody = StringUtils.trimToEmpty(ex.getResponseBody());
-            remoteException.append(responseBody);
-        }
-
-        // We only log the return of the Swagger request, if there is a content.
-        if (remoteExceptionWasLogged) {
-            log.error("Remote Exception: " + remoteException.toString());
-        }
-
-        try {
-            if (ex.getResponseBody() != null) {
-                TypeReference<ResponseExceptionDTO> typeRef = new TypeReference<ResponseExceptionDTO>() {
-                };
-                ObjectMapper mapper = new ObjectMapper();
-                ResponseExceptionDTO responseException = mapper.readValue(ex.getResponseBody(), typeRef);
-
-                // We cannot use instaceOf because if the ApiException body has at least one property equal
-                // to one of the properties of the ResponseExceptionDTO class, the deserialized object will
-                // be valid.
-                if (responseException.getType().equals(ResponseExceptionDTO.class.getName())) {
-                    String errorCode = responseException.getErrorCode();
-                    String errorMsg = responseException.getMessage();
-                    UUID uuid = logMessage(request, errorMsg, ex);
-                    return ResponseEntity.status(responseException.getStatus()).body(
-                        new ResponseExceptionDTO(uuid, errorCode, errorMsg, responseException.getStatus()));
-                }
-            }
-        } catch (IOException ioex) {
-            log.warn("Is was not possible deserialize API exception body to response exception!", ioex);
-        }
-
-        // Regardless of the return status of the Swagger request, we will generate the same standard error
-        // for our clients.
-        return handleException(request, ex);
     }
 
     /**
@@ -277,6 +284,35 @@ public class ExceptionHandlingController implements MessageSourceAware {
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, HttpStatus.CONFLICT.value()));
     }
 
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleEmptyResultDataAccessException(
+            HttpServletRequest request, EmptyResultDataAccessException ex) {
+        return handleHttpErrorException(request, HttpStatus.NOT_FOUND, ex);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundException(
+            HttpServletRequest request, ResourceNotFoundException ex) {
+        return handleHttpErrorException(request, HttpStatus.NOT_FOUND, ex);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleHttpRequestMethodNotSupportedException(
+            HttpServletRequest request, HttpRequestMethodNotSupportedException ex) {
+        return handleHttpErrorException(request, HttpStatus.METHOD_NOT_ALLOWED, ex);
+    }
+
+    @NotNull
+    protected ResponseEntity<ResponseExceptionDTO> handleHttpErrorException(
+            HttpServletRequest request, HttpStatus httpStatus, Exception ex) {
+
+        String errorCode = "http_error_" + httpStatus.value();
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
+        UUID uuid = logMessage(request, errorMsg, ex);
+        return ResponseEntity.status(httpStatus).body(
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
+    }
+
     private ResponseEntity<ResponseExceptionDTO> handleException(
             HttpServletRequest request, HttpStatus httpStatus, Exception ex, Serializable... args) {
 
@@ -287,33 +323,8 @@ public class ExceptionHandlingController implements MessageSourceAware {
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
     }
 
-    @ExceptionHandler(EmptyResultDataAccessException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleEmptyResultDataAccessException(
-            HttpServletRequest request, EmptyResultDataAccessException ex) {
-        return handleException(request, HttpStatus.NOT_FOUND, ex);
-    }
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundException(
-            HttpServletRequest request, ResourceNotFoundException ex) {
-        return handleException(request, HttpStatus.NOT_FOUND, ex);
-    }
-
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleHttpRequestMethodNotSupportedException(
-            HttpServletRequest request, HttpRequestMethodNotSupportedException ex) {
-        return handleException(request, HttpStatus.METHOD_NOT_ALLOWED, ex);
-    }
-
-    @NotNull
-    private ResponseEntity<ResponseExceptionDTO> handleException(
-            HttpServletRequest request, HttpStatus httpStatus, Exception ex) {
-
-        String errorCode = "http_error_" + httpStatus.value();
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
-        UUID uuid = logMessage(request, errorMsg, ex);
-        return ResponseEntity.status(httpStatus).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
+    private UUID logMessage(HttpServletRequest request, String errorMessage) {
+        return logMessage(request, errorMessage, null);
     }
 
     private UUID logMessage(HttpServletRequest request, String errorMessage, Exception ex) {

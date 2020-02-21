@@ -24,10 +24,10 @@ import io.herd.common.security.sign_request.authorization.SignRequestAuthorizati
 import io.herd.common.validation.ValidationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Service;
 
@@ -38,15 +38,20 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
 import static io.herd.common.security.sign_request.authorization.SignRequestSigner.HEADER_DATE;
 import static io.herd.common.security.sign_request.authorization.SignRequestSigner.HEADER_DATE_FORMAT;
 
+/**
+ * We cannot associate the creation of this Bean to the variable
+ * <code>security.sign-request.authorization.enabled</code> = true,
+ * as it can be used to sign requests when used by a Swagger client.
+ */
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "security.sign-request.authorization.enabled", havingValue = "true")
 public class SignRequestAuthorizationService {
 
     private static final String HEADER_AUTHORIZATION = "Authorization";
@@ -59,9 +64,8 @@ public class SignRequestAuthorizationService {
 
     private final SignRequestAuthorizedClientRepository signRequestAuthorizedClientRepository;
 
-    @Autowired
     public SignRequestAuthorizationService(SignRequestAuthorizationClientProperties signRequestAuthorizationClientProperties,
-                                           SignRequestAuthorizedClientRepository signRequestAuthorizedClientRepository) {
+                                           @Autowired(required = false) SignRequestAuthorizedClientRepository signRequestAuthorizedClientRepository) {
         this.signRequestAuthorizationClientProperties = signRequestAuthorizationClientProperties;
         this.signRequestAuthorizedClientRepository = signRequestAuthorizedClientRepository;
     }
@@ -110,9 +114,10 @@ public class SignRequestAuthorizationService {
                 final String verifySign = SignRequestSigner.builder().httpServletRequest(request)
                     .secret(authorizedClient.getSecretKey()).build().sign();
                 if (verifySign.equals(sign)) {
-                    return new UsernamePasswordAuthenticationToken("API_USER", null,
+                    List<GrantedAuthority> grantedAuthorities =
                         AuthorityUtils.createAuthorityList(
-                            authorizedClient.getRoles().stream().map(role -> "ROLE_" + role).toArray(String[]::new)));
+                            authorizedClient.getRoles().stream().map(role -> "ROLE_" + role).toArray(String[]::new));
+                    return new UsernamePasswordAuthenticationToken(authorizedClient, null, grantedAuthorities);
                 } else {
                     log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Invalid signed request!");
                 }

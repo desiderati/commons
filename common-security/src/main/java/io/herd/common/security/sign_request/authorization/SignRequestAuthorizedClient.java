@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -35,5 +36,6 @@ public class SignRequestAuthorizedClient {
     private UUID id;
     private String secretKey;
     private List<String> roles;
+    private Map<String, Object> additionalProperties;
 
 }

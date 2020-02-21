@@ -20,6 +20,7 @@ package io.herd.common.configuration;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
@@ -29,11 +30,12 @@ import java.util.Base64;
 @Setter // Nunca esquecer de colocar os setXXX(..) para arquivos de configuração!
 @Component
 @PropertySource("classpath:swagger-client.properties")
+@ConfigurationProperties(prefix = "swagger.client")
 @SuppressWarnings("unused")
 public class SwaggerClientProperties {
 
     private String host;
-    private String basepath;
+    private String basePath;
     private String authUser;
     private String authPass;
 

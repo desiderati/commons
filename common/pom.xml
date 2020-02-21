@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.herd.common</groupId>
         <artifactId>common-parent</artifactId>
-        <version>2.1.9</version>
+        <version>2.1.10</version>
         <!--suppress MavenModelInspection-->
         <relativePath>../common-parent</relativePath>
     </parent>
@@ -191,7 +191,7 @@
             <artifactId>springfox-swagger-ui</artifactId>
         </dependency>
 
-        <!-- To run Swagger Client Api -->
+        <!-- To run Swagger Client Api. Only if choose 'okhttp-gson' library. -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
