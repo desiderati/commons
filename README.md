@@ -7,13 +7,18 @@ Todas as mudanças deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-### [2.1.10] - 2020-02-20
+### [2.1.12] - 2020-02-21
+
+##### Changed
+- Now there is no need to add the Commons Herd.io version in children projects.
+
+### [2.1.11] - 2020-02-21
 
 ##### Added
 - Added the class **MockSignRequestAuthorizedClient**.
 
 ##### Changed
-- Fixed some minor bugs regarding the **JwtAuthorizationService** class instantiation.  
+- Fixed some minor bugs regarding the **JwtAuthorizationService** class instantiation.
 
 ### [2.1.10] - 2020-02-20
 
