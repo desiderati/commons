@@ -1,11 +1,16 @@
 # Changelog
 
-Para maiores informações veja o projeto: [Commons](common/README.md)
+For more information, see the project: [Commons](common/README.md)
 
-Todas as mudanças deste projeto serão documentadas neste arquivo.
+All project changes will be documented in this file.
 
-O formato é baseado em [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
-e este projeto adere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+### [2.1.13] - 2020-03-04
+
+##### Changed
+- Added support to CORS configuration through **application.properties** file.
 
 ### [2.1.12] - 2020-02-21
 

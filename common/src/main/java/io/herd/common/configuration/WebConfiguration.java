@@ -26,6 +26,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
@@ -47,6 +48,7 @@ import java.lang.reflect.Method;
 @SpringBootConfiguration
 @ConditionalOnWebApplication
 @ConditionalOnSingleCandidate(WebConfiguration.class)
+@EnableConfigurationProperties(CorsProperties.class)
 public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
 
     @Value("${app.api-base-path:/api}")
@@ -56,11 +58,15 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
 
     private final EntityManager entityManager;
 
+    private final CorsProperties corsProperties;
+
     @Autowired
     public WebConfiguration(@Qualifier("localValidatorFactoryBean") LocalValidatorFactoryBean validatorFactory,
-                            @Autowired(required = false) EntityManager entityManager) {
+                            @Autowired(required = false) EntityManager entityManager,
+                            CorsProperties corsProperties) {
         this.validatorFactory = validatorFactory;
         this.entityManager = entityManager;
+        this.corsProperties = corsProperties;
     }
 
     /**
@@ -71,7 +77,6 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
         if (!apiBasePath.startsWith("/")) {
             apiBasePath = "/" + apiBasePath;
         }
-
         return apiBasePath;
     }
 
@@ -86,7 +91,7 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
     }
 
     /**
-     * Configuramos o Cross-Origin Resource Sharing (CORS).
+     * Set up Cross-Origin Resource Sharing (CORS).
      * <p>
      * Global CORS configuration
      * https://docs.spring.io/spring/docs/4.3.11.RELEASE/spring-framework-reference/html/cors.html#_global_cors_configuration
@@ -94,16 +99,17 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping(getDefaultApiBasePath() + "/**")
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE")
-                .allowedOrigins("*");
+            .allowedMethods(corsProperties.getAllowedMethods())
+            .allowedHeaders(corsProperties.getAllowedHeaders())
+            .allowedOrigins(corsProperties.getAllowedOrigins())
+            .exposedHeaders(corsProperties.getExposedHeaders());
     }
 
     /**
-     * Garante que todos os RESTs serão prefixados com /api.
-     * Usar as versões /v1,/v2,... dentro dos próprios {@link RestController}.
+     * Ensures that all RESTs will be prefixed with {@link #getDefaultApiBasePath()}.
+     * Use the versions /v1, /v2, ... within the {@link RestController}.
      */
     @Bean
-
     public WebMvcRegistrations webMvcRegistrationsHandlerMapping() {
         return new WebMvcRegistrations() {
 
@@ -153,6 +159,7 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
         // on annotation @RepositoryRestResource.
         // Configures the Base Path. It can be redefined using property: spring.data.rest.base-path
         if (StringUtils.isBlank(repositoryRestConfiguration.getBasePath().getPath())) {
+            // FIXME Felipe Desiderati: Remove the version from here in the future!
             repositoryRestConfiguration.setBasePath(getDefaultApiBasePath() + "/v1");
         }
     }
