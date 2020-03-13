@@ -16,30 +16,11 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package io.herd.common.security.jwt;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
+public enum JwtEncryptionMethod {
 
-@Getter
-@Setter // Never forget to put the setXXX (..) for configuration files!
-@Component
-@PropertySource(value = "classpath:jwt.properties", ignoreResourceNotFound = true)
-@ConfigurationProperties(prefix = "jwt")
-public class JwtProperties {
-
-    /**
-     * Both used by Asymmetric Encryption.
-     */
-    private String privateKey;
-    private String publicKey;
-
-    /**
-     * Used by Symmetric Encryption.
-     */
-    private String secretKey;
+    ASYMMETRIC, SYMMETRIC
 
 }

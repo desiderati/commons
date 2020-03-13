@@ -25,6 +25,12 @@
       "type": "java.lang.Integer"
     },
     {
+      "defaultValue": "asymmetric",
+      "name": "security.jwt.authentication.encryption-method",
+      "description": "It defines the encryption method to be used to encrypt/decrypt the JWT Token. Possible values: asymmetric, symmetric.",
+      "type": "io.herd.common.security.jwt.JwtEncryptionMethod"
+    },
+    {
       "defaultValue": false,
       "name": "security.jwt.authorization.enabled",
       "description": "It defines if JWT Authorization will be enabled or not.",

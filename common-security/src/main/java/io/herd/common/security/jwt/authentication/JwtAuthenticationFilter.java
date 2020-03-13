@@ -27,7 +27,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -39,7 +41,8 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Authentication via JWT Token. To use this {@link Filter}, it will be necessary to define
- * your own {@link AuthenticationManager} implementation.
+ * your own {@link AuthenticationManager} implementation. Or configure the default one to use
+ * a customized {@link UserDetailsService}.
  */
 @Slf4j
 @Component
@@ -55,7 +58,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
      */
     private AuthenticationConverter authenticationConverter;
     private JwtAuthenticationTokenConfigurer jwtAuthenticationTokenConfigurer;
-    private AuthenticationManager authenticationManager;
+    private AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Autowired
     public JwtAuthenticationFilter(JwtService jwtService,
@@ -77,10 +80,9 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
         // after the method afterPropertiesSet().
     }
 
-    @Override
     @Autowired // Prevent circular dependency.
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
+    public void setAuthenticationManager(AuthenticationManagerBuilder authenticationManagerBuilder) {
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
     }
 
     @Autowired // Prevent circular dependency.
@@ -108,6 +110,11 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        return authenticationManager.authenticate(authenticationConverter.convert(request));
+        // We did not expose or obtain the bean AuthenticationManager directly, because if we define it,
+        // Spring Boot Security will not create a standard UserDetailsService.
+        if (getAuthenticationManager() == null) {
+            setAuthenticationManager(authenticationManagerBuilder.getObject());
+        }
+        return getAuthenticationManager().authenticate(authenticationConverter.convert(request));
     }
 }

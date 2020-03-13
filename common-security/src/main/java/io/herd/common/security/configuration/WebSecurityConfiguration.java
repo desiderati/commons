@@ -35,7 +35,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -44,7 +43,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
@@ -84,7 +82,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        // We don't need CSRF because our Token is invulnerable.
+        // We don't need CSRF because our Token is invulnerable. And also because with it enabled,
+        // we will not be able to call our back-end from the front-end.
         httpSecurity.csrf().disable()
 
             // We enable Cross-Origin Resource Sharing.
@@ -101,23 +100,29 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry authorizeRequests =
             httpSecurity.authorizeRequests();
+
+        // Default public endpoints. Security should not be enabled for these!
+        authorizeRequests = authorizeRequests
+            // We enable all Swagger RESTs.
+            .antMatchers("/swagger-resources/**").permitAll()
+            .antMatchers("/swagger-ui/**").permitAll()
+            .antMatchers("/swagger-ui.html").permitAll()
+            .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
+
+            // We enable all Actuator RESTs.
+            .antMatchers("/actuator/**").permitAll()
+
+            // It enables all calls to the public API.
+            // FIXME Felipe Desiderati: Remove the version from here in the future!
+            .antMatchers("/api/v1/public/**").permitAll();
+
         if (!jwtAuthenticationEnabled && !jwtAuthorizationEnabled && !signRequestAuthorizationEnabled) {
-            authorizeRequests.anyRequest().permitAll();
+            // If none configured, it uses the default behavior.
+            authorizeRequests.anyRequest().authenticated()
+                .and().formLogin()
+                .and().httpBasic();
 
         } else {
-            authorizeRequests = authorizeRequests
-                // We enable all Swagger RESTs.
-                .antMatchers("/swagger-resources/**").permitAll()
-                .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers("/swagger-ui.html").permitAll()
-                .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
-
-                // We enable all Actuator RESTs.
-                .antMatchers("/actuator/**").permitAll()
-
-                // It enables all calls to the public API.
-                .antMatchers("/api/v1/public/**").permitAll();
-
             if (jwtAuthenticationEnabled) {
                 // Login API.
                 authorizeRequests = authorizeRequests.antMatchers(HttpMethod.POST, loginUrl).permitAll();
@@ -135,19 +140,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             // All other requests will be authenticated.
             authorizeRequests.anyRequest().authenticated();
         }
-    }
-
-    @Bean
-    @Override
-    @ConditionalOnProperty(name = "security.jwt.authentication.enabled", havingValue = "true")
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "security.jwt.authentication.enabled", havingValue = "true")
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean

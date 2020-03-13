@@ -70,7 +70,7 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
     }
 
     /**
-     * @return O caminho raiz da aplicação.
+     * @return The application root path.
      */
     @SuppressWarnings("squid:S1075")
     public String getDefaultApiBasePath() {
