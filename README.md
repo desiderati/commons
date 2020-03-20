@@ -7,6 +7,11 @@ All project changes will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.1.15] - 2020-03-19
+
+##### Changed
+- Fixed bug related to the authentication. We must set authentication as **true** after calling the authentication services (JWT and Sign Request).
+
 ### [2.1.14] - 2020-03-11
 
 ##### Added

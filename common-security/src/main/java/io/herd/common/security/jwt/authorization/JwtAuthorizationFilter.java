@@ -75,6 +75,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             Authentication authentication = null;
             try {
                 authentication = jwtAuthorizationService.verifyAuthentication(servletRequest);
+                if (authentication != null) {
+                    authentication.setAuthenticated(true);
+                }
             } catch (AuthenticationServiceException failed) {
                 log.error("Authorization Failed: " + failed.getMessage(), failed);
             }

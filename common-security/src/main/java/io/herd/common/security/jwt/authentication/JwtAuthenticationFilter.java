@@ -67,6 +67,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
         // Indicates whether this filter should attempt to process a login request.
         super(new AntPathRequestMatcher(loginUrl, "POST"));
         setAuthenticationSuccessHandler((request, response, authentication) -> {
+            authentication.setAuthenticated(true);
             String token =
                 jwtService.generateToken(
                     jwtAuthenticationTokenConfigurer.retrieveJwtTokenConfigurer(request, authentication));

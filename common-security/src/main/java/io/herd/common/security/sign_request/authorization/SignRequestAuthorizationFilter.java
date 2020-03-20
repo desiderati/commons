@@ -76,6 +76,9 @@ public class SignRequestAuthorizationFilter extends OncePerRequestFilter {
             Authentication authentication = null;
             try {
                 authentication = signRequestAuthorizationService.verifySignature(signServletRequest);
+                if (authentication != null) {
+                    authentication.setAuthenticated(true);
+                }
             } catch (AuthenticationServiceException failed) {
                 log.error("Authorization Failed: " + failed.getMessage(), failed);
             }
