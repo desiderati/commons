@@ -7,6 +7,12 @@ All project changes will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.1.16] - 2020-03-20
+
+##### Changed
+- Fixed a bug related when an exception was thrown before the **ExceptionHandlingFilter**, generating this way a response message not readable by the **ExceptionHandlingController**. Now if the response body could not be deserialized into a **ResponseExceptionDTO**, it will be deserialized using a **Map<String, Object>**.
+- Now it is possible to disable the default authentication.
+
 ### [2.1.15] - 2020-03-19
 
 ##### Changed

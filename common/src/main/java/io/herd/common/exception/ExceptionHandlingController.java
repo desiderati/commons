@@ -29,6 +29,8 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -36,18 +38,23 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
@@ -57,7 +64,7 @@ import java.util.*;
 
 @Slf4j
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
-public class ExceptionHandlingController implements MessageSourceAware {
+public class ExceptionHandlingController extends ResponseEntityExceptionHandler implements MessageSourceAware {
 
     private static final String DEFAULT_MESSAGE =
         "The server encountered an unexpected condition that prevented it from fulfilling the request!";
@@ -123,48 +130,101 @@ public class ExceptionHandlingController implements MessageSourceAware {
 
     private ResponseEntity<ResponseExceptionDTO> handleSwaggerException(HttpServletRequest request, Exception exception,
             // We had to extract these parameters because the exceptions don't inherit the same parent class.
-            String exceptionMessage,
-            String responseBody,
-            Map<String, List<String>> responseHeaders) {
+            String exceptionMessage, String responseBody, Map<String, List<String>> responseHeaders) {
 
-        StringBuilder remoteException = new StringBuilder(exceptionMessage);
+        StringBuilder remoteExceptionStr = new StringBuilder(exceptionMessage);
         if (responseHeaders != null) {
-            remoteException.append(System.lineSeparator()).append("Headers:").append(System.lineSeparator());
+            remoteExceptionStr.append(System.lineSeparator()).append("Headers:").append(System.lineSeparator());
             for (final Map.Entry<String, List<String>> entry : responseHeaders.entrySet()) {
-                remoteException.append("  ").append(entry.getKey()).append(": ")
+                remoteExceptionStr.append("  ").append(entry.getKey()).append(": ")
                     .append(StringUtils.join(entry.getValue(), ", ")).append(System.lineSeparator());
             }
         }
 
         ValidationResponseExceptionDTO responseException = null;
+        Map<String, Object> responseErrorAttributes = null;
         if (responseBody != null) {
-            remoteException.append("Body:").append(System.lineSeparator());
-            try {
-                TypeReference<ValidationResponseExceptionDTO> typeRef = new TypeReference<ValidationResponseExceptionDTO>(){};
-                ObjectMapper mapper = new ObjectMapper();
-                responseException = mapper.readValue(responseBody, typeRef);
-                String prettyPrintedResponseBody =
-                    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseException);
-                remoteException.append(prettyPrintedResponseBody);
-            } catch (IOException ioex) {
-                log.warn("Is was not possible deserialize API exception body to response exception!", ioex);
-                remoteException.append(responseBody);
+            remoteExceptionStr.append("Body:").append(System.lineSeparator());
+            responseException = deserializeApiResponseException(remoteExceptionStr, responseBody);
+            if (responseException == null) {
+                // As fallback, we try to deserialize the response body into a map of objects.
+                responseErrorAttributes = deserializeApiResponseErrorAttributes(remoteExceptionStr, responseBody);
+                if (responseErrorAttributes == null) {
+                    log.warn("It is was not possible deserialize API using previous methods! " +
+                        "Appending response body directly as String...");
+                    remoteExceptionStr.append(responseBody);
+                }
             }
         }
 
         // We cannot use instaceOf because if the ApiException body has at least one property equal to one of
         // the properties of the ResponseExceptionDTO class, the deserialized object will be valid.
         if (responseException != null && responseException.getType().equals(ResponseExceptionDTO.class.getName())) {
+            if (DEFAULT_HTTP_STATUS.value() == responseException.getStatus()) {
+                request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, remoteExceptionStr);
+            }
+
             String errorCode = responseException.getErrorCode();
             String errorMsg = responseException.getMessage();
-            UUID uuid = logMessage(request, remoteException.toString());
+            UUID uuid = logMessage(request, remoteExceptionStr.toString());
             return ResponseEntity.status(responseException.getStatus()).body(
                 new ResponseExceptionDTO(uuid, errorCode, errorMsg, responseException.getStatus()));
+
+        } else if (responseErrorAttributes != null) {
+            if (DEFAULT_HTTP_STATUS.value() == (int) responseErrorAttributes.get("status")) {
+                request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, remoteExceptionStr);
+            }
+
+            String errorCode = "http_error_" + responseErrorAttributes.get("status");
+            String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
+            UUID uuid = logMessage(request, remoteExceptionStr.toString());
+            return ResponseEntity.status((int) responseErrorAttributes.get("status")).body(
+                new ResponseExceptionDTO(uuid, errorCode, errorMsg, (int) responseErrorAttributes.get("status")));
         }
 
         // Regardless of the return status of the Swagger request, we will generate the same standard error
         // for our clients.
         return handleException(request, exception);
+    }
+
+    private ValidationResponseExceptionDTO deserializeApiResponseException(StringBuilder remoteExceptionStr,
+                                                                           String responseBody) {
+        try {
+            TypeReference<ValidationResponseExceptionDTO> typeRef =
+                new TypeReference<ValidationResponseExceptionDTO>(){};
+            ObjectMapper mapper = new ObjectMapper();
+            ValidationResponseExceptionDTO responseException = mapper.readValue(responseBody, typeRef);
+            String prettyPrintedResponseBody =
+                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseException);
+            remoteExceptionStr.append(prettyPrintedResponseBody);
+            return responseException;
+        } catch (IOException ioex) {
+            log.info("It is was not possible deserialize API exception body to response exception! Message: {}",
+                ioex.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * As fallback, we try to deserialize the response body into a map of objects ({@link ErrorAttributes}).
+     *
+     * @see DefaultErrorAttributes
+     */
+    private Map<String, Object> deserializeApiResponseErrorAttributes(StringBuilder remoteExceptionStr,
+                                                                      String responseBody) {
+        try {
+            TypeReference<Map<String, Object>> typeRef = new TypeReference<Map<String, Object>>(){};
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> responseErrorAttributes = mapper.readValue(responseBody, typeRef);
+            String prettyPrintedResponseBody =
+                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseErrorAttributes);
+            remoteExceptionStr.append(prettyPrintedResponseBody);
+            return responseErrorAttributes;
+        } catch (IOException ioex) {
+            log.info("It is was not possible deserialize API exception body to response error attributes! Message: {}",
+                ioex.getMessage());
+            return null;
+        }
     }
 
     @ExceptionHandler({IllegalArgumentApplicationException.class, IllegalStateApplicationException.class})
@@ -205,7 +265,7 @@ public class ExceptionHandlingController implements MessageSourceAware {
     }
 
     /**
-     * Throwed when used the @{@link org.springframework.validation.annotation.Validated} annotation.
+     * Thrown when used the @{@link org.springframework.validation.annotation.Validated} annotation.
      */
     @ExceptionHandler(javax.validation.ConstraintViolationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleJavaxConstraintViolationException(
@@ -228,11 +288,12 @@ public class ExceptionHandlingController implements MessageSourceAware {
     }
 
     /**
-     * Throwed when used the  @{@link javax.validation.Valid} annotation.
+     * Thrown when used the  @{@link javax.validation.Valid} annotation.
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleMethodArgumentNotValidException(
-            HttpServletRequest request, MethodArgumentNotValidException ex) {
+    @NotNull
+    @Override
+    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+            @NotNull HttpHeaders headers, @NotNull HttpStatus status, WebRequest request) {
 
         String errorCode = "validation_error_msg";
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
@@ -296,15 +357,29 @@ public class ExceptionHandlingController implements MessageSourceAware {
         return handleHttpErrorException(request, HttpStatus.NOT_FOUND, ex);
     }
 
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleHttpRequestMethodNotSupportedException(
-            HttpServletRequest request, HttpRequestMethodNotSupportedException ex) {
-        return handleHttpErrorException(request, HttpStatus.METHOD_NOT_ALLOWED, ex);
+    @NotNull
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(@NotNull Exception ex, @Nullable Object body,
+             HttpHeaders headers, HttpStatus httpStatus, @NotNull WebRequest request) {
+
+        if (DEFAULT_HTTP_STATUS.equals(httpStatus)) {
+            request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+        }
+
+        String errorCode = "http_error_" + httpStatus.value();
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
+        UUID uuid = logMessage(request, errorMsg, ex);
+        return ResponseEntity.status(httpStatus).body(
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
     }
 
     @NotNull
     protected ResponseEntity<ResponseExceptionDTO> handleHttpErrorException(
             HttpServletRequest request, HttpStatus httpStatus, Exception ex) {
+
+        if (DEFAULT_HTTP_STATUS.equals(httpStatus)) {
+            request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex);
+        }
 
         String errorCode = "http_error_" + httpStatus.value();
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
@@ -315,6 +390,10 @@ public class ExceptionHandlingController implements MessageSourceAware {
 
     private ResponseEntity<ResponseExceptionDTO> handleException(
             HttpServletRequest request, HttpStatus httpStatus, Exception ex, Serializable... args) {
+
+        if (DEFAULT_HTTP_STATUS.equals(httpStatus)) {
+            request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex);
+        }
 
         String errorCode = ex.getMessage();
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE, args);
@@ -330,6 +409,13 @@ public class ExceptionHandlingController implements MessageSourceAware {
     private UUID logMessage(HttpServletRequest request, String errorMessage, Exception ex) {
         UUID uuid = UUID.randomUUID();
         log.error("Requested URL: " + request.getRequestURL());
+        log.error("UUID: " + uuid + " | " + errorMessage, ex);
+        return uuid;
+    }
+
+    private UUID logMessage(WebRequest request, String errorMessage, Exception ex) {
+        UUID uuid = UUID.randomUUID();
+        log.error("Requested URL: " + ((ServletWebRequest) request).getRequest().getRequestURI());
         log.error("UUID: " + uuid + " | " + errorMessage, ex);
         return uuid;
     }

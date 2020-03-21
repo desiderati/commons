@@ -47,6 +47,7 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebSecurity
 @SpringBootConfiguration
@@ -54,13 +55,16 @@ import org.springframework.security.web.firewall.HttpFirewall;
 @PropertySource("classpath:application-common-security.properties")
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
+
+    @Value("${security.default.authentication.enabled:false}")
+    private boolean defaultAuthenticationEnabled;
 
     @Value("${security.jwt.authentication.enabled:false}")
     private boolean jwtAuthenticationEnabled;
 
     @Value("${security.jwt.authentication.login-url:/api/v1/login}")
-    private String loginUrl;
+    private String jwtLoginUrl;
 
     @Value("${security.jwt.authorization.enabled:false}")
     private boolean jwtAuthorizationEnabled;
@@ -92,8 +96,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             // We can perform custom exception handling if authentication fails.
             //.and().exceptionHandling().authenticationEntryPoint(http403ForbiddenEntryPoint())
 
-            // We do not wish to enable session.
-            .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            // We do not wish to enable session. Only if default authentication is enabled.
+            .and().sessionManagement().sessionCreationPolicy(
+                defaultAuthenticationEnabled ? SessionCreationPolicy.IF_REQUIRED : SessionCreationPolicy.STATELESS)
 
             // Disables page caching.
             .and().headers().cacheControl();
@@ -116,16 +121,15 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             // FIXME Felipe Desiderati: Remove the version from here in the future!
             .antMatchers("/api/v1/public/**").permitAll();
 
-        if (!jwtAuthenticationEnabled && !jwtAuthorizationEnabled && !signRequestAuthorizationEnabled) {
+        if (!defaultAuthenticationEnabled && !jwtAuthenticationEnabled && !jwtAuthorizationEnabled
+                && !signRequestAuthorizationEnabled) {
             // If none configured, it uses the default behavior.
-            authorizeRequests.anyRequest().authenticated()
-                .and().formLogin()
-                .and().httpBasic();
+            authorizeRequests.anyRequest().permitAll();
 
         } else {
             if (jwtAuthenticationEnabled) {
                 // Login API.
-                authorizeRequests = authorizeRequests.antMatchers(HttpMethod.POST, loginUrl).permitAll();
+                authorizeRequests = authorizeRequests.antMatchers(HttpMethod.POST, jwtLoginUrl).permitAll();
                 httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
             }
 
@@ -137,8 +141,15 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 httpSecurity.addFilterBefore(signRequestAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
             }
 
-            // All other requests will be authenticated.
-            authorizeRequests.anyRequest().authenticated();
+            if (defaultAuthenticationEnabled) {
+                authorizeRequests.antMatchers("/").hasAnyRole("ADMIN");
+                authorizeRequests.anyRequest().authenticated()
+                    .and().formLogin()
+                    .and().httpBasic();
+            } else {
+                // All other requests will be authenticated.
+                authorizeRequests.anyRequest().authenticated();
+            }
         }
     }
 
