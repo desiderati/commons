@@ -7,6 +7,14 @@ All project changes will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.1.17] - 2020-03-21
+
+##### Added
+- Added support to MapStruct.
+
+##### Changed
+- Now it is possible to use a different profile when start the application to access the Swagger API.
+
 ### [2.1.16] - 2020-03-20
 
 ##### Changed
