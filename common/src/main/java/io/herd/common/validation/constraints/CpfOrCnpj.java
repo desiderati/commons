@@ -42,7 +42,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
     "^([0-9]{2}\\.[0-9]{3}\\.[0-9]{3}/[0-9]{4}-[0-9]{2})$|" +
     "^([0-9]{14})$")
 
-// Precisamos excluir os casos abaixo pois estes passam pela validação do módulo.
+// We need to exclude the cases below as they pass through the module validation, but they are invalid.
 @Pattern(regexp = "^(?:(?!000\\.?000\\.?000-?00).)*$")
 @Pattern(regexp = "^(?:(?!111\\.?111\\.?111-?11).)*$")
 @Pattern(regexp = "^(?:(?!222\\.?222\\.?222-?22).)*$")
@@ -59,7 +59,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Repeatable(CpfOrCnpj.List.class)
 @ReportAsSingleViolation
-@SuppressWarnings("unused")
 public @interface CpfOrCnpj {
 
     String message() default "{CpfOrCnpj.message}";

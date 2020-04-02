@@ -8,6 +8,12 @@
   "properties": [
     {
       "defaultValue": false,
+      "name": "security.default.authentication.enabled",
+      "description": "It defines if the default Authentication will be enabled or not.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": false,
       "name": "security.jwt.authentication.enabled",
       "description": "It defines if JWT Authentication will be enabled or not. Process of retrieving the user/password from the Request Body and verifying if the password matches. Here we will obtain all roles configured for the user.",
       "type": "java.lang.Boolean"

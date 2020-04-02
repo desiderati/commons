@@ -16,26 +16,20 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.tenant;
+package io.herd.common.data.mongodb.configuration;
 
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.PropertySource;
 
-@Slf4j
-@Component
-@ConditionalOnProperty(prefix = "app.multitenancy", name = "type")
-@SuppressWarnings("unused")
-public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver {
+@Configuration
+@PropertySource("classpath:application-common-data-mongodb.properties")
+// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
+@ComponentScan(basePackages = "io.herd.common.data.mongodb",
+    excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
+)
+public class MongoDbAutoConfiguration {
 
-    @Override
-    public String resolveCurrentTenantIdentifier() {
-        return TenantContext.getId();
-    }
-
-    @Override
-    public boolean validateExistingCurrentSessions() {
-        return true;
-    }
 }

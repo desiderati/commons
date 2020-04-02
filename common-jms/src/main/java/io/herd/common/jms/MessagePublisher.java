@@ -18,7 +18,7 @@
  */
 package io.herd.common.jms;
 
-import io.herd.common.jms.configuration.JmsConfiguration;
+import io.herd.common.jms.configuration.JmsAutoConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
@@ -32,7 +32,7 @@ import javax.jms.Queue;
  * O Spring consegue fazer a injeção de dependências corretamente,
  * pelo fato do nome do parâmetro ser igual ao nome da fila sendo configurada.
  *
- * @see JmsConfiguration#queue(String)
+ * @see JmsAutoConfiguration#queue(String)
  */
 @Slf4j
 @Component

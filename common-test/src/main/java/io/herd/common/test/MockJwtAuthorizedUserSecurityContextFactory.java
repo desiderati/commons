@@ -18,7 +18,7 @@
  */
 package io.herd.common.test;
 
-import io.herd.common.test.annotation.MockJwtAuthorizedUser;
+import io.herd.common.test.annotation.WithMockJwtAuthorizedUser;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -38,10 +38,10 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
  *
  * @link https://docs.spring.io/spring-security/site/docs/4.0.x/reference/htmlsingle/#test-method-withsecuritycontext
  */
-public class MockJwtAuthorizedUserSecurityContextFactory implements WithSecurityContextFactory<MockJwtAuthorizedUser> {
+public class MockJwtAuthorizedUserSecurityContextFactory implements WithSecurityContextFactory<WithMockJwtAuthorizedUser> {
 
     @Override
-    public SecurityContext createSecurityContext(MockJwtAuthorizedUser jwtAuthorizedUserAnnotation) {
+    public SecurityContext createSecurityContext(WithMockJwtAuthorizedUser jwtAuthorizedUserAnnotation) {
         Authentication auth =
             new UsernamePasswordAuthenticationToken(jwtAuthorizedUserAnnotation.username(),
                 null, AuthorityUtils.createAuthorityList(jwtAuthorizedUserAnnotation.role()));

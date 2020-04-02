@@ -7,6 +7,74 @@ All project changes will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### [2.2.6] - 2020-04-01
+
+##### Changed
+- Fixed a bug with **ComponentScan** annotation while using **WebMvcTest** annotation.
+
+### [2.2.5] - 2020-04-01
+
+##### Changed
+- Fixed a bug with **ComponentScan** annotation.
+
+### [2.2.4] - 2020-04-01
+
+##### Changed
+- Fixed a problem while generating file **spring-configuration-metadata.json**.
+
+### [2.2.3] - 2020-03-31
+
+##### Changed
+- **WebSecurityAutoConfiguration** will only be configured if there's no other bean of the same type.
+
+### [2.2.2] - 2020-03-31
+
+##### Changed
+- **ResponseExceptionDTOHttpMessageConverter** must always return an "application/json".
+
+### [2.2.1] - 2020-03-30
+
+##### Added
+- Support to Apollo GraphQL.
+- Added a custom **ResponseExceptionDTOHttpMessageConverter**.
+
+##### Changed
+- Updated Commons Compress: 1.8 -> 1.19.
+
+### [2.2.0] - 2020-03-25
+
+##### Changed
+- Support to Java 11.
+- Better Spring Boot auto configuration. Removed annotations (@EnableAutoConfiguration) that isn't needed by the application.
+- Better rethrowing functionality. See **ThrowingConsumer** for further information.
+- Some language translations.
+- Minor code review.
+- Better multi tenant support.
+
+### [2.1.18] - 2020-03-23
+
+##### Changed
+- Fixed a Bug related to allowing calls to the public API.
+
+### [2.1.17] - 2020-03-21
+
+##### Added
+- Added support to MapStruct.
+
+##### Changed
+- Now it is possible to use a different profile when start the application to access the Swagger API.
+
+### [2.1.16] - 2020-03-20
+
+##### Changed
+- Fixed a bug related when an exception was thrown before the **ExceptionHandlingFilter**, generating this way a response message not readable by the **ExceptionHandlingController**. Now if the response body could not be deserialized into a **ResponseExceptionDTO**, it will be deserialized using a **Map<String, Object>**.
+- Now it is possible to disable the default authentication.
+
+### [2.1.15] - 2020-03-19
+
+##### Changed
+- Fixed bug related to the authentication. We must set authentication as **true** after calling the authentication services (JWT and Sign Request).
+
 ### [2.1.14] - 2020-03-11
 
 ##### Added

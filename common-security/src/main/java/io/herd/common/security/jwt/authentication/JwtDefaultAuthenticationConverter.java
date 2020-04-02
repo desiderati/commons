@@ -43,7 +43,7 @@ public class JwtDefaultAuthenticationConverter implements AuthenticationConverte
             String username = jsonNode.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY).asText();
             String password = jsonNode.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY).asText();
 
-            //  Never get the roles from the request. The roles must be informed by the Authentication Manager.
+            // Never get the roles from the request. The roles must be informed by the Authentication Manager.
             return new UsernamePasswordAuthenticationToken(username, password);
         } catch (IOException e) {
             throw new AuthenticationServiceException("Authentication Failed: " + e.getMessage(), e);

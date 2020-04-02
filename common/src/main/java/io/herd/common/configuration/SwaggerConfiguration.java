@@ -20,8 +20,11 @@ package io.herd.common.configuration;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.data.rest.RepositoryRestMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,26 +43,28 @@ import java.util.function.Predicate;
 /**
  * Use this configuration whenever you need to expose application controllers ({@link RestController}) via Swagger.
  */
+@Configuration
 @EnableSwagger2WebMvc
-@SpringBootConfiguration
+@ConditionalOnWebApplication
+@ConditionalOnProperty(name = "springfox.swagger.enabled", havingValue = "true")
 @PropertySource("classpath:swagger.properties")
-@Import({SpringDataRestConfiguration.class, BeanValidatorPluginsConfiguration.class})
+@Import({
+    // Support to Spring Data Rest with Swagger
+    RepositoryRestMvcAutoConfiguration.class,
+    SpringDataRestConfiguration.class,
+    BeanValidatorPluginsConfiguration.class
+})
 public class SwaggerConfiguration {
-
-    // I dont't know why but the default value is not being recognized.
-    @Value("${springfox.swagger.enabled:true}")
-    private boolean enabled;
 
     @Value("${springfox.swagger.package-to-scan:}")
     private String packagesToScan;
 
-    @Value("${springfox.swagger.paths-to-expose:/api/v1/.*}")
+    @Value("${springfox.swagger.paths-to-expose:/api/v.*,/api/public/v.*}")
     private String pathsToExpose;
 
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
-            .enable(enabled)
             .protocols(protocols())
             .select()
             .apis(RequestHandlerSelectors.basePackage(packagesToScan))
@@ -78,6 +83,7 @@ public class SwaggerConfiguration {
         if (StringUtils.isBlank(pathsToExpose)) {
             return PathSelectors.any();
         }
+
         String[] pathsToExposeArr = pathsToExpose.split(",");
         Predicate<String> pathSelector = null;
         for (String pathToExpose : pathsToExposeArr) {

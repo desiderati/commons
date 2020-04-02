@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Usar esta classe quando for definir um repositório de dados personalizado!
+ * Use this class when defining a custom data repository!
  */
 @Repository
 @Transactional(readOnly = true)

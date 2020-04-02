@@ -16,21 +16,35 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.configuration;
+package io.herd.common.test.annotation;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import io.herd.common.test.MockSignRequestAuthorizedClientSecurityContextFactory;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContext;
 
-@Getter
-@Setter
-@ConfigurationProperties(prefix = "app.multitenancy")
-public class MultiTenancyProperties {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 
-    @SuppressWarnings("unused")
-    public enum Type {
-        NONE, SCHEMA, DATABASE, IDENTIFIER
-    }
+/**
+ * @see WithMockUser
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@WithSecurityContext(factory = MockSignRequestAuthorizedClientSecurityContextFactory.class)
+public @interface WithMockSignRequestAuthorizedClient {
 
-    private Type type;
+    /**
+     * As we cannot use a {@link Map} to configure the additional properties, we have defined
+     * here the bean name, which will be used to search the client configured inside the test
+     * context and use it as an authentication principal.
+     *
+     * @return The bean name registered in the context.
+     */
+    String beanName() default "signRequestAuthorizedClient";
+
+    /**
+     * Always with prefix "ROLE_".
+     */
+    String role() default "ROLE_ADMIN";
+
 }

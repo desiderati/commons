@@ -22,11 +22,11 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
@@ -38,7 +38,7 @@ import java.util.Arrays;
  * em um mesmo @{@link java.util.ResourceBundle}.
  */
 @Slf4j
-@SpringBootConfiguration
+@Configuration
 @PropertySource("classpath:i18n.properties")
 public class I18nConfiguration implements EnvironmentAware {
 

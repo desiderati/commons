@@ -1,1 +1,10 @@
-org.springframework.context.ApplicationContextInitializer= io.herd.common.configuration.ExternalPropertiesFileValidationInitializer
+# Initializers
+org.springframework.context.ApplicationContextInitializer=\
+io.herd.common.configuration.ExternalPropertiesFileValidationInitializer
+
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+io.herd.common.configuration.DefaultAutoConfiguration,\
+io.herd.common.configuration.WebAutoConfiguration,\
+io.herd.common.tenant.configuration.MultiTenantAutoConfiguration,\
+io.herd.common.tenant.configuration.MultiTenantLiquibaseAutoConfiguration

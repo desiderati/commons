@@ -16,18 +16,28 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.tenant;
+package io.herd.common.tenant.configuration;
 
-import java.util.Collections;
-import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
-/**
- * Identifica quais os clientes (Tenants) serão executadas as regras do Liquibase na inicialização da aplicação.
- * Não é obrigatório a implementação da mesma, entretanto é extremamente recomendado.
- */
-public interface MultiTenancyDatabaseMigrationInitializer {
+import javax.validation.constraints.NotNull;
 
-    default Set<String> tenants() {
-        return Collections.emptySet();
+@Getter
+@Setter
+@Validated
+@Component
+@ConfigurationProperties(prefix = "app.multitenant")
+public class MultiTenantProperties {
+
+    public enum Strategy {
+        NONE, SCHEMA /*, DATABASE, IDENTIFIER */ // Not supported yet!
     }
+
+    @NotNull
+    private Strategy strategy = Strategy.NONE;
+
 }

@@ -30,39 +30,33 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Neccessário definir a propriedade:
+ * You need to set the property:
  * <p>
  * spring.jpa.hibernate.naming.physical-strategy=io.herd.common.data.jpa.DefaultPhysicalNamingStrategy
  * <p>
- * Dentro do arquivo <b>application.properties</b>. Esta classe pode ser estendida caso desejemos
- * personalizar o prefixo a ser utilizado.
+ * Within the <b>application.properties</b> file. This class can be extended if you want to customize
+ * the prefix to be used.
  */
 @Slf4j
 public class DefaultPhysicalNamingStrategy extends SpringPhysicalNamingStrategy {
 
-    private static final String DEFAULT_PREFIX = "app";
-
     private String prefix;
 
     public DefaultPhysicalNamingStrategy() {
-        prefix = getTablePrefix("application.properties");
+        prefix = getTablePrefix();
         if (prefix == null) {
-            prefix = getTablePrefix("application-common.properties");
-        }
-        if (prefix == null) {
-            prefix = DEFAULT_PREFIX;
-            log.warn("Property 'app.database.table-prefix' not configured! Using default value: " + prefix);
+            log.info("Property 'app.database.table-prefix' not configured! Ignoring table prefix...");
         }
     }
 
-    private String getTablePrefix(String filename) {
+    private String getTablePrefix() {
         try {
             Properties prop = new Properties();
             PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver =
                 new PathMatchingResourcePatternResolver();
 
             Resource[] resources =
-                pathMatchingResourcePatternResolver.getResources("classpath*:" + filename);
+                pathMatchingResourcePatternResolver.getResources("classpath*:application.properties");
             for (Resource resource : resources) {
                 InputStream is = resource.getInputStream();
                 prop.load(is);
@@ -74,7 +68,7 @@ public class DefaultPhysicalNamingStrategy extends SpringPhysicalNamingStrategy 
             return null;
         } catch (Exception ex) {
             String errorMsg =
-                "It wasn't possible to load property 'app.database.table-prefix' from file: " + filename + "!";
+                "It wasn't possible to load property 'app.database.table-prefix' from file: application.properties";
             log.info(errorMsg);
             log.debug(errorMsg, ex);
             return null;

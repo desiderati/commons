@@ -20,16 +20,23 @@ package io.herd.common.configuration;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotBlank;
 
 @Getter
 @Setter
-@SpringBootConfiguration
+@Validated
+@Component
 @ConfigurationProperties(prefix = "app.datasource")
 public class DatabaseProperties {
 
-    private String ddlCreateSchema = "CREATE SCHEMA ${schemaName}";
-    private String ddlChangeSchema = "SET SCHEMA '${schemaName}'";
+    @NotBlank
+    private String ddlCreateSchema = "CREATE SCHEMA IF NOT EXISTS ${schemaName}";
+
+    @NotBlank
+    private String ddlChangeSchema = "USE ${schemaName}";
 
 }

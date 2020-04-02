@@ -28,9 +28,9 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.constraints.NotBlank;
 
 @Getter
-@Setter // Nunca esquecer de colocar os setXXX(..) para arquivos de configuração!
-@Component
+@Setter
 @Validated
+@Component
 @PropertySource("classpath:google-calendar.properties")
 @ConfigurationProperties(prefix = "google.calendar")
 public class GoogleCalendarProperties {

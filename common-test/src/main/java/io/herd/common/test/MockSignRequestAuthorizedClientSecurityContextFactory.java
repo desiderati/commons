@@ -18,7 +18,7 @@
  */
 package io.herd.common.test;
 
-import io.herd.common.test.annotation.MockSignRequestAuthorizedClient;
+import io.herd.common.test.annotation.WithMockSignRequestAuthorizedClient;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -30,7 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 public class MockSignRequestAuthorizedClientSecurityContextFactory
-        implements WithSecurityContextFactory<MockSignRequestAuthorizedClient>, ApplicationContextAware {
+        implements WithSecurityContextFactory<WithMockSignRequestAuthorizedClient>, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
@@ -40,7 +40,11 @@ public class MockSignRequestAuthorizedClientSecurityContextFactory
     }
 
     @Override
-    public SecurityContext createSecurityContext(MockSignRequestAuthorizedClient signRequestAuthorizedClientAnnotation) {
+    public SecurityContext createSecurityContext(
+            WithMockSignRequestAuthorizedClient signRequestAuthorizedClientAnnotation) {
+
+        // We didn't cast to SignRequestAuthorizedClient, because this module would need
+        // a dependency with the security module.
         Object signRequestAuthorizedClient =
             applicationContext.getBean(signRequestAuthorizedClientAnnotation.beanName());
         Authentication auth =

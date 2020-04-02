@@ -19,8 +19,10 @@
 package io.herd.common.data;
 
 import io.herd.common.configuration.DatabaseProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,7 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
+@ConditionalOnBean(JdbcTemplate.class)
 public class DatabaseService {
 
     private DatabaseProperties databaseProperties;
@@ -46,6 +50,7 @@ public class DatabaseService {
     public void createSchema(String name) {
         Map<String, String> values = new HashMap<>();
         values.put("schemaName", name);
+        log.info("Creating schema: " + name);
 
         StringSubstitutor strSubstitutor = new StringSubstitutor(values);
         String createQuery = strSubstitutor.replace(databaseProperties.getDdlCreateSchema());

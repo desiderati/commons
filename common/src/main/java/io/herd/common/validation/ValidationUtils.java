@@ -24,7 +24,6 @@ import javax.validation.*;
 import java.util.Set;
 
 @UtilityClass
-@SuppressWarnings("unused")
 public class ValidationUtils {
 
     public <T> void validate(T object, Class<?>... groups) {

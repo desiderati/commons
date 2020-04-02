@@ -30,13 +30,12 @@ import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration;
+import org.springframework.context.annotation.*;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
@@ -50,13 +49,16 @@ import java.net.URI;
 
 @Slf4j
 @EnableJms
-@EnableAutoConfiguration // Without it, ConnectionFactory will not be wired within IntelliJ.
-@SpringBootConfiguration
+@Configuration(proxyBeanMethods = false)
+@AutoConfigureAfter(ActiveMQAutoConfiguration.class)
+@Import({ActiveMQAutoConfiguration.class, org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration.class})
 @PropertySource({"classpath:application-common-jms.properties", "classpath:jms.properties"})
-@ComponentScan("io.herd.common.jms")
-public class JmsConfiguration {
+// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
+@ComponentScan(basePackages = "io.herd.common.jms",
+    excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
+)
+public class JmsAutoConfiguration {
 
-    @SuppressWarnings("WeakerAccess") // Must be public!
     public static final String TYPE_ID_PROPERTY_NAME = "_type";
 
     @Bean
@@ -130,6 +132,7 @@ public class JmsConfiguration {
      * Aproveitamos e já registramos uma política de reentrega.
      */
     @Bean
+
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
             DefaultJmsListenerContainerFactoryConfigurer configurer,
             ConnectionFactory connectionFactory, @Qualifier("jmsErrorHandler") ErrorHandler errorHandler) {

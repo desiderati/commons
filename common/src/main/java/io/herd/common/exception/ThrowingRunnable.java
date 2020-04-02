@@ -28,7 +28,7 @@ public interface ThrowingRunnable {
     @SuppressWarnings("squid:S00112")
     void run() throws Exception;
 
-    static Runnable uncheckedRunnable(ThrowingRunnable f) {
+    static Runnable silently(ThrowingRunnable f) {
         return () -> {
             try {
                 f.run();

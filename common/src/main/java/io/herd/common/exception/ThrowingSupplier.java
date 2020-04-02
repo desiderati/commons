@@ -30,7 +30,7 @@ public interface ThrowingSupplier<R> {
     @SuppressWarnings("squid:S00112")
     R get() throws Exception;
 
-    static <R> Supplier<R> uncheckedRunnable(ThrowingSupplier<R> f) {
+    static <R> Supplier<R> silently(ThrowingSupplier<R> f) {
         return () -> {
             try {
                 return f.get();

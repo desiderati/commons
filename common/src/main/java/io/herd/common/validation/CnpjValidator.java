@@ -20,31 +20,18 @@ package io.herd.common.validation;
 
 import io.herd.common.validation.constraints.Cnpj;
 import org.hibernate.validator.constraints.Mod11Check;
-import org.hibernate.validator.internal.constraintvalidators.hv.Mod11CheckValidator;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import java.util.regex.Pattern;
 
 /**
- * Não utilizamos a validação já disponível pelo Hibernate, pois desejamos validar ou com toda formatação,
- * ou sem formatação alguma.
+ * We didn't use the validation already available by the Hibernate, because we want to validate either
+ * using formatting or without any formatting at all.
  *
  * @see org.hibernate.validator.internal.constraintvalidators.hv.br.CNPJValidator
  */
-public class CnpjValidator implements ConstraintValidator<Cnpj, CharSequence> {
-
-    private static final Pattern DIGITS_ONLY = Pattern.compile("\\d+");
-
-    private final Mod11CheckValidator withSeparatorMod11Validator1 = new Mod11CheckValidator();
-    private final Mod11CheckValidator withSeparatorMod11Validator2 = new Mod11CheckValidator();
-
-    private final Mod11CheckValidator withoutSeparatorMod11Validator1 = new Mod11CheckValidator();
-    private final Mod11CheckValidator withoutSeparatorMod11Validator2 = new Mod11CheckValidator();
+public class CnpjValidator extends AbstractCpfCpnpjValidator<Cnpj> {
 
     @Override
     public void initialize(Cnpj constraintAnnotation) {
-        // Validates CNPJ strings with separator, eg 91.509.901/0001-69.
+        // Validates CNPJ strings with separator, eg.: 91.509.901/0001-69.
         withSeparatorMod11Validator1.initialize(
             0, 14, 16, true, 9, '0',
             '0', Mod11Check.ProcessingDirection.RIGHT_TO_LEFT
@@ -54,7 +41,7 @@ public class CnpjValidator implements ConstraintValidator<Cnpj, CharSequence> {
             '0', Mod11Check.ProcessingDirection.RIGHT_TO_LEFT
         );
 
-        // Validates CNPJ strings without separator, eg 91509901000169.
+        // Validates CNPJ strings without separator, eg.: 91509901000169.
         withoutSeparatorMod11Validator1.initialize(
             0, 11, 12, true, 9, '0',
             '0', Mod11Check.ProcessingDirection.RIGHT_TO_LEFT
@@ -63,21 +50,5 @@ public class CnpjValidator implements ConstraintValidator<Cnpj, CharSequence> {
             0, 12, 13, true, 9, '0',
             '0', Mod11Check.ProcessingDirection.RIGHT_TO_LEFT
         );
-    }
-
-    @Override
-    public boolean isValid(CharSequence value, ConstraintValidatorContext context) {
-        // noinspection DuplicatedCode
-        if (value == null) {
-            return true;
-        }
-
-        if (DIGITS_ONLY.matcher(value).matches()) {
-            return withoutSeparatorMod11Validator1.isValid(value, context)
-                && withoutSeparatorMod11Validator2.isValid(value, context);
-        } else {
-            return withSeparatorMod11Validator1.isValid(value, context)
-                && withSeparatorMod11Validator2.isValid(value, context);
-        }
     }
 }

@@ -31,9 +31,8 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Until now, there is no official JUnit5 extension implementation from Mockito,
- * so we’ll be using the default implementation provided by the JUnit team.
+ * so we’ll use the default implementation provided by the JUnit team.
  */
-@SuppressWarnings("unused")
 public class MockitoExtension implements TestInstancePostProcessor, ParameterResolver {
 
     @Override

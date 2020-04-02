@@ -18,10 +18,8 @@
  */
 package io.herd.common.security.sign_request.authorization;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.herd.common.security.MultiTenantSupport;
+import lombok.*;
 
 import java.util.*;
 
@@ -29,10 +27,14 @@ import java.util.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SignRequestAuthorizedClient {
+@ToString(onlyExplicitlyIncluded = true)
+public class SignRequestAuthorizedClient implements MultiTenantSupport {
 
+    @ToString.Include
     private UUID id;
+
     private String secretKey;
+    private String tenant;
     private List<String> roles = new ArrayList<>();
     private Map<String, Object> additionalProperties = new HashMap<>();
 

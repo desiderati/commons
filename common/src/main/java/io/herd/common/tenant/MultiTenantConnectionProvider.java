@@ -19,14 +19,14 @@
 package io.herd.common.tenant;
 
 import io.herd.common.configuration.DatabaseProperties;
-import io.herd.common.configuration.MultiTenancySchemaConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.hibernate.engine.jdbc.connections.spi.AbstractMultiTenantConnectionProvider;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
@@ -36,42 +36,43 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Classe responsável por aplicar as regras de Multi Tenancy sempre que uma conexão for criada pelo Hibernate.
+ * Class responsible for applying the rules of Multi Tenant whenever a connection is created by the Hibernate.
  */
 @Slf4j
 @Component
-@ConditionalOnBean(MultiTenancySchemaConfiguration.class)
-public class MultiTenancyConnectionProvider extends AbstractMultiTenantConnectionProvider {
-
-    private static final long serialVersionUID = -2940366997865297000L;
+@ConditionalOnProperty(prefix = "app.multitenant", name = "strategy", havingValue = "schema")
+public class MultiTenantConnectionProvider extends AbstractMultiTenantConnectionProvider {
 
     private final transient DatabaseProperties databaseProperties;
-    private final transient HikariDatasourceConnectionProvider datasourceConnectionProvider;
-    private final transient LiquibaseMultiTenancyDatabaseMigration liquibaseMultiTenancyDatabaseMigration;
+    private final transient HikariDatasourceConnectionProvider connectionProvider;
+    private final transient LiquibaseSchemaUpdater liquibaseSchemaUpdater;
 
     @Autowired
-    public MultiTenancyConnectionProvider(DatabaseProperties databaseProperties,
-                                          HikariDatasourceConnectionProvider datasourceConnectionProvider,
-                                          LiquibaseMultiTenancyDatabaseMigration liquibaseMultiTenancyDatabaseMigration) {
+    public MultiTenantConnectionProvider(DatabaseProperties databaseProperties,
+                                         HikariDatasourceConnectionProvider connectionProvider,
+                                         ObjectProvider<LiquibaseSchemaUpdater> liquibaseSchemaUpdater) {
 
         this.databaseProperties = databaseProperties;
-        this.datasourceConnectionProvider = datasourceConnectionProvider;
-        this.liquibaseMultiTenancyDatabaseMigration = liquibaseMultiTenancyDatabaseMigration;
+        this.connectionProvider = connectionProvider;
+        this.liquibaseSchemaUpdater = liquibaseSchemaUpdater.getIfAvailable();
     }
 
     @Override
     public Connection getConnection(String tenantIdentifier) throws SQLException {
-        // Garantir que as regras do Liquibase estão sendo aplicadas a novos clientes.
-        liquibaseMultiTenancyDatabaseMigration.migrateDatabase(tenantIdentifier);
-
         Connection connection = super.getConnection(tenantIdentifier);
         try (Statement statement = connection.createStatement()) {
             StringSubstitutor stringSubstitutor = getStringSubstitutor(tenantIdentifier);
+            statement.execute(stringSubstitutor.replace(databaseProperties.getDdlCreateSchema()));
+
+            if (liquibaseSchemaUpdater != null) {
+                // Ensure that Liquibase rules are being applied to the new clients.
+                liquibaseSchemaUpdater.update(tenantIdentifier);
+            }
+
             statement.execute(stringSubstitutor.replace(databaseProperties.getDdlChangeSchema()));
         } catch (Exception e) {
-            log.error("Failed to change schema to '{}'", tenantIdentifier);
+            log.error("Failed to create/select schema to '{}'", tenantIdentifier, e);
         }
-
         return connection;
     }
 
@@ -84,11 +85,11 @@ public class MultiTenancyConnectionProvider extends AbstractMultiTenantConnectio
 
     @Override
     protected ConnectionProvider getAnyConnectionProvider() {
-        return datasourceConnectionProvider;
+        return connectionProvider;
     }
 
     @Override
     protected ConnectionProvider selectConnectionProvider(String tenantIdentifier) {
-        return datasourceConnectionProvider;
+        return connectionProvider;
     }
 }

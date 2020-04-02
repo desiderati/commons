@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@SuppressWarnings("unused")
 public class NotificationService {
 
     private final BroadcasterFactory atmosphereBroadcasterFactory;

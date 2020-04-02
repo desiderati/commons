@@ -16,27 +16,34 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.test.annotation;
+package io.herd.common.exception;
 
-import io.herd.common.test.MockJwtAuthorizedUserSecurityContextFactory;
-import org.springframework.security.test.context.support.WithSecurityContext;
+import org.junit.jupiter.api.Test;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.io.IOException;
+import java.util.Arrays;
 
-/**
- * Adds support to authentication while running tests. It will be necessary to annotate the classes
- * or methods containing the tests, indicating the user being authenticated.
- */
-@Retention(RetentionPolicy.RUNTIME)
-@WithSecurityContext(factory = MockJwtAuthorizedUserSecurityContextFactory.class)
-public @interface MockJwtAuthorizedUser {
+import static io.herd.common.exception.ThrowingConsumer.sneakyThrow;
+import static io.herd.common.exception.ThrowingConsumer.silently;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    String username() default "admin";
+public class ThrowingConsumerTest {
 
-    /**
-     * Always with prefix "ROLE_".
-     */
-    String role() default "ROLE_ADMIN";
+    @Test
+    public void testSilently() {
+        IOException ioException = assertThrows(IOException.class, () ->
+            Arrays.asList(1, 2, 3).forEach(silently(i -> {
+                if (i == 3) {
+                    throw new IOException("i=" + i);
+                }
+            }))
+        );
+        assertThat(ioException.getMessage()).isEqualTo("i=3");
+    }
 
+    @Test
+    public void testSneakyThrow() {
+        assertThrows(IOException.class, () -> sneakyThrow(new IOException()));
+    }
 }

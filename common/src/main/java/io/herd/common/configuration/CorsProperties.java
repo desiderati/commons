@@ -21,15 +21,30 @@ package io.herd.common.configuration;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Getter
 @Setter
+@Validated
+@Component
 @ConfigurationProperties(prefix = "spring.web.cors")
 public class CorsProperties {
 
-    private String[] allowedMethods = new String[]{"GET", "POST", "PUT", "PATCH", "DELETE"};
-    private String[] allowedHeaders = new String[]{"*"};
-    private String[] allowedOrigins = new String[]{"*"};
-    private String[] exposedHeaders = new String[]{"Authorization"};
+    @NotEmpty
+    private List<@NotBlank String> allowedMethods = List.of("GET", "POST", "PUT", "PATCH", "DELETE");
+
+    @NotEmpty
+    private List<@NotBlank String> allowedHeaders = List.of("*");
+
+    @NotEmpty
+    private List<@NotBlank String> allowedOrigins = List.of("*");
+
+    @NotEmpty
+    private List<@NotBlank String> exposedHeaders = List.of("Authorization");
 
 }

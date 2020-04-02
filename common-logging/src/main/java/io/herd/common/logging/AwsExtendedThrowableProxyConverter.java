@@ -25,7 +25,6 @@ import ch.qos.logback.core.CoreConstants;
 /**
  * @link https://stackoverflow.com/questions/53233934/aws-streaming-multi-line-log-files-from-cloudwatch-to-elk
  */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class AwsExtendedThrowableProxyConverter extends ExtendedThrowableProxyConverter {
 
     @Override

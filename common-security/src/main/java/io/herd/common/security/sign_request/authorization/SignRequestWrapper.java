@@ -35,6 +35,12 @@ public class SignRequestWrapper extends HttpServletRequestWrapper {
 
     public SignRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
+
+        // We need to execute the method below, because when calling request.getInputStream(),
+        // it will mark the request as read (readState = true). And the application will not be
+        // able to retrieve the request parameters since it was marked as read.
+        // This will load the parameters!
+        request.getParameterMap();
         InputStream inputStream = request.getInputStream();
         body = IOUtils.toByteArray(inputStream);
     }

@@ -21,25 +21,26 @@ package io.herd.common.configuration.annotation;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.lang.annotation.*;
 
+/**
+ * Annotation to aid defining a new Spring Boot Application start class, merging all basic
+ * annotations in just one.
+ */
 @Inherited
 @Documented
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@EnableAspectJAutoProxy
 
 @EnableJpaRepositories
 @EntityScan
 
-// NOTE Felipe Desiderati: Não definir a anotação abaixo senão o Spring Boot não irá
-// configurar os Proxies corretamente. O gerenciamento de transação é configurado
-// automaticamente através do application.properties.
+// NOTE Felipe Desiderati: Do not define the annotation below, otherwise Spring Boot will not configure
+// Proxies correctly. Transaction management is automatically configured through application.properties.
 // See: org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration
 //@EnableTransactionManagement
 @ComponentScan
@@ -58,7 +59,7 @@ public @interface CustomSpringBootApplication {
     String[] propertySource() default {"classpath:application.properties"};
 
     @AliasFor(annotation = ComponentScan.class, attribute = "value")
-    String[] componentScan() default {"io.herd.common"};
+    String[] componentScan() default {""};
 
 }
 

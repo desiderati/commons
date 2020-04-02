@@ -33,8 +33,8 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Não utilizamos a validação já disponível pelo Hibernate, pois desejamos validar ou com toda formatação,
- * ou sem formatação alguma.
+ * We didn't use the validation already available by the Hibernate, because we want to validate either
+ * using formatting or without any formatting at all.
  *
  * @see org.hibernate.validator.constraints.br.CNPJ
  */
@@ -45,7 +45,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
 @Retention(RUNTIME)
 @Repeatable(Cnpj.List.class)
-@SuppressWarnings("unused")
 public @interface Cnpj {
 
     String message() default "{Cnpj.message}";

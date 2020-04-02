@@ -18,7 +18,7 @@
  */
 package io.herd.common.jms;
 
-import io.herd.common.jms.configuration.JmsConfiguration;
+import io.herd.common.jms.configuration.JmsAutoConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
 
@@ -26,10 +26,9 @@ import org.springframework.jms.annotation.JmsListener;
  * Classe equivalente a uma implementação de {@link javax.jms.MessageListener} a qual é resposável por ler
  * as mensagens enviadas para a fila padrão.
  *
- * @see JmsConfiguration#queue(String)
+ * @see JmsAutoConfiguration#queue(String)
  */
 @Slf4j
-@SuppressWarnings("unused")
 public abstract class AbstractMessageListener<M extends Message> {
 
     @JmsListener(destination = "${jms.default-queue.name}")
@@ -40,6 +39,6 @@ public abstract class AbstractMessageListener<M extends Message> {
         log.info("Message {} received and processed with success!", message.getId());
     }
 
-    @SuppressWarnings({"WeakerAccess", "squid:S00112"}) // Must be protected!
+    @SuppressWarnings({"squid:S00112"}) // Must thrown a generic exception.
     protected abstract void doReceive(M message) throws Exception;
 }

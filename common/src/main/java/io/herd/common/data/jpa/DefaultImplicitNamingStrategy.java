@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Neccessário definir a propriedade:
+ * You need to set the property:
  * <p>
  * spring.jpa.hibernate.naming.implicit-strategy=io.herd.common.data.jpa.DefaultImplicitNamingStrategy
  * <p>
- * Dentro do arquivo <b>application.properties</b>.
+ * Within the <b>application.properties</b> file.
  */
 public class DefaultImplicitNamingStrategy extends SpringImplicitNamingStrategy {
 

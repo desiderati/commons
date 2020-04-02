@@ -21,7 +21,7 @@ package io.herd.common.data.jpa;
 import org.hibernate.dialect.HSQLDialect;
 
 /**
- * Veja mais em: https://hibernate.atlassian.net/browse/HHH-7002
+ * @see <a href="https://hibernate.atlassian.net/browse/HHH-7002">SchemaExport ERROR when using in-memory database (H2)</a>
  */
 @SuppressWarnings("unused")
 public class ImprovedHSQLDialect extends HSQLDialect {

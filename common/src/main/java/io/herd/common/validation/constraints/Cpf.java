@@ -33,14 +33,14 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Não utilizamos a validação já disponível pelo Hibernate, pois desejamos validar ou com toda formatação,
- * ou sem formatação alguma.
+ * We didn't use the validation already available by the Hibernate, because we want to validate either
+ * using formatting or without any formatting at all.
  *
  * @see org.hibernate.validator.constraints.br.CPF
  */
 @Pattern(regexp = "^([0-9]{3}\\.[0-9]{3}\\.[0-9]{3}-[0-9]{2})$|^([0-9]{11})$")
 
-// Precisamos excluir os casos abaixo pois estes passam pela validação do módulo.
+// We need to exclude the cases below as they pass through the module validation, but they are invalid.
 @Pattern(regexp = "^(?:(?!000\\.?000\\.?000-?00).)*$")
 @Pattern(regexp = "^(?:(?!111\\.?111\\.?111-?11).)*$")
 @Pattern(regexp = "^(?:(?!222\\.?222\\.?222-?22).)*$")
@@ -57,7 +57,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
 @Retention(RUNTIME)
 @Repeatable(Cpf.List.class)
-@SuppressWarnings("unused")
 public @interface Cpf {
 
     String message() default "{Cpf.message}";

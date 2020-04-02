@@ -117,6 +117,7 @@ public class SignRequestAuthorizationService {
                     List<GrantedAuthority> grantedAuthorities =
                         AuthorityUtils.createAuthorityList(
                             authorizedClient.getRoles().stream().map(role -> "ROLE_" + role).toArray(String[]::new));
+
                     return new UsernamePasswordAuthenticationToken(authorizedClient, null, grantedAuthorities);
                 } else {
                     log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Invalid signed request!");

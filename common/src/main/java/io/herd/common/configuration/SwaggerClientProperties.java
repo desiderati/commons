@@ -23,21 +23,33 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Base64;
 
 @Getter
-@Setter // Nunca esquecer de colocar os setXXX(..) para arquivos de configuração!
-@Component
+@Setter
+@Validated
+@Component // I don't know why, but without it, the properties file is not loaded.
 @PropertySource("classpath:swagger-client.properties")
 @ConfigurationProperties(prefix = "swagger.client")
-@SuppressWarnings("unused")
 public class SwaggerClientProperties {
 
+    @NotBlank
     private String host;
+
+    @NotBlank
     private String basePath;
+
     private String authUser;
     private String authPass;
+
+    @NotNull
+    @Min(value = 0)
+    private Integer timeout = 0; // Timeout in seconds. (0 = No Timeout)
 
     public String getBasicAuthorizationHeader() {
         if (authUser != null && authPass != null) {

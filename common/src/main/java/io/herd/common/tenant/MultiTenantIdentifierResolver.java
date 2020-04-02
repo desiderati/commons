@@ -18,46 +18,25 @@
  */
 package io.herd.common.tenant;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
-/**
- * Class responsible for storing the customer identifier (Tenant).
- */
 @Slf4j
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class TenantContext {
+@Component
+@DependsOn("multiTenantContext")
+@ConditionalOnProperty(prefix = "app.multitenant", name = "strategy", havingValue = "schema")
+public class MultiTenantIdentifierResolver implements CurrentTenantIdentifierResolver {
 
-    private static ThreadLocal<String> currentTenantId = new ThreadLocal<>();
-    private static ThreadLocal<UUID> currentTenantUUID = new ThreadLocal<>();
-    private static final String DEFAULT_TENANT = "dummy";
-
-    public static void set(String tenant, UUID tenantUUID) {
-        log.debug("Setting tenant: {}", tenant);
-
-        currentTenantId.set(tenant);
-        currentTenantUUID.set(tenantUUID);
+    @Override
+    public String resolveCurrentTenantIdentifier() {
+        return MultiTenantContext.getId();
     }
 
-    public static String getId() {
-        if (currentTenantId.get() == null) {
-            return DEFAULT_TENANT;
-        }
-
-        return currentTenantId.get();
-    }
-
-    @SuppressWarnings("unused")
-    public static UUID getUUID() {
-        return currentTenantUUID.get();
-    }
-
-    @SuppressWarnings("unused")
-    public static void clear() {
-        currentTenantId.remove();
-        currentTenantUUID.remove();
+    @Override
+    public boolean validateExistingCurrentSessions() {
+        return true;
     }
 }

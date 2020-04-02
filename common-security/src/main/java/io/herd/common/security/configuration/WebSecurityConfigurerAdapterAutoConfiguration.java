@@ -18,22 +18,16 @@
  */
 package io.herd.common.security.configuration;
 
-import io.herd.common.security.jwt.JwtTokenExtractor;
+import io.herd.common.configuration.WebAutoConfiguration;
 import io.herd.common.security.jwt.authentication.JwtAuthenticationFilter;
-import io.herd.common.security.jwt.authentication.JwtAuthenticationTokenConfigurer;
-import io.herd.common.security.jwt.authentication.JwtDefaultAuthenticationConverter;
-import io.herd.common.security.jwt.authentication.JwtDefaultAuthenticationTokenConfigurer;
 import io.herd.common.security.jwt.authorization.JwtAuthorizationFilter;
-import io.herd.common.security.jwt.authorization.JwtDefaultTokenExtractor;
 import io.herd.common.security.sign_request.authorization.SignRequestAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,25 +36,31 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 
-@EnableWebSecurity
-@SpringBootConfiguration
-@EnableAutoConfiguration
-@PropertySource("classpath:application-common-security.properties")
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+/**
+ * If you have defined your custom {@link WebSecurityConfigurerAdapter}, all basic configurations
+ * will be disabled and you will have to reconfigure the endpoints permissions by yourself.
+ */
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnWebApplication
+@ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
+@Import(WebAutoConfiguration.class)
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Value("${security.default.authentication.enabled:false}")
+    private boolean defaultAuthenticationEnabled;
 
     @Value("${security.jwt.authentication.enabled:false}")
     private boolean jwtAuthenticationEnabled;
 
     @Value("${security.jwt.authentication.login-url:/api/v1/login}")
-    private String loginUrl;
+    private String jwtLoginUrl;
 
     @Value("${security.jwt.authorization.enabled:false}")
     private boolean jwtAuthorizationEnabled;
@@ -68,14 +68,21 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Value("${security.sign-request.authorization.enabled:false}")
     private boolean signRequestAuthorizationEnabled;
 
-    @Autowired(required = false) // Required = false does not work with constructors!
+    @Autowired(required = false) // Prevent circular dependency.
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Autowired(required = false) // Required = false does not work with constructors!
+    @Autowired(required = false) // Prevent circular dependency.
     private JwtAuthorizationFilter jwtAuthorizationFilter;
 
-    @Autowired(required = false) // Required = false does not work with constructors!
+    @Autowired(required = false) // Prevent circular dependency.
     private SignRequestAuthorizationFilter signRequestAuthorizationFilter;
+
+    private String defaultApiBasePath;
+
+    @Autowired
+    public WebSecurityConfigurerAdapterAutoConfiguration(String defaultApiBasePath) {
+        this.defaultApiBasePath = defaultApiBasePath;
+    }
 
     /**
      * By default we leave all requests open.
@@ -92,8 +99,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             // We can perform custom exception handling if authentication fails.
             //.and().exceptionHandling().authenticationEntryPoint(http403ForbiddenEntryPoint())
 
-            // We do not wish to enable session.
-            .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            // We do not wish to enable session. Only if default authentication is enabled.
+            .and().sessionManagement().sessionCreationPolicy(
+                defaultAuthenticationEnabled ? SessionCreationPolicy.IF_REQUIRED : SessionCreationPolicy.STATELESS)
 
             // Disables page caching.
             .and().headers().cacheControl();
@@ -113,19 +121,20 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/actuator/**").permitAll()
 
             // It enables all calls to the public API.
-            // FIXME Felipe Desiderati: Remove the version from here in the future!
-            .antMatchers("/api/v1/public/**").permitAll();
+            .antMatchers(defaultApiBasePath + "/public/**").permitAll()
 
-        if (!jwtAuthenticationEnabled && !jwtAuthorizationEnabled && !signRequestAuthorizationEnabled) {
+            // Default error page.
+            .antMatchers("/error").permitAll();
+
+        if (!defaultAuthenticationEnabled && !jwtAuthenticationEnabled && !jwtAuthorizationEnabled
+                && !signRequestAuthorizationEnabled) {
             // If none configured, it uses the default behavior.
-            authorizeRequests.anyRequest().authenticated()
-                .and().formLogin()
-                .and().httpBasic();
+            authorizeRequests.anyRequest().permitAll();
 
         } else {
             if (jwtAuthenticationEnabled) {
                 // Login API.
-                authorizeRequests = authorizeRequests.antMatchers(HttpMethod.POST, loginUrl).permitAll();
+                authorizeRequests = authorizeRequests.antMatchers(HttpMethod.POST, jwtLoginUrl).permitAll();
                 httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
             }
 
@@ -137,30 +146,15 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 httpSecurity.addFilterBefore(signRequestAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
             }
 
-            // All other requests will be authenticated.
-            authorizeRequests.anyRequest().authenticated();
+            if (defaultAuthenticationEnabled) {
+                authorizeRequests.anyRequest().authenticated()
+                    .and().formLogin()
+                    .and().httpBasic();
+            } else {
+                // All other requests will be authenticated.
+                authorizeRequests.anyRequest().authenticated();
+            }
         }
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(AuthenticationConverter.class)
-    @ConditionalOnProperty(name = "security.jwt.authentication.enabled", havingValue = "true")
-    public AuthenticationConverter authenticationConverter() {
-        return new JwtDefaultAuthenticationConverter();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(JwtAuthenticationTokenConfigurer.class)
-    @ConditionalOnProperty(name = "security.jwt.authentication.enabled", havingValue = "true")
-    public JwtAuthenticationTokenConfigurer jwtAuthenticationTokenConfigurer() {
-        return new JwtDefaultAuthenticationTokenConfigurer();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(JwtTokenExtractor.class)
-    @ConditionalOnProperty(name = "security.jwt.authorization.enabled", havingValue = "true")
-    public JwtTokenExtractor<Authentication> jwtTokenExtractor() {
-        return new JwtDefaultTokenExtractor();
     }
 
     @Override
@@ -168,7 +162,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
     }
 
-    protected HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+    private HttpFirewall allowUrlEncodedSlashHttpFirewall() {
         DefaultHttpFirewall firewall = new DefaultHttpFirewall();
         firewall.setAllowUrlEncodedSlash(true);
         return firewall;

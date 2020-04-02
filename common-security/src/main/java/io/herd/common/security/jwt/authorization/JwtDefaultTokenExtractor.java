@@ -18,13 +18,17 @@
  */
 package io.herd.common.security.jwt.authorization;
 
+import io.herd.common.security.UserWithMultiTenantSupport;
 import io.herd.common.security.jwt.JwtService;
 import io.herd.common.security.jwt.JwtTokenExtractor;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,10 +37,16 @@ public class JwtDefaultTokenExtractor implements JwtTokenExtractor<Authenticatio
     @Override
     @SuppressWarnings("unchecked")
     public Authentication extract(Claims tokenPayload) {
-        return new UsernamePasswordAuthenticationToken(
-            tokenPayload.getSubject(),
-            tokenPayload.get(JwtService.CREDENTIALS_ATTRIBUTE),
-            ((List<String>) tokenPayload.get(JwtService.AUTHORITIES_ATTRIBUTE))
-                .stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+        String username = tokenPayload.getSubject();
+        Collection<? extends GrantedAuthority> authorities =
+            ((List<String>) tokenPayload.get(JwtService.AUTHORITIES_ATTRIBUTE)).stream()
+                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+
+        String tenant = (String) tokenPayload.get(JwtService.TENANT_ATTRIBUTE);
+        User principal = (tenant != null) ?
+            new UserWithMultiTenantSupport(username, "****", authorities, tenant) :
+            new User(username, "****", authorities);
+
+        return new UsernamePasswordAuthenticationToken(principal,null, authorities);
     }
 }

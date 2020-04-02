@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 /**
  * Using the ThrowingConsumer Functional Interface allow us to handle lambda functions
- * which throws checked exceptions, and whit this, we didn't have to declare a specific
+ * which throws checked exceptions, and with this, we didn't have to declare a specific
  * Consumer which handles such checked exception.
  */
 @FunctionalInterface
@@ -32,7 +32,7 @@ public interface ThrowingConsumer<T> {
     @SuppressWarnings("squid:S00112")
     void accept(T t) throws Exception;
 
-    static <T> Consumer<T> uncheckedConsumer(ThrowingConsumer<T> f) {
+    static <T> Consumer<T> silently(ThrowingConsumer<T> f) {
         return t -> {
             try {
                 f.accept(t);

@@ -23,7 +23,7 @@ import java.io.Serializable;
 public interface Identity<I extends Serializable> extends Serializable {
 
     /**
-     * @return O identificador da entidade.
+     * @return The entity ID.
      */
     I getId();
 

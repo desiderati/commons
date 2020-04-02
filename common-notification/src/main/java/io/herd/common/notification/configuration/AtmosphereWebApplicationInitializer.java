@@ -22,11 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.atmosphere.cpr.*;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.web.WebApplicationInitializer;
 
 import javax.servlet.ServletContext;
@@ -41,9 +42,11 @@ import static org.atmosphere.cpr.ApplicationConfig.ANNOTATION_PACKAGE;
 import static org.atmosphere.cpr.ApplicationConfig.BROADCASTER_SHARABLE_THREAD_POOLS;
 
 @Slf4j
-@EnableAutoConfiguration
-@SpringBootConfiguration
-@ComponentScan("io.herd.common.notification")
+@Configuration
+// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
+@ComponentScan(basePackages = "io.herd.common.notification",
+    excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
+)
 public class AtmosphereWebApplicationInitializer extends ContainerInitializer
         implements WebApplicationInitializer, ServletContextInitializer {
 
@@ -79,7 +82,7 @@ public class AtmosphereWebApplicationInitializer extends ContainerInitializer
     public void onStartup(@NotNull ServletContext servletContext) throws ServletException {
         AtmosphereServlet servlet = servletContext.createServlet(AtmosphereServlet.class);
         ServletRegistration.Dynamic registration = servletContext.addServlet("atmosphere", servlet);
-        if (registration != null) { // Se for igual a null, indica que o Servlet já foi registrado.
+        if (registration != null) { // If it is equal to null, it indicates that the Servlet has already been registered.
             registration.addMapping(atmosphereUrlMapping);
             registration.setLoadOnStartup(0);
             registration.setAsyncSupported(true);

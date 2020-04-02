@@ -20,6 +20,7 @@ package io.herd.common.security.jwt.authentication;
 
 import io.herd.common.security.jwt.JwtService;
 import io.herd.common.security.jwt.JwtTokenConfigurer;
+import io.herd.common.security.MultiTenantSupport;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -30,12 +31,17 @@ import java.util.stream.Collectors;
 public class JwtDefaultAuthenticationTokenConfigurer implements JwtAuthenticationTokenConfigurer {
 
     @Override
-    public JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication auth) {
+    public JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication authentication) {
         return tokenPayload -> {
-            tokenPayload.setSubject(((User) auth.getPrincipal()).getUsername());
-            tokenPayload.put(JwtService.CREDENTIALS_ATTRIBUTE, auth.getCredentials());
+            tokenPayload.setSubject(((User) authentication.getPrincipal()).getUsername());
             tokenPayload.put(JwtService.AUTHORITIES_ATTRIBUTE,
-                auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
+                authentication.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
+
+            if (authentication.getPrincipal() instanceof MultiTenantSupport) {
+                MultiTenantSupport multiTenantSupport = (MultiTenantSupport) authentication.getPrincipal();
+                tokenPayload.put(JwtService.TENANT_ATTRIBUTE, multiTenantSupport.getTenant());
+            }
         };
     }
 }

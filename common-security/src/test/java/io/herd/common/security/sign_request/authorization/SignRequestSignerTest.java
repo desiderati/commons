@@ -42,7 +42,6 @@ public class SignRequestSignerTest {
             .when(servletRequest).getInputStream();
         when(servletRequest.getHeader(SignRequestSigner.HEADER_DATE)).thenReturn("Fri, 17 Jan 2020 18:30:00 GMT");
 
-        // TODO Felipe Desiderati: Retrieve from JSON file.
         String secretKey = "!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5";
         String signedValue = SignRequestSigner.builder().httpServletRequest(servletRequest)
             .secret(secretKey).build().sign();

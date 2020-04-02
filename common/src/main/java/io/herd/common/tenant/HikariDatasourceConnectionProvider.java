@@ -24,6 +24,8 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.service.UnknownUnwrapTypeException;
 import org.hibernate.service.spi.Stoppable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -31,18 +33,18 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Foi criada esta implementação pois o Hibernate não possui uma implementação para o Hikari Connection Pool.
+ * Despite the fact that Hibernate has its own implementation, such implementation does not have
+ * the option to initialize it with the {@link HikariDataSource} configured by Spring.
  */
 @Component
+@ConditionalOnClass(HikariDataSource.class)
+@ConditionalOnProperty(prefix = "app.multitenant", name = "strategy", havingValue = "schema")
 public class HikariDatasourceConnectionProvider implements ConnectionProvider, Stoppable {
 
-    private static final long serialVersionUID = 4199561413714268076L;
-
-    private final transient DataSource dataSource;
+    private final transient HikariDataSource dataSource;
 
     @Autowired
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public HikariDatasourceConnectionProvider(DataSource dataSource) {
+    public HikariDatasourceConnectionProvider(HikariDataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -63,26 +65,27 @@ public class HikariDatasourceConnectionProvider implements ConnectionProvider, S
 
     @Override
     public void stop() {
-        ((HikariDataSource) dataSource).close();
+        dataSource.close();
     }
 
     @Override
     public boolean isUnwrappableAs(Class unwrapType) {
-        return ConnectionProvider.class.equals(unwrapType) || HikariConnectionProvider.class.isAssignableFrom(unwrapType);
+        return ConnectionProvider.class.equals(unwrapType)
+            || HikariConnectionProvider.class.isAssignableFrom(unwrapType);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> T unwrap(Class<T> unwrapType) {
-        if ( ConnectionProvider.class.equals( unwrapType ) ||
-                HikariConnectionProvider.class.isAssignableFrom( unwrapType ) ) {
+        if (ConnectionProvider.class.equals(unwrapType) ||
+                HikariConnectionProvider.class.isAssignableFrom(unwrapType)) {
             return (T) this;
-        }
-        else if ( DataSource.class.isAssignableFrom( unwrapType ) ) {
+
+        } else if (DataSource.class.isAssignableFrom(unwrapType)) {
             return (T) this.dataSource;
-        }
-        else {
-            throw new UnknownUnwrapTypeException( unwrapType );
+
+        } else {
+            throw new UnknownUnwrapTypeException(unwrapType);
         }
     }
 }

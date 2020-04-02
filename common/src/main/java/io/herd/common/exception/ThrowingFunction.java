@@ -30,7 +30,7 @@ public interface ThrowingFunction<T, R> {
     @SuppressWarnings("squid:S00112")
     R apply(T t) throws Exception;
 
-    static <T, R> Function<T, R> uncheckedFunction(ThrowingFunction<T, R> f) {
+    static <T, R> Function<T, R> silently(ThrowingFunction<T, R> f) {
         return t -> {
             try {
                 return f.apply(t);

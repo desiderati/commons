@@ -16,26 +16,25 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.test.annotation;
+package io.herd.common.security;
 
-import io.herd.common.test.MockSignRequestAuthorizedClientSecurityContextFactory;
-import org.springframework.security.test.context.support.WithSecurityContext;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
 
-@Retention(RetentionPolicy.RUNTIME)
-@WithSecurityContext(factory = MockSignRequestAuthorizedClientSecurityContextFactory.class)
-public @interface MockSignRequestAuthorizedClient {
+@Getter
+@Setter
+@SuppressWarnings("squid:S2160")
+public class UserWithMultiTenantSupport extends User implements MultiTenantSupport {
 
-    /**
-     * @return The bean name registered in the context.
-     */
-    String beanName() default "signRequestAuthorizedClient";
+    private String tenant;
 
-    /**
-     * Always with prefix "ROLE_".
-     */
-    String role() default "ROLE_ADMIN";
-
+    public UserWithMultiTenantSupport(String username, String password,
+                                      Collection<? extends GrantedAuthority> authorities, String tenant) {
+        super(username, password, authorities);
+        this.tenant = tenant;
+    }
 }

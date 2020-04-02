@@ -18,19 +18,23 @@
  */
 package io.herd.common.configuration;
 
+import io.herd.common.exception.ResponseExceptionDTOHttpMessageConverter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -45,11 +49,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Type;
 import java.lang.reflect.Method;
 
-@SpringBootConfiguration
+@Slf4j
+@Configuration
 @ConditionalOnWebApplication
-@ConditionalOnSingleCandidate(WebConfiguration.class)
 @EnableConfigurationProperties(CorsProperties.class)
-public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
+@Import({DefaultAutoConfiguration.class, SwaggerConfiguration.class})
+public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
 
     @Value("${app.api-base-path:/api}")
     private String apiBasePath;
@@ -61,29 +66,31 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
     private final CorsProperties corsProperties;
 
     @Autowired
-    public WebConfiguration(@Qualifier("localValidatorFactoryBean") LocalValidatorFactoryBean validatorFactory,
-                            @Autowired(required = false) EntityManager entityManager,
-                            CorsProperties corsProperties) {
+    public WebAutoConfiguration(@Qualifier("localValidatorFactoryBean") LocalValidatorFactoryBean validatorFactory,
+                                ObjectProvider<EntityManager> entityManager, CorsProperties corsProperties) {
+
         this.validatorFactory = validatorFactory;
-        this.entityManager = entityManager;
+        this.entityManager = entityManager.getIfAvailable();
         this.corsProperties = corsProperties;
     }
 
     /**
      * @return The application root path.
      */
-    @SuppressWarnings("squid:S1075")
+    @Bean
+    @SuppressWarnings("squid:S1075") // Hard-coded path delimiter.
     public String getDefaultApiBasePath() {
         if (!apiBasePath.startsWith("/")) {
             apiBasePath = "/" + apiBasePath;
         }
+
+        log.info("Configuring API base path as: " + apiBasePath);
         return apiBasePath;
     }
 
     /**
-     * Specify a custom Spring MessageSource for resolving validation messages,
-     * instead of relying on JSR-303's default "ValidationMessages.properties"
-     * bundle in the classpath.
+     * Specify a custom Spring MessageSource for resolving validation messages, instead of relying
+     * on JSR-303's default "ValidationMessages.properties" bundle in the classpath.
      */
     @Override
     public Validator getValidator() {
@@ -99,10 +106,10 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping(getDefaultApiBasePath() + "/**")
-            .allowedMethods(corsProperties.getAllowedMethods())
-            .allowedHeaders(corsProperties.getAllowedHeaders())
-            .allowedOrigins(corsProperties.getAllowedOrigins())
-            .exposedHeaders(corsProperties.getExposedHeaders());
+            .allowedMethods(corsProperties.getAllowedMethods().toArray(new String[]{}))
+            .allowedHeaders(corsProperties.getAllowedHeaders().toArray(new String[]{}))
+            .allowedOrigins(corsProperties.getAllowedOrigins().toArray(new String[]{}))
+            .exposedHeaders(corsProperties.getExposedHeaders().toArray(new String[]{}));
     }
 
     /**
@@ -114,14 +121,12 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
         return new WebMvcRegistrations() {
 
             @Override
-            @SuppressWarnings("squid:MaximumInheritanceDepth")
             public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
                 return new RequestMappingHandlerMapping() {
 
                     @Override
                     protected void registerHandlerMethod(@NonNull Object handler, @NonNull Method method,
                                                          @NonNull RequestMappingInfo mapping) {
-
                         Class<?> beanType = method.getDeclaringClass();
                         RestController restApiController = beanType.getAnnotation(RestController.class);
                         if (restApiController != null) {
@@ -157,10 +162,16 @@ public class WebConfiguration implements WebMvcConfigurer, RepositoryRestConfigu
 
         // Felipe Desiderati: Spring Data Rest should allow to define the complete path
         // on annotation @RepositoryRestResource.
+        // See: https://stackoverflow.com/questions/30396953/how-to-customize-spring-data-rest-to-use-a-multi-segment-path-for-a-repository-r
         // Configures the Base Path. It can be redefined using property: spring.data.rest.base-path
         if (StringUtils.isBlank(repositoryRestConfiguration.getBasePath().getPath())) {
-            // FIXME Felipe Desiderati: Remove the version from here in the future!
             repositoryRestConfiguration.setBasePath(getDefaultApiBasePath() + "/v1");
         }
+    }
+
+    @Bean
+    public ResponseExceptionDTOHttpMessageConverter responseExceptionDTOMessageConverter(
+            @Qualifier("jacksonHttpMessageConverter") MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter) {
+        return new ResponseExceptionDTOHttpMessageConverter(mappingJackson2HttpMessageConverter);
     }
 }

@@ -18,7 +18,10 @@
  */
 package io.herd.common.security.jwt.authorization;
 
+import io.herd.common.tenant.MultiTenantContext;
+import io.herd.common.security.MultiTenantSupport;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -75,6 +78,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             Authentication authentication = null;
             try {
                 authentication = jwtAuthorizationService.verifyAuthentication(servletRequest);
+                if (authentication != null && authentication.getPrincipal() instanceof MultiTenantSupport) {
+                    MultiTenantSupport multiTenantSupport = (MultiTenantSupport) authentication.getPrincipal();
+                    if (StringUtils.isNotBlank(multiTenantSupport.getTenant())) {
+                        MultiTenantContext.set(multiTenantSupport.getTenant());
+                    }
+                }
             } catch (AuthenticationServiceException failed) {
                 log.error("Authorization Failed: " + failed.getMessage(), failed);
             }
@@ -84,6 +93,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             log.debug("SecurityContextHolder already contains: '"
                 + SecurityContextHolder.getContext().getAuthentication() + "'");
         }
-        filterChain.doFilter(servletRequest, servletResponse);
+
+        try {
+            filterChain.doFilter(servletRequest, servletResponse);
+        } finally {
+            MultiTenantContext.clear();
+        }
     }
 }

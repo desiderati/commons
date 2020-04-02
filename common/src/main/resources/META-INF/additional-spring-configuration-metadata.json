@@ -5,8 +5,8 @@
       "type": "io.herd.common.configuration.DatabaseProperties"
     },
     {
-      "name": "app.multitenancy",
-      "type": "io.herd.common.configuration.MultiTenancyProperties"
+      "name": "app.multitenant",
+      "type": "io.herd.common.tenant.configuration.MultiTenantProperties"
     },
     {
       "name": "spring.web.cors",
@@ -34,14 +34,13 @@
     {
       "name": "app.database.table-prefix",
       "type": "java.lang.String",
-      "description": "The prefix to be used by all system tables.",
-      "defaultValue": "app"
+      "description": "The prefix to be used by all system tables."
     },
     {
       "name": "app.database.ddl-create-schema",
       "type": "java.lang.String",
       "description": "The DDL for schema creation.",
-      "defaultValue": "CREATE SCHEMA ${schemaName}"
+      "defaultValue": "CREATE SCHEMA IF NOT EXISTS ${schemaName}"
     },
     {
       "name": "app.database.ddl-change-schema",
@@ -50,15 +49,15 @@
       "defaultValue": "SET SCHEMA ''${schemaName}''"
     },
     {
-      "name": "app.multitenancy.default-tenant-identifier",
+      "name": "app.multitenant.default-tenant",
       "type": "java.lang.String",
-      "description": "Default Tenant Identifier.",
+      "description": "Default Tenant.",
       "defaultValue": "public"
     },
     {
-      "name": "app.multitenancy.type",
-      "type": "io.herd.common.configuration.MultiTenancyProperties$Type",
-      "description": "Multitenancy Type.",
+      "name": "app.multitenant.strategy",
+      "type": "io.herd.common.tenant.configuration.MultiTenantProperties$Strategy",
+      "description": "Multi Tenant Strategy.",
       "defaultValue": "NONE"
     },
     {
@@ -77,7 +76,7 @@
       "name": "springfox.swagger.paths-to-expose",
       "type": "java.lang.String",
       "description": "Only the paths defined here will be exposed on Swagger UI.",
-      "defaultValue": "/api/v1/.*"
+      "defaultValue": "/api/v.*,/api/public/v.*"
     },
     {
       "name": "spring.web.cors.allowed-methods",

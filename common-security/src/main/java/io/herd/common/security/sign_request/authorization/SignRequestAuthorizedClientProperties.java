@@ -55,8 +55,7 @@ public class SignRequestAuthorizedClientProperties implements SignRequestAuthori
         public PropertySource<?> createPropertySource(String name,
                                                       EncodedResource resource) throws IOException {
             List<SignRequestAuthorizedClient> authorizedClients =
-                new ObjectMapper().readValue(
-                    resource.getInputStream(), new TypeReference<List<SignRequestAuthorizedClient>>(){});
+                new ObjectMapper().readValue(resource.getInputStream(), new TypeReference<>(){});
             Map<String, Object> authorizedClientsProperties = new HashedMap<>();
             authorizedClientsProperties.put("security.sign-request.authorization.authorized-clients", authorizedClients);
             return new MapPropertySource("sign-request-authorized-clients", authorizedClientsProperties);

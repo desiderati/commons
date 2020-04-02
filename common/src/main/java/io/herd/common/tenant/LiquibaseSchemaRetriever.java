@@ -16,17 +16,16 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.data.mongodb.configuration;
+package io.herd.common.tenant;
 
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
+import java.util.Set;
 
-@EnableAutoConfiguration // Without it, ConnectionFactory will not be wired within IntelliJ.
-@SpringBootConfiguration
-@PropertySource("classpath:application-common-data-mongodb.properties")
-@ComponentScan("io.herd.common.data.mongodb")
-public class MongoDbConfiguration {
+/**
+ * Identifies which schemas (Tenants) will be updated with the Liquibase rules at application startup.
+ * It is not mandatory to implement it, however it is highly recommended.
+ */
+public interface LiquibaseSchemaRetriever {
+
+    Set<String> schemas();
 
 }
