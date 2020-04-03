@@ -31,13 +31,16 @@ import java.lang.annotation.*;
 @DataJpaTest
 @SpringBootTest
 @AutoConfigureWebMvc
-@ActiveProfiles("test")
+@ActiveProfiles
 @Inherited
 @Documented
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @SuppressWarnings("unused")
 public @interface ServiceJpaTest {
+
+    @AliasFor(annotation = ActiveProfiles.class, attribute = "profiles")
+    String[] activeProfiles() default "";
 
     @AliasFor(annotation = Sql.class, attribute = "scripts")
     String[] sqlScripts() default "";

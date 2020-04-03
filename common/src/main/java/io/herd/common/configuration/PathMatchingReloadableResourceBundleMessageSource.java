@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * Implementação de {@link org.springframework.context.MessageSource} responsável por buscar
- * todos os arquivos de propriedades (<b>ARQUIVOS COM MESMO NOME</b>) contidos dentro do Classpath.
+ * {@link org.springframework.context.MessageSource} implementation responsible for searching
+ * all properties files (<b>FILES WITH THE SAME NAME</b>) contained within Classpath.
  */
 @Slf4j
 public class PathMatchingReloadableResourceBundleMessageSource extends ReloadableResourceBundleMessageSource {

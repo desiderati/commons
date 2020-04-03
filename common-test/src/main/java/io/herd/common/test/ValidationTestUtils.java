@@ -45,11 +45,11 @@ public class ValidationTestUtils {
         List<String> errorMsgsList = new ArrayList<>();
         Collections.addAll(errorMsgsList, errorMsgs);
         assertEquals(responseExceptionDTO.getValidationMessages().length, errorMsgsList.size(),
-            "All validations messages muts be handled!");
+            "All validations messages must be handled!");
 
         for (String validationMessage : responseExceptionDTO.getValidationMessages()) {
             errorMsgsList.remove(validationMessage);
         }
-        assertTrue(errorMsgsList.isEmpty(), "All validations messages muts be handled!");
+        assertTrue(errorMsgsList.isEmpty(), "All validations messages must be handled!");
     }
 }

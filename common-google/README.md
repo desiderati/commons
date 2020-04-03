@@ -1,12 +1,9 @@
-Instruções de Uso
-=================
-
-Suporte à APIs do Google
+Support for Google APIs
 ------------------------
 
-Será necessário copiar o arquivo `google-calendar.properties` contido no diretório `/src/main/resources` deste projeto, 
-para dentro do diretório `/src/main/resources` da sua aplicação, alterando os valores de suas propriedades 
-de acordo com a necessidade. Somente copiar um arquivo de propriedades, caso haja alguma alteração nas 
-propriedades do mesmo.
+It will be necessary to copy the file `google-calendar.properties` contained in the directory `/src/main/resources` 
+of this project, to your application's `/src/main/resources` directory, changing the values 
+of its properties according to the necessity. 
+Only copy this properties file, in case there is a change in the properties.
 
-Para maiores informações acessar: https://developers.google.com/calendar/quickstart/java
+For more information access: https://developers.google.com/calendar/quickstart/java

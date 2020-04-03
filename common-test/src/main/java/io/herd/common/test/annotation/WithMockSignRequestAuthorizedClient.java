@@ -38,7 +38,7 @@ public @interface WithMockSignRequestAuthorizedClient {
      * here the bean name, which will be used to search the client configured inside the test
      * context and use it as an authentication principal.
      *
-     * @return The bean name registered in the context.
+     * @return The bean name registered in the test context.
      */
     String beanName() default "signRequestAuthorizedClient";
 

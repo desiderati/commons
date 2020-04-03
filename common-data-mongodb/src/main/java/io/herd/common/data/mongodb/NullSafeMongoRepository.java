@@ -31,7 +31,7 @@ public class NullSafeMongoRepository {
 
     @Pointcut("target(org.springframework.data.mongodb.repository.MongoRepository)")
     public void repositoryMethods() {
-        // AspectJ configuration
+        // Just an ASPECTJ configuration, no implementation is required.
     }
 
     @Around("repositoryMethods()")

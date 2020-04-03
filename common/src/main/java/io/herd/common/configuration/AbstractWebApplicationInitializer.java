@@ -24,16 +24,15 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
 /**
- * Precisamos definir este {@link SpringBootServletInitializer} pois o Spring Boot
- * somente configura automaticamente o contexto de inicialização do Spring caso usemos a classe
- * {@link org.springframework.boot.SpringApplication} para a execução da aplicação.
+ * We need to define this {@link SpringBootServletInitializer} because the Spring Boot will only automatically
+ * configure Spring's bootstrap context if we use the {@link org.springframework.boot.SpringApplication} class
+ * to run the application.
  * <p>
- * Utilizar esta configuração sempre que formos usar um servidor de aplicação para distribuição da
- * aplicação. Por exemplo, WildFly.
+ * Use this configuration whenever you are going to use an application server to distribute the application.
+ * For example, WildFly.
  * <p>
- * Retirado da documentação: <i>Note that a WebApplicationInitializer is only needed if you are
- * building a war file and deploying it. If you prefer to run an embedded container then you won't
- * need this at all.</i>
+ * From the documentation: <i>Note that a WebApplicationInitializer is only needed if you are building a war
+ * file and deploying it. If you prefer to run an embedded container then you won't need this at all.</i>
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public abstract class AbstractWebApplicationInitializer extends SpringBootServletInitializer {

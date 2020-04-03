@@ -86,7 +86,7 @@ public class JmsAutoConfiguration {
     }
 
     /**
-     * Registramos um gerenciador de filas embutido.
+     * We registered an embedded queue manager.
      */
     @Bean
     @ConditionalOnProperty(prefix = "jms.broker", name = "enabled", havingValue = "true")
@@ -115,7 +115,7 @@ public class JmsAutoConfiguration {
     }
 
     /**
-     * Registramos uma DLQ para a fila de entrada.
+     * We registered a DLQ for the input queue.
      */
     @Bean
     @ConditionalOnProperty(prefix = "jms.dlq", name = "enabled", havingValue = "true")
@@ -127,12 +127,10 @@ public class JmsAutoConfiguration {
     }
 
     /**
-     * Precisamos redefinir um {@link DefaultJmsListenerContainerFactory}, para que assim seja possível registrar
-     * um {@link ErrorHandler} personalizado.
-     * Aproveitamos e já registramos uma política de reentrega.
+     * We need to redefine a {@link DefaultJmsListenerContainerFactory}, because we need to register
+     * a custom {@link ErrorHandler}. We also had to register a redelivery policy.
      */
     @Bean
-
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
             DefaultJmsListenerContainerFactoryConfigurer configurer,
             ConnectionFactory connectionFactory, @Qualifier("jmsErrorHandler") ErrorHandler errorHandler) {
@@ -160,7 +158,7 @@ public class JmsAutoConfiguration {
     }
 
     /**
-     * Registramos um conversor para JSON.
+     * We registered a converter for JSON.
      */
     @Bean
     public MessageConverter jacksonJmsMessageConverter() {

@@ -34,9 +34,6 @@ import java.io.IOException;
 public class GoogleCalendarServiceTestApplication {
 
     public static void main(String[] args) throws IOException {
-        // Para aplicações Non-Web precisamos inicializar a aplicação desta forma.
-        // Evitando assim que o Container Web seja carregado desnecessariamente.
-        // Por padrão, todas as aplicações possuem dependência com o Javax Servlet.
         ConfigurableApplicationContext context =
             new SpringApplicationBuilder(GoogleCalendarServiceTestApplication.class).web(WebApplicationType.NONE).run(args);
         GoogleCalendarService googleCalendarService = context.getBean(GoogleCalendarService.class);

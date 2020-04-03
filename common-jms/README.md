@@ -1,15 +1,7 @@
-Instruções de Uso
-=================
+Support for JMS Queues
+----------------------
 
-Caso sua aplicação redefina o arquivo `application.properties`, será necessário copiar as propriedades do 
-arquivo `application.properties` contido no diretório `/src/main/resources` deste projeto, para dentro 
-do arquivo `application.properties` redefinido pela sua aplicação, alterando os valores de suas propriedades 
-de acordo com a necessidade.
-
-Suporte à Filas JMS
--------------------
-
-Será necessário copiar o arquivo `jms.properties` contido no diretório `/src/main/resources` deste projeto, 
-para dentro do diretório `/src/main/resources` da sua aplicação, alterando os valores de suas propriedades 
-de acordo com a necessidade. Somente copiar um arquivo de propriedades, caso haja alguma alteração nas 
-propriedades do mesmo.
+It will be necessary to copy the file `jms.properties` contained in the directory `/src/main/resources` 
+of this project, to your application's `/src/main/resources` directory, changing the values 
+of its properties according to the necessity.
+Only copy this properties file, in case there is a change in the properties.

@@ -1,8 +1,8 @@
-Instruções de Uso
-=================
+Instructions
+------------
 
-Adicionar a seguinte dependência ao arquivo `pom.xml` da sua aplicação. Desta forma, todo as 
-informações de Log serão gravadas seguindo um mesmo padrão de formatação. Para uso com testes apenas!
+Add the following dependency to your application's `pom.xml` file. In this way, all
+log information will be recorded following the same formatting pattern. To use with tests only!
 
 ```
 <dependencies>
@@ -10,7 +10,7 @@ informações de Log serão gravadas seguindo um mesmo padrão de formatação. 
     <dependency>
         <groupId>io.herd.common</groupId>
         <artifactId>common-logging-test</artifactId>
-        <version>{INSERIR ÚLTIMA VERSÃO DISPONÍVEL}</version>
+        <version>{LATEST AVAILABLE VERSION}</version>
         <scope>test</scope>
     </dependency>
     ...

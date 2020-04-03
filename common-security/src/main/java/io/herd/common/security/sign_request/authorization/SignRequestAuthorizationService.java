@@ -96,7 +96,7 @@ public class SignRequestAuthorizationService {
     }
 
     /**
-     * Checks whether the current requisition is authorized to be executed. If so, the system (client)
+     * Checks whether the current requisition is authorized to be executed. If so, the application (client)
      * accessing this API is added to the current request with the appropriate permissions.
      */
     public Authentication verifySignature(HttpServletRequest request) {

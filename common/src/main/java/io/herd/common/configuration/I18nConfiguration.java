@@ -34,8 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Configuração usada para carregar todos os arquivos de internacionalização de uma aplicação
- * em um mesmo @{@link java.util.ResourceBundle}.
+ * Configuration used to load all application internationalization files in the same {@link java.util.ResourceBundle}.
  */
 @Slf4j
 @Configuration

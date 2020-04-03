@@ -70,7 +70,7 @@ public class GoogleCalendarService {
                 .setApplicationName(googleCalendarProperties.getApplicationName())
                 .build();
         } catch (Exception ex) {
-            throw new ApplicationException("Error while creating Goolge Calendar instance!", ex);
+            throw new ApplicationException("Error while creating Google Calendar instance!", ex);
         }
     }
 

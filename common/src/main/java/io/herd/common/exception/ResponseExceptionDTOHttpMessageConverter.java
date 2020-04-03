@@ -31,7 +31,7 @@ import java.util.Collections;
 
 /**
  * This converter was created for cases when the content-type returned by the API is different
- * from {@link MediaType#APPLICATION_JSON}. For these cases, such as {@link MediaType#APPLICATION_OCTET_STREAM},
+ * than {@link MediaType#APPLICATION_JSON}. For these cases, such as {@link MediaType#APPLICATION_OCTET_STREAM},
  * the standard converter was not able to serialize the {@link ResponseExceptionDTO} class
  * when an exception occurred.
  */

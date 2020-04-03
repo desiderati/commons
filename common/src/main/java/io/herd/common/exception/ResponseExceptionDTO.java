@@ -29,8 +29,7 @@ import java.util.UUID;
 public class ResponseExceptionDTO implements Serializable {
 
     /**
-     * Apenas para termos total e plena certeza ao deserializar (JSON) esta classe,
-     * saberemos que é realmente ela que estamos tratando.
+     * Just to have the guarantee that is exactly this class that we are deserializing.
      */
     private String type = ResponseExceptionDTO.class.getName();
 

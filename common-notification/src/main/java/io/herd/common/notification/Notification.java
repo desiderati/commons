@@ -35,7 +35,7 @@ public class Notification implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Armazena o identificador do AtmosphereResource.
+     * AtmosphereResource UUID.
      */
     private String uuid;
 

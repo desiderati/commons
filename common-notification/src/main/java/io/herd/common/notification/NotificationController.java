@@ -18,6 +18,7 @@
  */
 package io.herd.common.notification;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.atmosphere.config.service.*;
 import org.atmosphere.cpr.AtmosphereResource;
@@ -26,8 +27,9 @@ import org.atmosphere.cpr.BroadcasterFactory;
 
 import javax.inject.Inject;
 
-// Não pode ser Singleton!!!
+// Can not be singleton!
 @Slf4j
+@Getter
 @ManagedService(path = "/{notification}/{user}")
 public class NotificationController {
 
@@ -41,12 +43,12 @@ public class NotificationController {
     private String user;
 
     /**
-     * Executado quando a conexão foi totalmente estabelecida, ou seja, pronta para receber mensagens.
-     * <p>
-     * Caso seja necessário, será possível retornar uma mensagem ao ouvinte deste recurso usando um codificador.
-     * Ex.: @Ready(encoders = {NotificationJacksonEncoder.class})
-     * <p>
-     * @link https://github.com/Atmosphere/atmosphere/wiki/Getting-Started-with-the-ManagedService-Annotation
+     * Executed when the connection was fully established, in other words, ready to receive messages.
+     * <p>
+     * If necessary, it will be possible to return a message to the listener of this resource using an encoder.
+     * Eg.: @Ready(encoders = {NotificationJacksonEncoder.class})
+     * <p>
+     * @link https://github.com/Atmosphere/atmosphere/wiki/Getting-Started-with-the-ManagedService-Annotation
      */
     @Ready
     public void onReady(AtmosphereResource resource) {
@@ -54,7 +56,7 @@ public class NotificationController {
     }
 
     /**
-     * Chamado quando o cliente desconecta ou quando ocorre um fechamento inesperado da conexão.
+     * Called when the client disconnects or when an unexpected connection closes.
      */
     @Disconnect
     public void onDisconnect(AtmosphereResourceEvent event) {
@@ -63,8 +65,8 @@ public class NotificationController {
     }
 
     /**
-     * Método necessário para que o servidor receba a mensagem enviada por algum cliente,
-     * execute algum tipo de tratamento e a renvie a todos os ouvintes.
+     * Necessary method for: 1) to receive the message sent by a client,
+     * 2) to perform some type of treatment and 3) to resend it to all listeners.
      */
     @Message(encoders = NotificationJacksonEncoder.class, decoders = NotificationJacksonDecoder.class)
     public Notification onMessage(AtmosphereResource resource, Notification notification) {

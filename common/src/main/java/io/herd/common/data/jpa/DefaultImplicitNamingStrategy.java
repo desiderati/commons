@@ -46,9 +46,9 @@ public class DefaultImplicitNamingStrategy extends SpringImplicitNamingStrategy 
 
     @Override
     public Identifier determineForeignKeyName(ImplicitForeignKeyNameSource source) {
-        // Não podemos deixar de usar o nome da tabela, pois caso contrário poderemos
-        // gerar FKs com o mesmo nome e por causa de um Bug no Liquibase, apenas umas
-        // das FKs seriam criadas. Mesmo as mesmas sendo de diferentes tabelas.
+        // We need to use the table name, because otherwise we can generate FKs with the same name
+        // and because of a bug in Liquibase, only one of these FKs will be created. Even though
+        // they are from different tables.
         // Veja mais: https://liquibase.jira.com/browse/CORE-3313
         return getIdentifier(source, "fk_" + source.getTableName());
     }
@@ -66,15 +66,15 @@ public class DefaultImplicitNamingStrategy extends SpringImplicitNamingStrategy 
     private Identifier getIdentifier(ImplicitConstraintNameSource source, String prefix) {
         String identifierName = getIdentifierName(source, prefix, this::getColumnName);
         if (identifierName.length() > MAX_IDENTIFIER_LENGTH) {
-            // Maior que o tamanho suportado pelo PostgreSQL.
-            // Todas as colunas serão truncadas com três caracteres!
+            // Larger than the size supported by PostgreSQL.
+            // All columns will be truncated to three characters!
             identifierName =
                 getIdentifierName(source, prefix, rawColumnName -> getColumnName(
                     StringUtils.truncate(rawColumnName, 3)));
         }
 
-        // Se mesmo assim continuar maior que o tamanho suportado pelo PostgreSQL.
-        // O banco de dados irá truncar por sua conta! Veja explicação abaixo!
+        // If it is still larger than the size supported by PostgreSQL, the database
+        // will truncate on your own! See explanation below!
 
         // Postgres warns us of identifiers longer than 63 characters, informing us
         // of what they will be truncated to. It then proceeds to create the identifier.

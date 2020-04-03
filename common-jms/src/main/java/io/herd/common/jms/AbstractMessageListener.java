@@ -23,8 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
 
 /**
- * Classe equivalente a uma implementação de {@link javax.jms.MessageListener} a qual é resposável por ler
- * as mensagens enviadas para a fila padrão.
+ * {@link javax.jms.MessageListener} responsible for reading messages sent to the standard queue.
  *
  * @see JmsAutoConfiguration#queue(String)
  */

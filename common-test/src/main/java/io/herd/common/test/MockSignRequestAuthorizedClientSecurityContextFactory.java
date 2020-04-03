@@ -43,7 +43,7 @@ public class MockSignRequestAuthorizedClientSecurityContextFactory
     public SecurityContext createSecurityContext(
             WithMockSignRequestAuthorizedClient signRequestAuthorizedClientAnnotation) {
 
-        // We didn't cast to SignRequestAuthorizedClient, because this module would need
+        // We didn't cast to SignRequestAuthorizedClient, because in this case, this module would need
         // a dependency with the security module.
         Object signRequestAuthorizedClient =
             applicationContext.getBean(signRequestAuthorizedClientAnnotation.beanName());

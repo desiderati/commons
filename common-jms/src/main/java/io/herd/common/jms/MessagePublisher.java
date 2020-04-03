@@ -27,10 +27,10 @@ import org.springframework.stereotype.Component;
 import javax.jms.Queue;
 
 /**
- * Classe resposável por publicar as mensagens na fila padrão.
+ * Class responsible for publishing messages to the standard queue.
  * <p>
- * O Spring consegue fazer a injeção de dependências corretamente,
- * pelo fato do nome do parâmetro ser igual ao nome da fila sendo configurada.
+ * Spring is able to do the dependency injection correctly, because the parameter name
+ * is the same as the name of the queue being configured.
  *
  * @see JmsAutoConfiguration#queue(String)
  */
