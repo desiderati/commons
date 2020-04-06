@@ -1,5 +1,9 @@
-Commons Herd.io ![Build Status](https://github.com/desiderati/commons/workflows/Build%20Status/badge.svg)
+Commons Herd.io
 ---------------
+
+[![Build Status](https://github.com/desiderati/commons/workflows/Build%20Status/badge.svg)](https://github.com/desiderati/commons/actions?query=workflow%3A%22Build+Status%22)
+[![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
+[![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
 For more information, see the projects:
  
@@ -18,7 +22,7 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [2.2.7] - 2020-04-02
+#### [2.2.8] - 2020-04-02
 - Undertown access log configuration.
 
 #### [2.2.7] - 2020-04-02
