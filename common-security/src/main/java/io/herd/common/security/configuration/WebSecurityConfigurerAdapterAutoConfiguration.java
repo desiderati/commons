@@ -89,8 +89,9 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
      */
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        // We don't need CSRF because our Token is invulnerable. And also because with it enabled,
-        // we will not be able to call our back-end from the front-end.
+        // We don't need to enable CSRF support because our Token is invulnerable.
+        // And also because with it enabled, we will not be able to call our back-end
+        // from the front-end.
         httpSecurity.csrf().disable()
 
             // We enable Cross-Origin Resource Sharing.
@@ -101,7 +102,9 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
 
             // We do not wish to enable session. Only if default authentication is enabled.
             .and().sessionManagement().sessionCreationPolicy(
-                defaultAuthenticationEnabled ? SessionCreationPolicy.IF_REQUIRED : SessionCreationPolicy.STATELESS)
+                defaultAuthenticationEnabled ?
+                    SessionCreationPolicy.IF_REQUIRED :
+                    SessionCreationPolicy.STATELESS)
 
             // Disables page caching.
             .and().headers().cacheControl();

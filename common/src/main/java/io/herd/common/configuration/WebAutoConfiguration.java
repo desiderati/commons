@@ -56,6 +56,8 @@ import java.lang.reflect.Method;
 @Import({DefaultAutoConfiguration.class, SwaggerConfiguration.class})
 public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
 
+    private static final String URL_PATH_SEPARATOR = "/";
+
     @Value("${app.api-base-path:/api}")
     private String apiBasePath;
 
@@ -78,10 +80,18 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
      * @return The application root path.
      */
     @Bean
-    @SuppressWarnings("squid:S1075") // Hard-coded path delimiter.
     public String getDefaultApiBasePath() {
-        if (!apiBasePath.startsWith("/")) {
-            apiBasePath = "/" + apiBasePath;
+        if (StringUtils.isBlank(apiBasePath)) {
+            apiBasePath = URL_PATH_SEPARATOR;
+        } else {
+            // Some sanitization. (Replace all duplicated)
+            apiBasePath = apiBasePath.replaceAll(URL_PATH_SEPARATOR + "+", URL_PATH_SEPARATOR);
+            if (!apiBasePath.startsWith(URL_PATH_SEPARATOR)) {
+                apiBasePath = URL_PATH_SEPARATOR + apiBasePath;
+            }
+            if (apiBasePath.endsWith(URL_PATH_SEPARATOR)) {
+                apiBasePath = apiBasePath.substring(0, apiBasePath.length() - 1);
+            }
         }
 
         log.info("Configuring API base path as: " + apiBasePath);
@@ -101,11 +111,16 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
      * Set up Cross-Origin Resource Sharing (CORS).
      * <p>
      * Global CORS configuration
-     * https://docs.spring.io/spring/docs/4.3.11.RELEASE/spring-framework-reference/html/cors.html#_global_cors_configuration
+     * https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-cors-global
      */
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
-        registry.addMapping(getDefaultApiBasePath() + "/**")
+        String defaultApiBasePath =
+            URL_PATH_SEPARATOR.equals(getDefaultApiBasePath()) ?
+                URL_PATH_SEPARATOR + "**" :
+                getDefaultApiBasePath() + URL_PATH_SEPARATOR + "**";
+
+        registry.addMapping(defaultApiBasePath)
             .allowedMethods(corsProperties.getAllowedMethods().toArray(new String[]{}))
             .allowedHeaders(corsProperties.getAllowedHeaders().toArray(new String[]{}))
             .allowedOrigins(corsProperties.getAllowedOrigins().toArray(new String[]{}))
@@ -165,7 +180,7 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
         // See: https://stackoverflow.com/questions/30396953/how-to-customize-spring-data-rest-to-use-a-multi-segment-path-for-a-repository-r
         // Configures the Base Path. It can be redefined using property: spring.data.rest.base-path
         if (StringUtils.isBlank(repositoryRestConfiguration.getBasePath().getPath())) {
-            repositoryRestConfiguration.setBasePath(getDefaultApiBasePath() + "/v1");
+            repositoryRestConfiguration.setBasePath(getDefaultApiBasePath() + URL_PATH_SEPARATOR + "v1");
         }
     }
 

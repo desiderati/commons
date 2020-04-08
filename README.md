@@ -22,6 +22,11 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.2.9] - 2020-04-08
+- Fixed a bug with the Hikari and Liquibase.
+- Some Undertown tweaks.
+- Better Api Base Path sanitization.
+
 #### [2.2.8] - 2020-04-02
 - Undertown access log configuration.
 
