@@ -21,7 +21,6 @@ package io.herd.common.configuration;
 import liquibase.integration.spring.SpringLiquibase;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
@@ -30,14 +29,14 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.*;
+import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 @Configuration
 @EnableAspectJAutoProxy // Enables support for handling components marked with AspectJ's @Aspect annotation.
 @AutoConfigureBefore({ValidationAutoConfiguration.class})
 @PropertySource("classpath:application-common.properties")
-@ComponentScan({"io.herd.common.data", "io.herd.common.exception"})
+@ComponentScan("io.herd.common.data")
 @EnableConfigurationProperties({DatabaseProperties.class, SwaggerClientProperties.class})
 @Import({
     // Spring Cloud uses RefreshAutoConfiguration to add the refresh scope to your application.
@@ -64,20 +63,12 @@ public class DefaultAutoConfiguration {
     }
 
     @Bean
+    @Primary
     @RefreshScope // It forces the LocalValidatorFactoryBean to generate a new MessageInterpolator!
-    public LocalValidatorFactoryBean localValidatorFactoryBean(MessageSource messageSource) {
+    public Validator customValidator(MessageSource messageSource) {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.setValidationMessageSource(messageSource);
         return validator;
-    }
-
-    @Bean
-    @Primary
-    public MethodValidationPostProcessor customMethodValidationPostProcessor(
-            @Qualifier("localValidatorFactoryBean") LocalValidatorFactoryBean validatorFactory) {
-        MethodValidationPostProcessor methodValidationPostProcessor = new MethodValidationPostProcessor();
-        methodValidationPostProcessor.setValidatorFactory(validatorFactory);
-        return methodValidationPostProcessor;
     }
 
     /**

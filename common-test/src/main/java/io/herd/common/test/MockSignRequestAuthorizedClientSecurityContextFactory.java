@@ -29,6 +29,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
+/**
+ * Adds support for authorization when running tests.
+ */
 public class MockSignRequestAuthorizedClientSecurityContextFactory
         implements WithSecurityContextFactory<WithMockSignRequestAuthorizedClient>, ApplicationContextAware {
 

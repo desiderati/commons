@@ -22,6 +22,11 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.2.10] - 2020-04-08
+- Better auto configuration setup. Aiming to execute test slicing technique available on Spring Boot correctly.
+- Created the classes **ServiceJpaTest** and **MockitoLoader**.
+- Support to DBUnit.
+
 #### [2.2.9] - 2020-04-08
 - Fixed a bug with the Hikari and Liquibase.
 - Some Undertown tweaks.

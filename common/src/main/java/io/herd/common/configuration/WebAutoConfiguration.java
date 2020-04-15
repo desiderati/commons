@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -37,7 +38,6 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.Validator;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -53,6 +53,7 @@ import java.lang.reflect.Method;
 @Configuration
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(CorsProperties.class)
+@ComponentScan("io.herd.common.exception")
 @Import({DefaultAutoConfiguration.class, SwaggerConfiguration.class})
 public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
 
@@ -61,17 +62,17 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
     @Value("${app.api-base-path:/api}")
     private String apiBasePath;
 
-    private LocalValidatorFactoryBean validatorFactory;
+    private Validator validator;
 
     private final EntityManager entityManager;
 
     private final CorsProperties corsProperties;
 
     @Autowired
-    public WebAutoConfiguration(@Qualifier("localValidatorFactoryBean") LocalValidatorFactoryBean validatorFactory,
+    public WebAutoConfiguration(@Qualifier("customValidator") Validator validator,
                                 ObjectProvider<EntityManager> entityManager, CorsProperties corsProperties) {
 
-        this.validatorFactory = validatorFactory;
+        this.validator = validator;
         this.entityManager = entityManager.getIfAvailable();
         this.corsProperties = corsProperties;
     }
@@ -104,7 +105,7 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
      */
     @Override
     public Validator getValidator() {
-        return validatorFactory;
+        return validator;
     }
 
     /**

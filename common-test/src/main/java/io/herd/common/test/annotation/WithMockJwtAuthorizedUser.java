@@ -26,8 +26,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Adds support to authentication while running tests. It will be necessary to annotate the classes
- * or methods containing the tests, indicating the user being authenticated.
+ * Adds support to authorization while running tests. It will be necessary to annotate the classes
+ * or methods containing the tests, indicating the client being authorized.
  *
  * @see WithMockUser
  */

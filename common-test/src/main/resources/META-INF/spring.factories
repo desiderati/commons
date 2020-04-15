@@ -1,0 +1,14 @@
+# AutoConfigureCommon auto-configuration imports
+io.herd.common.test.annotation.AutoConfigureCommon=\
+io.herd.common.configuration.DefaultAutoConfiguration,\
+io.herd.common.configuration.WebAutoConfiguration
+
+# AutoConfigureCommonTenant auto-configuration imports
+io.herd.common.test.annotation.AutoConfigureCommonTenant=\
+io.herd.common.tenant.configuration.MultiTenantAutoConfiguration,\
+io.herd.common.tenant.configuration.MultiTenantLiquibaseAutoConfiguration
+
+# AutoConfigureCommonSecurity auto-configuration imports
+io.herd.common.test.annotation.AutoConfigureCommonSecurity=\
+io.herd.common.security.configuration.WebSecurityAutoConfiguration,\
+io.herd.common.security.configuration.WebSecurityConfigurerAdapterAutoConfiguration

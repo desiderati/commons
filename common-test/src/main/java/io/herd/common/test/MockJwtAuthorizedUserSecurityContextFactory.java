@@ -27,7 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 /**
- * Adds support for authentication when running tests.
+ * Adds support for authorization when running tests.
  * <p>
  * Ps.: It will be necessary to annotate the test classes as follows (only when using TestNG):
  *

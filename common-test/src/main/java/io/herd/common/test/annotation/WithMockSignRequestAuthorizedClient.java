@@ -27,6 +27,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 
 /**
+ * Adds support to authorization while running tests. It will be necessary to annotate the classes
+ * or methods containing the tests, indicating the client being authorized.
+ *
  * @see WithMockUser
  */
 @Retention(RetentionPolicy.RUNTIME)

@@ -29,6 +29,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.MessageSource;
@@ -64,6 +65,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @Slf4j
+@ConditionalOnWebApplication
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
 public class ExceptionHandlingController extends ResponseEntityExceptionHandler implements MessageSourceAware {
 

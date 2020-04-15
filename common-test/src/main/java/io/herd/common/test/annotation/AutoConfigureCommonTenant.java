@@ -18,31 +18,24 @@
  */
 package io.herd.common.test.annotation;
 
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.annotation.*;
 
-@Import({})
-@AutoConfigureCommon
-@DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Repository.class))
-
-@Inherited
-@Documented
-@Target({ElementType.TYPE})
+/**
+ * It enables Commons Herd.io (Tenant) auto configuration when using test slicing
+ * like {@link WebMvcTest} or {@link DataJpaTest}.
+ * <p>
+ * If you are going to test using the annotation {@link SpringBootTest},
+ * there's no need to use this annotation.
+ */
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@SuppressWarnings("unused")
-public @interface ServiceJpaTest {
-
-    /**
-     * Specifies the {@link Service}s to test.
-     */
-    @AliasFor(annotation = Import.class, attribute = "value")
-    Class<?>[] services() default {};
-
+@Documented
+@Inherited
+@ImportAutoConfiguration
+public @interface AutoConfigureCommonTenant {
 }

@@ -19,9 +19,12 @@
 package io.herd.common.configuration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.Ordered;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -35,11 +38,12 @@ import java.util.Collections;
 
 @Slf4j
 @Configuration
+@Import(ThymeleafAutoConfiguration.class)
 public class ThymeleafConfiguration {
 
     @Bean
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public SpringTemplateEngine templateEngine(ITemplateResolver defaultResolver) {
+    @Primary
+    public SpringTemplateEngine customTemplateEngine(ITemplateResolver defaultResolver) {
         // Default Resolver.
         final SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         ((AbstractConfigurableTemplateResolver) defaultResolver).setOrder(Ordered.LOWEST_PRECEDENCE - 1);
