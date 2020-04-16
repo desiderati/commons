@@ -16,27 +16,29 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.data.mongodb;
+package io.herd.common.web;
 
-import io.herd.common.data.jpa.NullSafeJpaRepository;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.stereotype.Component;
+    import lombok.experimental.UtilityClass;
+    import org.apache.commons.lang3.StringUtils;
 
-@Aspect
-@Component
-public class NullSafeMongoRepository {
+@UtilityClass
+public class UrlUtils {
 
-    @Pointcut("target(org.springframework.data.mongodb.repository.MongoRepository)")
-    public void repositoryMethods() {
-        // Just an ASPECTJ configuration, no implementation is required.
-    }
+    public static final String URL_PATH_SEPARATOR = "/";
 
-    @Around("repositoryMethods()")
-    @SuppressWarnings("squid:S112")
-    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        return NullSafeJpaRepository.processParameterAndReturnNullIfNull(joinPoint);
+    public String sanitize(String path) {
+        if (StringUtils.isBlank(path)) {
+            path = URL_PATH_SEPARATOR;
+        } else {
+            // Some sanitization. (Replace all duplicated)
+            path = path.replaceAll(URL_PATH_SEPARATOR + "+", URL_PATH_SEPARATOR);
+            if (!path.startsWith(URL_PATH_SEPARATOR)) {
+                path = URL_PATH_SEPARATOR + path;
+            }
+            if (path.endsWith(URL_PATH_SEPARATOR)) {
+                path = path.substring(0, path.length() - 1);
+            }
+        }
+        return path;
     }
 }

@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 public class JwtDefaultAuthenticationTokenConfigurer implements JwtAuthenticationTokenConfigurer {
 
     @Override
+    @SuppressWarnings("squid:S1905") // Unnecessary cast
     public JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication authentication) {
         return tokenPayload -> {
             tokenPayload.setSubject(((User) authentication.getPrincipal()).getUsername());

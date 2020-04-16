@@ -24,6 +24,7 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.Principal;
 
 /**
  * Adds support to authorization while running tests. It will be necessary to annotate the classes
@@ -35,6 +36,17 @@ import java.lang.annotation.RetentionPolicy;
 @WithSecurityContext(factory = MockJwtAuthorizedUserSecurityContextFactory.class)
 public @interface WithMockJwtAuthorizedUser {
 
+    /**
+     * We have defined here the bean name, which will be used to search the JWT token configured
+     * inside the test context and use it as an authentication principal.
+     *
+     * @return The bean name registered in the test context.
+     */
+    String beanName() default "jwtToken";
+
+    /**
+     * It will be used to create the {@link Principal}, if JWT token not presented.
+     */
     String username() default "admin";
 
     /**

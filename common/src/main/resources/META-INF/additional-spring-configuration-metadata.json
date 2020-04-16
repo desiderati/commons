@@ -76,7 +76,7 @@
       "name": "springfox.swagger.paths-to-expose",
       "type": "java.lang.String",
       "description": "Only the paths defined here will be exposed on Swagger UI.",
-      "defaultValue": "/api/v.*,/api/public/v.*"
+      "defaultValue": "/v.*,/public/v.*"
     },
     {
       "name": "spring.web.cors.allowed-methods",

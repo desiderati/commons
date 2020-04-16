@@ -22,6 +22,16 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.0] - 2020-04-15
+- Spring 5.3.5 and Spring Boot 2.2.6. Other dependencies update.
+- Node 12.16.2 and NPM 6.14.4.
+- Fixed a bug related to Swagger configuration. It was not taking into account the fact that the context path 
+  could be different than /.
+- Fixed a bug related to Commons Herd.io Notification's auto-configuration.
+- Fixed a bug when table prefix was configured blank. See: **DefaultPhysicalNamingStrategy**.
+- Created class **MongoContainer**.
+- Changed the **MockJwtAuthorizedUserSecurityContextFactory**. Now, it's mandatory the JWT token bean configuration.
+
 #### [2.2.10] - 2020-04-08
 - Better auto configuration setup. Aiming to execute test slicing technique available on Spring Boot correctly.
 - Created the classes **ServiceJpaTest** and **MockitoLoader**.

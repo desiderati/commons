@@ -19,6 +19,7 @@
 package io.herd.common.configuration;
 
 import io.herd.common.exception.ResponseExceptionDTOHttpMessageConverter;
+import io.herd.common.web.UrlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
@@ -49,6 +50,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Type;
 import java.lang.reflect.Method;
 
+import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
+
 @Slf4j
 @Configuration
 @ConditionalOnWebApplication
@@ -57,9 +60,6 @@ import java.lang.reflect.Method;
 @Import({DefaultAutoConfiguration.class, SwaggerConfiguration.class})
 public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
 
-    private static final String URL_PATH_SEPARATOR = "/";
-
-    @Value("${app.api-base-path:/api}")
     private String apiBasePath;
 
     private Validator validator;
@@ -69,8 +69,12 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
     private final CorsProperties corsProperties;
 
     @Autowired
-    public WebAutoConfiguration(@Qualifier("customValidator") Validator validator,
+    public WebAutoConfiguration(@Value("${app.api-base-path:/api}") String apiBasePath,
+                                @Qualifier("customValidator") Validator validator,
                                 ObjectProvider<EntityManager> entityManager, CorsProperties corsProperties) {
+
+        this.apiBasePath = UrlUtils.sanitize(apiBasePath);
+        log.info("Configuring API base path as: " + this.apiBasePath);
 
         this.validator = validator;
         this.entityManager = entityManager.getIfAvailable();
@@ -81,21 +85,7 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
      * @return The application root path.
      */
     @Bean
-    public String getDefaultApiBasePath() {
-        if (StringUtils.isBlank(apiBasePath)) {
-            apiBasePath = URL_PATH_SEPARATOR;
-        } else {
-            // Some sanitization. (Replace all duplicated)
-            apiBasePath = apiBasePath.replaceAll(URL_PATH_SEPARATOR + "+", URL_PATH_SEPARATOR);
-            if (!apiBasePath.startsWith(URL_PATH_SEPARATOR)) {
-                apiBasePath = URL_PATH_SEPARATOR + apiBasePath;
-            }
-            if (apiBasePath.endsWith(URL_PATH_SEPARATOR)) {
-                apiBasePath = apiBasePath.substring(0, apiBasePath.length() - 1);
-            }
-        }
-
-        log.info("Configuring API base path as: " + apiBasePath);
+    public String defaultApiBasePath() {
         return apiBasePath;
     }
 
@@ -116,12 +106,12 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
      */
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
-        String defaultApiBasePath =
-            URL_PATH_SEPARATOR.equals(getDefaultApiBasePath()) ?
-                URL_PATH_SEPARATOR + "**" :
-                getDefaultApiBasePath() + URL_PATH_SEPARATOR + "**";
+        String mapping =
+            apiBasePath.equals(URL_PATH_SEPARATOR) ?
+                apiBasePath + "**" :
+                apiBasePath + URL_PATH_SEPARATOR + "**";
 
-        registry.addMapping(defaultApiBasePath)
+        registry.addMapping(mapping)
             .allowedMethods(corsProperties.getAllowedMethods().toArray(new String[]{}))
             .allowedHeaders(corsProperties.getAllowedHeaders().toArray(new String[]{}))
             .allowedOrigins(corsProperties.getAllowedOrigins().toArray(new String[]{}))
@@ -129,7 +119,7 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
     }
 
     /**
-     * Ensures that all RESTs will be prefixed with {@link #getDefaultApiBasePath()}.
+     * Ensures that all RESTs will be prefixed with {@link #defaultApiBasePath()}.
      * Use the versions /v1, /v2, ... within the {@link RestController}.
      */
     @Bean
@@ -146,7 +136,7 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
                         Class<?> beanType = method.getDeclaringClass();
                         RestController restApiController = beanType.getAnnotation(RestController.class);
                         if (restApiController != null) {
-                            PatternsRequestCondition apiPattern = new PatternsRequestCondition(getDefaultApiBasePath())
+                            PatternsRequestCondition apiPattern = new PatternsRequestCondition(apiBasePath)
                                 .combine(mapping.getPatternsCondition());
 
                             mapping = new RequestMappingInfo(mapping.getName(), apiPattern,
@@ -181,7 +171,7 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
         // See: https://stackoverflow.com/questions/30396953/how-to-customize-spring-data-rest-to-use-a-multi-segment-path-for-a-repository-r
         // Configures the Base Path. It can be redefined using property: spring.data.rest.base-path
         if (StringUtils.isBlank(repositoryRestConfiguration.getBasePath().getPath())) {
-            repositoryRestConfiguration.setBasePath(getDefaultApiBasePath() + URL_PATH_SEPARATOR + "v1");
+            repositoryRestConfiguration.setBasePath(apiBasePath + URL_PATH_SEPARATOR + "v1");
         }
     }
 

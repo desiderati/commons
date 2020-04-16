@@ -78,10 +78,7 @@ public class DefaultPhysicalNamingStrategy extends SpringPhysicalNamingStrategy 
     @Override
     public final Identifier toPhysicalTableName(Identifier name, JdbcEnvironment jdbcEnvironment) {
         Identifier identifier = super.toPhysicalTableName(name, jdbcEnvironment);
-        return new Identifier(getPrefix() + "_" + identifier.getText(), identifier.isQuoted());
-    }
-
-    protected String getPrefix() {
-        return prefix;
+        String tablePrefix = (StringUtils.isBlank(prefix)) ? "" : prefix + "_";
+        return new Identifier(tablePrefix + identifier.getText(), identifier.isQuoted());
     }
 }

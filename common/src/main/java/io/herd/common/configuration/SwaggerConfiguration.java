@@ -18,7 +18,9 @@
  */
 package io.herd.common.configuration;
 
+import io.herd.common.web.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -59,8 +61,19 @@ public class SwaggerConfiguration {
     @Value("${springfox.swagger.package-to-scan:}")
     private String packagesToScan;
 
-    @Value("${springfox.swagger.paths-to-expose:/api/v.*,/api/public/v.*}")
+    @Value("${springfox.swagger.paths-to-expose:/v.*,/public/v.*}")
     private String pathsToExpose;
+
+    @Value("${server.servlet.context-path:/}")
+    private String servletContextPath;
+
+    private String defaultApiBasePath;
+
+    @Autowired
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    public SwaggerConfiguration(String defaultApiBasePath) {
+        this.defaultApiBasePath = defaultApiBasePath;
+    }
 
     @Bean
     public Docket api() {
@@ -88,11 +101,17 @@ public class SwaggerConfiguration {
         Predicate<String> pathSelector = null;
         for (String pathToExpose : pathsToExposeArr) {
             if (pathSelector == null) {
-                pathSelector = PathSelectors.regex(pathToExpose);
+                pathSelector = PathSelectors.regex(computePathToExpose(pathToExpose));
             } else {
-                pathSelector = pathSelector.or(PathSelectors.regex(pathToExpose));
+                pathSelector = pathSelector.or(PathSelectors.regex(computePathToExpose(pathToExpose)));
             }
         }
         return pathSelector;
+    }
+
+    private String computePathToExpose(String pathToExpose) {
+        pathToExpose = UrlUtils.sanitize(servletContextPath) + UrlUtils.sanitize(defaultApiBasePath)
+            + UrlUtils.sanitize(pathToExpose);
+        return UrlUtils.sanitize(pathToExpose);
     }
 }

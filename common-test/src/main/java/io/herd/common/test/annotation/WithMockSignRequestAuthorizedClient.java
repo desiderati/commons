@@ -24,7 +24,6 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Map;
 
 /**
  * Adds support to authorization while running tests. It will be necessary to annotate the classes
@@ -37,9 +36,8 @@ import java.util.Map;
 public @interface WithMockSignRequestAuthorizedClient {
 
     /**
-     * As we cannot use a {@link Map} to configure the additional properties, we have defined
-     * here the bean name, which will be used to search the client configured inside the test
-     * context and use it as an authentication principal.
+     * We have defined here the bean name, which will be used to search the authorized client configured
+     * inside the test context and use it as an authentication principal.
      *
      * @return The bean name registered in the test context.
      */

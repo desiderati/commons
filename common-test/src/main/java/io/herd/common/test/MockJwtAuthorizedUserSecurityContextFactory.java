@@ -19,6 +19,10 @@
 package io.herd.common.test;
 
 import io.herd.common.test.annotation.WithMockJwtAuthorizedUser;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -39,13 +43,28 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
  *
  * @link https://docs.spring.io/spring-security/site/docs/4.0.x/reference/htmlsingle/#test-method-withsecuritycontext
  */
-public class MockJwtAuthorizedUserSecurityContextFactory implements WithSecurityContextFactory<WithMockJwtAuthorizedUser> {
+public class MockJwtAuthorizedUserSecurityContextFactory
+        implements WithSecurityContextFactory<WithMockJwtAuthorizedUser>, ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(@NotNull ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     @Override
     public SecurityContext createSecurityContext(WithMockJwtAuthorizedUser jwtAuthorizedUserAnnotation) {
-        Authentication auth =
-            new UsernamePasswordAuthenticationToken(jwtAuthorizedUserAnnotation.username(),
+        Authentication auth;
+        try {
+            Object jwtToken =
+                applicationContext.getBean(jwtAuthorizedUserAnnotation.beanName());
+            auth = new UsernamePasswordAuthenticationToken(jwtToken,
                 null, AuthorityUtils.createAuthorityList(jwtAuthorizedUserAnnotation.role()));
+        } catch (NoSuchBeanDefinitionException ex) {
+            auth = new UsernamePasswordAuthenticationToken(jwtAuthorizedUserAnnotation.username(),
+                null, AuthorityUtils.createAuthorityList(jwtAuthorizedUserAnnotation.role()));
+        }
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);

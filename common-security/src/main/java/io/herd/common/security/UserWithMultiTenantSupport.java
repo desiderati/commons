@@ -27,6 +27,7 @@ import java.util.Collection;
 
 @Getter
 @Setter
+@SuppressWarnings("squid:S2160") // Override equals(..)
 public class UserWithMultiTenantSupport extends User implements MultiTenantSupport {
 
     private String tenant;
