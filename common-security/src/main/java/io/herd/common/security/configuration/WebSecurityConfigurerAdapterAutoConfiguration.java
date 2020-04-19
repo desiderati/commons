@@ -85,7 +85,16 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
     }
 
     /**
-     * By default we leave all requests open.
+     * This method allows configuration of web-based security at a resource level, based on a selection match.
+     * E.g. The example below restricts the URLs that start with /admin/ to users that have ADMIN role, and
+     * declares that any other URLs need to be successfully authenticated.
+     * <pre>
+     * protected void configure(HttpSecurity http) throws Exception {
+     *     http.authorizeRequests()
+     *         .antMatchers("/admin/**").hasRole("ADMIN")
+     *         .anyRequest().authenticated();
+     * }
+     * </pre>
      */
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -111,24 +120,6 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
 
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry authorizeRequests =
             httpSecurity.authorizeRequests();
-
-        // Default public endpoints. Security should not be enabled for these!
-        authorizeRequests = authorizeRequests
-            // We enable all Swagger RESTs.
-            .antMatchers("/swagger-resources/**").permitAll()
-            .antMatchers("/swagger-ui/**").permitAll()
-            .antMatchers("/swagger-ui.html").permitAll()
-            .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
-
-            // We enable all Actuator RESTs.
-            .antMatchers("/actuator/**").permitAll()
-
-            // It enables all calls to the public API.
-            .antMatchers(defaultApiBasePath + "/public/**").permitAll()
-
-            // Default error page.
-            .antMatchers("/error").permitAll();
-
         if (!defaultAuthenticationEnabled && !jwtAuthenticationEnabled && !jwtAuthorizationEnabled
                 && !signRequestAuthorizationEnabled) {
             // If none configured, it uses the default behavior.
@@ -160,9 +151,31 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
         }
     }
 
+    /**
+     * This method is used for configuration settings that impact global security (ignore resources, set debug mode,
+     * reject requests by implementing a custom firewall definition). For example, the following method would cause
+     * any request that starts with /resources/ to be ignored for authentication purposes.
+     */
     @Override
     public void configure(WebSecurity web) {
         web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+
+        // Default public endpoints. Security should not be enabled for these!
+        web.ignoring()
+            // We enable all Swagger RESTs.
+            .antMatchers("/swagger-resources/**")
+            .antMatchers("/swagger-ui/**")
+            .antMatchers("/swagger-ui.html")
+            .antMatchers("/webjars/springfox-swagger-ui/**")
+
+            // We enable all Actuator RESTs.
+            .antMatchers("/actuator/**")
+
+            // It enables all calls to the public API.
+            .antMatchers(defaultApiBasePath + "/public/**")
+
+            // Default error page.
+            .antMatchers("/error");
     }
 
     private HttpFirewall allowUrlEncodedSlashHttpFirewall() {

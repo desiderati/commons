@@ -22,6 +22,9 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.1] - 2020-04-15
+- Better Spring Security configuration.
+
 #### [2.3.0] - 2020-04-15
 - Spring 5.3.5 and Spring Boot 2.2.6. Other dependencies update.
 - Node 12.16.2 and NPM 6.14.4.
