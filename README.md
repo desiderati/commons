@@ -22,6 +22,9 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.2] - 2020-04-22
+- Better Undertown configuration.
+
 #### [2.3.1] - 2020-04-15
 - Better Spring Security configuration.
 
