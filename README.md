@@ -22,6 +22,9 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.3] - 2020-04-30
+- Created the functionality of cleaning up the database state between tests.
+
 #### [2.3.2] - 2020-04-22
 - Better Undertown configuration.
 

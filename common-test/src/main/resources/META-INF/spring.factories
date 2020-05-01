@@ -12,3 +12,7 @@ io.herd.common.tenant.configuration.MultiTenantLiquibaseAutoConfiguration
 io.herd.common.test.annotation.AutoConfigureCommonSecurity=\
 io.herd.common.security.configuration.WebSecurityAutoConfiguration,\
 io.herd.common.security.configuration.WebSecurityConfigurerAdapterAutoConfiguration
+
+# TestExecutionListeners
+org.springframework.test.context.TestExecutionListener=\
+io.herd.common.test.CleanupDatabaseTestExecutionListener

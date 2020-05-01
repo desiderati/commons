@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A {@link SmartContextLoader} which can be used in unit tests to automatically create mocks
- * for all autowired beans that are not yet defined in the spring context.
+ * for all autowired beans that are not yet defined in the Spring Context.
  * <p>
  * Based on: https://www.foreach.be/blog/automatic-mocking-spring-beans-mockedloader?lang=nl
  */
