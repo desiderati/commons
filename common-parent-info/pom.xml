@@ -29,7 +29,7 @@
     </parent>
     <groupId>io.herd.common</groupId>
     <artifactId>common-parent-info</artifactId>
-    <version>2.3.3</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -82,8 +82,10 @@
     </repositories>
 
     <properties>
+        <revision>2.3.4-SNAPSHOT</revision>
+
         <!-- Major versions. -->
-        <commons-herd.io.version>2.3.3</commons-herd.io.version>
+        <commons-herd.io.version>${revision}</commons-herd.io.version>
         <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
 
         <!-- Basic configuration. -->
@@ -119,10 +121,18 @@
                     </configuration>
                 </plugin>
                 <plugin>
+                    <artifactId>maven-scm-plugin</artifactId>
+                    <version>1.11.2</version>
+                    <configuration>
+                        <tag>version/${project.version}</tag>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>3.0.0-M1</version>
                     <configuration>
                         <useReleaseProfile>false</useReleaseProfile>
+                        <tagNameFormat>version/@{project.version}</tagNameFormat>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -131,6 +141,11 @@
                     <configuration>
                         <retryFailedDeploymentCount>7</retryFailedDeploymentCount>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.7</version>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -22,6 +22,10 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.4] - 2020-05-08
+- Configured the ${revision} placeholder.
+- Configured the Maven Version Plugin which will be responsible for updating the POM version.
+
 #### [2.3.3] - 2020-04-30
 - Created the functionality of cleaning up the database state between tests.
 
