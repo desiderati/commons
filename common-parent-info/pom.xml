@@ -82,7 +82,7 @@
     </repositories>
 
     <properties>
-        <revision>2.3.4-SNAPSHOT</revision>
+        <revision>2.3.4</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>
