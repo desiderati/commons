@@ -22,7 +22,10 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [2.3.4] - 2020-05-08
+#### [2.3.5] - 2020-05-08
+- Configured the flatten plugin. The ${revision} placeholder will only work if you use this plugin. See: https://blog.soebes.de/blog/2017/04/02/maven-pom-files-without-a-version-in-it/ 
+
+#### [2.3.4] - 2020-05-08 (Do not use this version, it will not work!)
 - Configured the ${revision} placeholder.
 - Configured the Maven Version Plugin which will be responsible for updating the POM version.
 

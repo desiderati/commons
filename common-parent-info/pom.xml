@@ -82,7 +82,7 @@
     </repositories>
 
     <properties>
-        <revision>2.3.4</revision>
+        <revision>2.3.5</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>
@@ -350,6 +350,36 @@
                     <execution>
                         <id>repackage</id>
                         <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
+                The Flatten Maven Plugin generates a flattened version of the pom.xml that Maven installs
+                and deploys instead of the original. Used because of the ${revision} property.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.2.2</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <!-- Only resolves variables revision, sha1 and changelist. Keeps everything else. -->
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten-pom</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>clean-flattened-pom</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

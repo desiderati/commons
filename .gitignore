@@ -190,6 +190,7 @@ bin/
 pom.xml.next
 pom.xml.branch
 dependency-reduced-pom.xml
+.flattened-pom.xml
 
 ### Allure ###
 allure-report/
