@@ -22,6 +22,9 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.6] - 2020-05-14
+- Fixed a bug related to the banner.txt file creation. There's a bug with the flatten plugin, which replaces the placeholders when defined inside the <profile> tag.  
+
 #### [2.3.5] - 2020-05-08
 - Configured the flatten plugin. The ${revision} placeholder will only work if you use this plugin. See: https://blog.soebes.de/blog/2017/04/02/maven-pom-files-without-a-version-in-it/ 
 

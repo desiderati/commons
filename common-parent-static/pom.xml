@@ -51,16 +51,13 @@
                     <groupId>com.github.eirslett</groupId>
                     <artifactId>frontend-maven-plugin</artifactId>
                     <version>1.8.0</version>
-                    <configuration>
-                        <installDirectory>node_config</installDirectory>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>install-node-and-npm</id>
+                            <phase>generate-resources</phase>
                             <goals>
                                 <goal>install-node-and-npm</goal>
                             </goals>
-                            <phase>generate-resources</phase>
                             <configuration>
                                 <nodeVersion>${node.version}</nodeVersion>
                                 <npmVersion>${npm.version}</npmVersion>
@@ -68,37 +65,34 @@
                         </execution>
                         <execution>
                             <id>run-npm-install</id>
+                            <phase>generate-resources</phase>
                             <goals>
                                 <goal>npm</goal>
                             </goals>
-                            <phase>generate-resources</phase>
                             <configuration>
                                 <arguments>install</arguments>
                             </configuration>
                         </execution>
                         <execution>
                             <id>run-npm-build</id>
+                            <phase>generate-resources</phase>
                             <goals>
                                 <goal>npm</goal>
                             </goals>
-                            <phase>generate-resources</phase>
                             <configuration>
                                 <arguments>run ${npm.build-environment}</arguments>
                             </configuration>
                         </execution>
                     </executions>
+                    <configuration>
+                        <installDirectory>node_config</installDirectory>
+                    </configuration>
                 </plugin>
                 <!--
                     It assembles the dist directory.
                 -->
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <configuration>
-                        <descriptors>
-                            <descriptor>assembly.xml</descriptor>
-                        </descriptors>
-                        <appendAssemblyId>false</appendAssemblyId>
-                    </configuration>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -107,6 +101,12 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <descriptors>
+                            <descriptor>assembly.xml</descriptor>
+                        </descriptors>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

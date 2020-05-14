@@ -61,8 +61,8 @@
     </scm>
 
     <issueManagement>
-        <url>https://github.com/desiderati/commons/issues</url>
         <system>GitHub Issues</system>
+        <url>https://github.com/desiderati/commons/issues</url>
     </issueManagement>
 
     <distributionManagement>
@@ -73,16 +73,8 @@
         </repository>
     </distributionManagement>
 
-    <repositories>
-        <repository>
-            <id>jfrog-snapshots</id>
-            <name>jfrog-snapshots</name>
-            <url>http://oss.jfrog.org/oss-snapshot-local</url>
-        </repository>
-    </repositories>
-
     <properties>
-        <revision>2.3.5</revision>
+        <revision>2.3.6</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>
@@ -109,6 +101,14 @@
         -->
         <start-class />
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jfrog-snapshots</id>
+            <name>jfrog-snapshots</name>
+            <url>http://oss.jfrog.org/oss-snapshot-local</url>
+        </repository>
+    </repositories>
 
     <build>
         <pluginManagement>
@@ -361,11 +361,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.2.2</version>
-                <configuration>
-                    <updatePomFile>true</updatePomFile>
-                    <!-- Only resolves variables revision, sha1 and changelist. Keeps everything else. -->
-                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                </configuration>
                 <executions>
                     <execution>
                         <id>flatten-pom</id>
@@ -382,6 +377,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <!-- Only resolves variables revision, sha1 and changelist. Keeps everything else. -->
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -216,14 +216,6 @@
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>${liquibase.version}</version>
-                <configuration>
-                    <propertyFileWillOverride>true</propertyFileWillOverride>
-                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-                    <changeSetAuthor>maven</changeSetAuthor>
-                    <changeLogFile>${liquibase.changelog-dir}/${liquibase.initial-schema-file}</changeLogFile>
-                    <outputChangeLogFile>${liquibase.changelog-dir}/${liquibase.initial-schema-file}</outputChangeLogFile>
-                    <diffChangeLogFile>${liquibase.changelog-dir}/${liquibase.changelog-file}</diffChangeLogFile>
-                </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.liquibase.ext</groupId>
@@ -312,47 +304,40 @@
                         <version>${commons-herd.io.version}</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+                    <propertyFileWillOverride>true</propertyFileWillOverride>
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+                    <changeSetAuthor>maven</changeSetAuthor>
+                    <changeLogFile>${liquibase.changelog-dir}/${liquibase.initial-schema-file}</changeLogFile>
+                    <outputChangeLogFile>${liquibase.changelog-dir}/${liquibase.initial-schema-file}</outputChangeLogFile>
+                    <diffChangeLogFile>${liquibase.changelog-dir}/${liquibase.changelog-file}</diffChangeLogFile>
+                </configuration>
+            </plugin>
+            <!--
+                It copies the project banner which will be used to log the project name and version!
+            -->
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-project-banner</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <type>jar</type>
+                            <includeGroupIds>${banner.txt-group-id}</includeGroupIds>
+                            <includeArtifactIds>${banner.txt-artifact-id}</includeArtifactIds>
+                            <includes>banner.txt</includes>
+                            <outputDirectory>${generated-resources.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>generate-banner.txt-file</id>
-            <activation>
-                <file>
-                    <missing>src/main/resources/banner.txt</missing>
-                </file>
-            </activation>
-            <build>
-                <plugins>
-                    <!--
-                        It copies the project banner which will be used to log the project name and version!
-                    -->
-                    <plugin>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-project-banner</id>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>unpack-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <overWriteIfNewer>true</overWriteIfNewer>
-                                    <type>jar</type>
-                                    <includeGroupIds>${banner.txt-group-id}</includeGroupIds>
-                                    <includeArtifactIds>${banner.txt-artifact-id}</includeArtifactIds>
-                                    <includes>banner.txt</includes>
-                                    <outputDirectory>${generated-resources.dir}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencyManagement>
         <dependencies>
