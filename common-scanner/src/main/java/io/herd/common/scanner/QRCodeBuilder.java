@@ -39,7 +39,7 @@ public class QRCodeBuilder {
 
     private static final int DEFAULT_DIMENSION = 250;
 
-    private QRCode qrCode;
+    private final QRCode qrCode;
 
     private int width = DEFAULT_DIMENSION;
 

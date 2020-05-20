@@ -25,7 +25,7 @@ cat jwtRS256.pkcs8.key
 Generating the API access key and identifier
 --------------------------------------------
 
-**API Id:** UUID that will be used to identify the client application.
+**API ID:** UUID that will be used to identify the client application.
 (https://www.uuidgenerator.net/)
 
 **API Secret:** 512-bit random key used to sign requests and verify signature.

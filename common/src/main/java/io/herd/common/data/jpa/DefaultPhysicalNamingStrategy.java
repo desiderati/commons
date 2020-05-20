@@ -40,7 +40,7 @@ import java.util.Properties;
 @Slf4j
 public class DefaultPhysicalNamingStrategy extends SpringPhysicalNamingStrategy {
 
-    private String prefix;
+    private final String prefix;
 
     public DefaultPhysicalNamingStrategy() {
         prefix = getTablePrefix();

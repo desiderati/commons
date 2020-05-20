@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings("unused")
 public class ValidationTestUtils {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @SneakyThrows
     public void assertBeanValidation(MvcResult result, String ... errorMsgs) {

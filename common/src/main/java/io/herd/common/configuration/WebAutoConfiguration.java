@@ -60,9 +60,9 @@ import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
 @Import({DefaultAutoConfiguration.class, SwaggerConfiguration.class})
 public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
 
-    private String apiBasePath;
+    private final String apiBasePath;
 
-    private Validator validator;
+    private final Validator validator;
 
     private final EntityManager entityManager;
 

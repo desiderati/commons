@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MultiTenantContext {
 
-    private static ThreadLocal<String> currentTenantId = new ThreadLocal<>();
+    private static final ThreadLocal<String> currentTenantId = new ThreadLocal<>();
     private static String defaultTenant;
 
     @Autowired

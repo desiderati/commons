@@ -26,7 +26,7 @@ import org.hibernate.Hibernate;
 public class HibernateUtils {
 
     @SuppressWarnings("unchecked")
-    public static <T, S extends T> S unproxy(T object) {
+    public <T, S extends T> S unproxy(T object) {
         return (S) Hibernate.unproxy(object);
     }
 }

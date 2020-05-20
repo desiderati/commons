@@ -25,7 +25,7 @@ import java.util.UUID;
 @Getter
 public abstract class Message {
 
-    private UUID id;
+    private final UUID id;
 
     public Message() {
         id = UUID.randomUUID();

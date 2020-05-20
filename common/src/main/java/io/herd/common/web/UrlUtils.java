@@ -18,12 +18,14 @@
  */
 package io.herd.common.web;
 
-    import lombok.experimental.UtilityClass;
-    import org.apache.commons.lang3.StringUtils;
+import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 
 @UtilityClass
 public class UrlUtils {
 
+    // If you remove the static keyword, an compilation error occurs.
+    @SuppressWarnings("RedundantModifiersUtilityClassLombok")
     public static final String URL_PATH_SEPARATOR = "/";
 
     public String sanitize(String path) {

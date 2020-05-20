@@ -23,6 +23,7 @@ import io.herd.common.exception.ResponseExceptionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
+@ConditionalOnWebApplication
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
 public class SecurityExceptionHandlingController extends ExceptionHandlingController {
 
@@ -45,6 +47,6 @@ public class SecurityExceptionHandlingController extends ExceptionHandlingContro
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ResponseExceptionDTO> handleAccessDeniedException(
             HttpServletRequest request, AccessDeniedException ex) {
-        return handleHttpErrorException(request, HttpStatus.UNAUTHORIZED, ex);
+        return handleHttpErrorException(request, HttpStatus.FORBIDDEN, ex);
     }
 }

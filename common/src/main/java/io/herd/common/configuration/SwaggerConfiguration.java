@@ -67,7 +67,7 @@ public class SwaggerConfiguration {
     @Value("${server.servlet.context-path:/}")
     private String servletContextPath;
 
-    private String defaultApiBasePath;
+    private final String defaultApiBasePath;
 
     @Autowired
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")

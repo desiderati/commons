@@ -25,8 +25,8 @@ import javax.validation.ConstraintValidatorContext;
 
 public class CpfOrCnpjValidator implements ConstraintValidator<CpfOrCnpj, CharSequence> {
 
-    private CpfValidator cpfValidator = new CpfValidator();
-    private CnpjValidator cnpjValidator = new CnpjValidator();
+    private final CpfValidator cpfValidator = new CpfValidator();
+    private final CnpjValidator cnpjValidator = new CnpjValidator();
 
     @Override
     public void initialize(CpfOrCnpj constraintAnnotation) {

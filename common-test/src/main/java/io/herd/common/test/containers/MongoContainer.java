@@ -62,10 +62,12 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
             + getContainerIpAddress() + ":" + getMappedPort(MONGO_PORT) +  "/";
     }
 
+    @SuppressWarnings("SameReturnValue")
     public String getAuthenticationDatabase() {
         return "admin";
     }
 
+    @SuppressWarnings("SameReturnValue")
     public String getDatabase() {
         return "local";
     }

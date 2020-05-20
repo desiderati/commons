@@ -29,6 +29,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -66,6 +67,7 @@ import java.util.*;
 
 @Slf4j
 @ConditionalOnWebApplication
+@ConditionalOnSingleCandidate(ExceptionHandlingController.class)
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
 public class ExceptionHandlingController extends ResponseEntityExceptionHandler implements MessageSourceAware {
 
@@ -81,10 +83,10 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     private static final HttpStatus DEFAULT_HTTP_STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
 
+    private final ModelMapper modelMapper;
+
     @Setter
     private MessageSource messageSource;
-
-    private ModelMapper modelMapper;
 
     @Autowired
     public ExceptionHandlingController(ModelMapper modelMapper) {
@@ -164,7 +166,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             }
         }
 
-        // We cannot use instaceOf because if the ApiException body has at least one property equal to one of
+        // We cannot use instanceOf because if the ApiException body has at least one property equal to one of
         // the properties of the ResponseExceptionDTO class, the deserialized object will be valid.
         if (responseException != null && responseException.getType().equals(ResponseExceptionDTO.class.getName())) {
             return getResponseExceptionDTO(request, remoteExceptionStr, responseException);
@@ -216,9 +218,9 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
                 mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseException);
             remoteExceptionStr.append(prettyPrintedResponseBody);
             return responseException;
-        } catch (IOException ioex) {
+        } catch (IOException ex) {
             log.info("It is was not possible deserialize API exception body to response exception! Message: {}",
-                ioex.getMessage());
+                ex.getMessage());
             return null;
         }
     }
@@ -238,9 +240,9 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
                 mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseErrorAttributes);
             remoteExceptionStr.append(prettyPrintedResponseBody);
             return responseErrorAttributes;
-        } catch (IOException ioex) {
+        } catch (IOException ex) {
             log.info("It is was not possible deserialize API exception body to response error attributes! Message: {}",
-                ioex.getMessage());
+                ex.getMessage());
             return null;
         }
     }
@@ -299,10 +301,10 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             log.error("Validation: " + fieldErrorMsg);
         }
 
-        ValidationResponseExceptionDTO responseExpection =
+        ValidationResponseExceptionDTO responseException =
             new ValidationResponseExceptionDTO(
                 uuid, errorCode, errorMsg, HttpStatus.BAD_REQUEST.value(), errors.toArray(new String[]{}));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseExpection);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseException);
     }
 
     /**
@@ -323,10 +325,10 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             log.error("Validation: " + fieldErrorMsg);
         }
 
-        ValidationResponseExceptionDTO responseExpection =
+        ValidationResponseExceptionDTO responseException =
             new ValidationResponseExceptionDTO(
                 uuid, errorCode, errorMsg, HttpStatus.BAD_REQUEST.value(), errors.toArray(new String[]{}));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseExpection);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseException);
     }
 
     @ExceptionHandler(TransactionException.class)
@@ -378,7 +380,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     @NotNull
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(@NotNull Exception ex, @Nullable Object body,
-             HttpHeaders headers, HttpStatus httpStatus, @NotNull WebRequest request) {
+            @NotNull HttpHeaders headers, @NotNull HttpStatus httpStatus, @NotNull WebRequest request) {
 
         if (DEFAULT_HTTP_STATUS.equals(httpStatus)) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, RequestAttributes.SCOPE_REQUEST);

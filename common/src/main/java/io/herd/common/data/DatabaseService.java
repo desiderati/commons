@@ -36,9 +36,9 @@ import java.util.Map;
 @ConditionalOnBean(JdbcTemplate.class)
 public class DatabaseService {
 
-    private DatabaseProperties databaseProperties;
+    private final DatabaseProperties databaseProperties;
 
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public DatabaseService(DatabaseProperties databaseProperties, JdbcTemplate jdbcTemplate) {

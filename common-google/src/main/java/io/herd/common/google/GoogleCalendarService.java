@@ -56,9 +56,9 @@ public class GoogleCalendarService {
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
 
     @Getter
-    private Calendar calendar;
+    private final Calendar calendar;
 
-    private GoogleCalendarProperties googleCalendarProperties;
+    private final GoogleCalendarProperties googleCalendarProperties;
 
     @Autowired
     public GoogleCalendarService(GoogleCalendarProperties googleCalendarProperties) {

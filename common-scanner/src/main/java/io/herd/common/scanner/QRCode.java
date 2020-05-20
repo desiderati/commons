@@ -33,9 +33,9 @@ public class QRCode implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private UUID id;
+    private final UUID id;
 
-    private String content;
+    private final String content;
 
     @Setter(AccessLevel.PACKAGE)
     @Transient

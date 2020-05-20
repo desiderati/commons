@@ -19,6 +19,7 @@
 package io.herd.common.test;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 import org.mockito.internal.stubbing.InvocationContainerImpl;
 import org.mockito.internal.util.MockUtil;
@@ -104,7 +105,7 @@ public class MockitoLoader extends SpringBootContextLoader {
         }
 
         @Override
-        public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+        public Object resolveDependency(@NotNull DependencyDescriptor descriptor, String beanName,
                                         Set<String> autowiredBeanNames, TypeConverter typeConverter) {
             try {
                 return super.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);

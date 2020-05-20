@@ -25,10 +25,10 @@ package io.herd.common.crc;
 @SuppressWarnings("unused")
 public class CrcCalculator {
 
-    private CrcAlgorithm crcAlgorithm;
-    private byte hashSize;
+    private final CrcAlgorithm crcAlgorithm;
+    private final byte hashSize;
+    private final long[] table = new long[256];
     private long mask = 0xFFFFFFFFFFFFFFFFL;
-    private long[] table = new long[256];
 
     public CrcCalculator(CrcAlgorithm crcAlgorithm) {
         this.crcAlgorithm = crcAlgorithm;

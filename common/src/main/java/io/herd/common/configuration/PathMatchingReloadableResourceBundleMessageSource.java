@@ -37,7 +37,7 @@ public class PathMatchingReloadableResourceBundleMessageSource extends Reloadabl
 
     private static final String PROPERTIES_SUFFIX = ".properties";
 
-    private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+    private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
     @NotNull
     @Override

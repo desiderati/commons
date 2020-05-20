@@ -29,6 +29,6 @@ public class JmsErrorHandler implements ErrorHandler {
 
     @Override
     public void handleError(@NotNull Throwable t) {
-        log.error("An error occured while processing JMS message!", t);
+        log.error("An error occurred while processing JMS message!", t);
     }
 }

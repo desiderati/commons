@@ -77,7 +77,7 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
     @Autowired(required = false) // Prevent circular dependency.
     private SignRequestAuthorizationFilter signRequestAuthorizationFilter;
 
-    private String defaultApiBasePath;
+    private final String defaultApiBasePath;
 
     @Autowired
     public WebSecurityConfigurerAdapterAutoConfiguration(String defaultApiBasePath) {
@@ -154,7 +154,7 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
     /**
      * This method is used for configuration settings that impact global security (ignore resources, set debug mode,
      * reject requests by implementing a custom firewall definition). For example, the following method would cause
-     * any request that starts with /resources/ to be ignored for authentication purposes.
+     * any request that starts with /context-path/** to be ignored for authentication purposes.
      */
     @Override
     public void configure(WebSecurity web) {

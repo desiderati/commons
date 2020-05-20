@@ -44,8 +44,8 @@ public class JwtService {
     public static final String TENANT_ATTRIBUTE = "tenant";
 
     private final JwtProperties jwtProperties;
-    private JwtEncryptionMethod jwtEncryptionMethod;
-    private int expirationPeriod;
+    private final JwtEncryptionMethod jwtEncryptionMethod;
+    private final int expirationPeriod;
 
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
     private final PrivateKey privateKey = loadPrivateKey();

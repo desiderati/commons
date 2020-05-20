@@ -31,7 +31,7 @@ public class ResponseExceptionDTO implements Serializable {
     /**
      * Just to have the guarantee that is exactly this class that we are deserializing.
      */
-    private String type = ResponseExceptionDTO.class.getName();
+    private final String type = ResponseExceptionDTO.class.getName();
 
     private UUID errorId;
 

@@ -22,11 +22,14 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.7] - 2020-05-19
+- Some code review.  
+
 #### [2.3.6] - 2020-05-14
-- Fixed a bug related to the banner.txt file creation. There's a bug with the flatten plugin, which replaces the placeholders when defined inside the <profile> tag.  
+- Fixed a bug related to the banner.txt file creation. There's a bug with the Maven Flatten Plugin, which replaces the placeholders when defined inside the <profile> tag.  
 
 #### [2.3.5] - 2020-05-08
-- Configured the flatten plugin. The ${revision} placeholder will only work if you use this plugin. See: https://blog.soebes.de/blog/2017/04/02/maven-pom-files-without-a-version-in-it/ 
+- Configured the Maven Flatten Plugin. The ${revision} placeholder will only work if you use this plugin. See: https://blog.soebes.de/blog/2017/04/02/maven-pom-files-without-a-version-in-it/ 
 
 #### [2.3.4] - 2020-05-08 (Do not use this version, it will not work!)
 - Configured the ${revision} placeholder.
@@ -45,7 +48,7 @@ All project changes will be documented in this file.
 - Spring 5.3.5 and Spring Boot 2.2.6. Other dependencies update.
 - Node 12.16.2 and NPM 6.14.4.
 - Fixed a bug related to Swagger configuration. It was not taking into account the fact that the context path 
-  could be different than /.
+  could be different from /.
 - Fixed a bug related to Commons Herd.io Notification's auto-configuration.
 - Fixed a bug when table prefix was configured blank. See: **DefaultPhysicalNamingStrategy**.
 - Created class **MongoContainer**.
@@ -84,7 +87,7 @@ All project changes will be documented in this file.
 #### [2.2.2] - 2020-03-31
 - **ResponseExceptionDTOHttpMessageConverter** must always return an "application/json". 
   It will ensure when the controller throws an exception, even if the response content-type is different 
-  than "application/json", the response entity will be configured to return an "application/json" content type. 
+  from "application/json", the response entity will be configured to return an "application/json" content type. 
 
 #### [2.2.1] - 2020-03-30
 - Support to Apollo GraphQL.
@@ -194,7 +197,7 @@ All project changes will be documented in this file.
 - Added support to Spring Actuator for all Spring Web applications.
 
 #### [2.0.1] - 2020-01-11
-- Now it is possible to configure the **EntityScan** and **JpaRepositotyScan**.
+- Now it is possible to configure the **EntityScan** and **JpaRepositoryScan**.
 
 #### [2.0.0] - 2020-01-10
 - Better files generation available for Swagger Clients. Now it is possible to download the JSON file 

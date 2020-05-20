@@ -37,7 +37,7 @@ import java.util.Collections;
  */
 public class ResponseExceptionDTOHttpMessageConverter extends AbstractHttpMessageConverter<ResponseExceptionDTO> {
 
-    private MappingJackson2HttpMessageConverter httpMessageConverter;
+    private final MappingJackson2HttpMessageConverter httpMessageConverter;
 
     public ResponseExceptionDTOHttpMessageConverter(MappingJackson2HttpMessageConverter httpMessageConverter) {
         this.httpMessageConverter = httpMessageConverter;
