@@ -22,11 +22,14 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.8] - 2020-05-21
+- Added handling for UndeclaredThrowableException.
+
 #### [2.3.7] - 2020-05-19
-- Some code review.  
+- Some code review.
 
 #### [2.3.6] - 2020-05-14
-- Fixed a bug related to the banner.txt file creation. There's a bug with the Maven Flatten Plugin, which replaces the placeholders when defined inside the <profile> tag.  
+- Fixed a bug related to the banner.txt file creation. There's a bug with the Maven Flatten Plugin, which replaces the placeholders when defined inside the <profile> tag.
 
 #### [2.3.5] - 2020-05-08
 - Configured the Maven Flatten Plugin. The ${revision} placeholder will only work if you use this plugin. See: https://blog.soebes.de/blog/2017/04/02/maven-pom-files-without-a-version-in-it/ 
@@ -85,9 +88,9 @@ All project changes will be documented in this file.
   of the same type inside the application context.
 
 #### [2.2.2] - 2020-03-31
-- **ResponseExceptionDTOHttpMessageConverter** must always return an "application/json". 
+- **ResponseExceptionDTOHttpMessageConverter** must always return an "application/json".
   It will ensure when the controller throws an exception, even if the response content-type is different 
-  from "application/json", the response entity will be configured to return an "application/json" content type. 
+  from "application/json", the response entity will be configured to return an "application/json" content type.
 
 #### [2.2.1] - 2020-03-30
 - Support to Apollo GraphQL.
@@ -96,7 +99,7 @@ All project changes will be documented in this file.
 
 #### [2.2.0] - 2020-03-25
 - Migration to Java 11.
-- Better Spring Boot auto configuration. Removed **EnableAutoConfiguration** annotations. 
+- Better Spring Boot auto configuration. Removed **EnableAutoConfiguration** annotations.
 - Better rethrowing functionality. See **ThrowingConsumer** for further information.
 - Some language translations.
 - Minor code review.
@@ -146,7 +149,7 @@ All project changes will be documented in this file.
 #### [2.1.9] - 2020-02-11
 - Added the **SecurityExceptionHandlingController** class.
 - Added support to authorities and credentials on JWT Authentication/Authorization Component.
-- Now it is possible to configure the expiration period while generating the JWT Token.  
+- Now it is possible to configure the expiration period while generating the JWT Token.
 
 #### [2.1.8] - 2020-01-31
 - Added the **AwsExtendedThrowableProxyConverter** class, which is responsible for grouping the stack trace 
@@ -169,7 +172,7 @@ All project changes will be documented in this file.
 - Added empty **application.properties** file.
 
 #### [2.1.2] - 2020-01-22
-- Fixed a bug related to refreshing properties and local validation. 
+- Fixed a bug related to refreshing properties and local validation.
 
 #### [2.1.1] - 2020-01-22
 - Added support to default properties.
@@ -179,7 +182,7 @@ All project changes will be documented in this file.
 - Improved the Swagger client properties configuration. Now there is no need of extending 
   the **SwaggerClientProperties** class.
 - Changed the **DefaultPhysicalNamingStrategy** class. Now there is no need of extending it, 
-  just to configure the property 'app.database.table-prefix'. 
+  just to configure the property 'app.database.table-prefix'.
 - Better messages while handling authorization and authentication.
 
 #### [2.1.0] - 2020-01-16
@@ -215,7 +218,7 @@ All project changes will be documented in this file.
 - Creation of **common-parent-static** module.
 - Addition of standard error pages. (**40X.html** and **50X.html**)
 - Improvements in the way we treat null parameters in **Repository** classes.
-- Improvements in the **ExceptionHandlingController** class: corrections related to the way we handle exceptions. 
+- Improvements in the **ExceptionHandlingController** class: corrections related to the way we handle exceptions.
   Separation between exceptions for controllers and services.
 - Migration to Spring 5 and SpringBoot 2. Including dependencies.
 - Application configuration improvements (Auto Configuration).

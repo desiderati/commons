@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.*;
 
 @Slf4j
@@ -93,8 +94,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         this.modelMapper = modelMapper;
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseExceptionDTO> handleException(HttpServletRequest request, Exception ex) {
+    @ExceptionHandler(Throwable.class)
+    public ResponseEntity<ResponseExceptionDTO> handleThrowable(HttpServletRequest request, Throwable ex) {
         ResponseEntity<ResponseExceptionDTO> responseEntity = handleApiExceptionCopycat(request, ex);
         if (responseEntity != null) {
             return responseEntity;
@@ -112,7 +113,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     /**
      * Cases where the ApiException is in another package than the default.
      */
-    private ResponseEntity<ResponseExceptionDTO> handleApiExceptionCopycat(HttpServletRequest request, Exception ex) {
+    private ResponseEntity<ResponseExceptionDTO> handleApiExceptionCopycat(HttpServletRequest request, Throwable ex) {
         if (!(ex instanceof ApiException) && ex.getClass().getName().endsWith("ApiException")) {
             ApiException apiException = modelMapper.map(ex, ApiException.class);
             if (apiException.getCode() != 0 && apiException.getResponseBody() != null
@@ -176,7 +177,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
         // Regardless of the return status of the Swagger request, we will generate the same standard error
         // for our clients.
-        return handleException(request, exception);
+        return handleThrowable(request, exception);
     }
 
     @NotNull
@@ -339,7 +340,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         if (constraintEx != null) {
             return handleConstraintViolationException(request, constraintEx);
         } else {
-            return handleException(request, ex);
+            return handleThrowable(request, ex);
         }
     }
 
@@ -351,7 +352,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         if (constraintEx != null) {
             return handleConstraintViolationException(request, constraintEx);
         } else {
-            return handleException(request, ex);
+            return handleThrowable(request, ex);
         }
     }
 
@@ -373,8 +374,14 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundException(
-            HttpServletRequest request, ResourceNotFoundException ex) {
+        HttpServletRequest request, ResourceNotFoundException ex) {
         return handleHttpErrorException(request, HttpStatus.NOT_FOUND, ex);
+    }
+
+    @ExceptionHandler(UndeclaredThrowableException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundException(
+            HttpServletRequest request, UndeclaredThrowableException ex) {
+        return handleThrowable(request, ex.getUndeclaredThrowable());
     }
 
     @NotNull
@@ -395,7 +402,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     @NotNull
     protected ResponseEntity<ResponseExceptionDTO> handleHttpErrorException(
-            HttpServletRequest request, HttpStatus httpStatus, Exception ex) {
+            HttpServletRequest request, HttpStatus httpStatus, Throwable ex) {
 
         if (DEFAULT_HTTP_STATUS.equals(httpStatus)) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex);
@@ -426,14 +433,14 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         return logMessage(request, errorMessage, null);
     }
 
-    private UUID logMessage(HttpServletRequest request, String errorMessage, Exception ex) {
+    private UUID logMessage(HttpServletRequest request, String errorMessage, Throwable ex) {
         UUID uuid = UUID.randomUUID();
         log.error("Requested URL: " + request.getRequestURL());
         log.error("UUID: " + uuid + " | " + errorMessage, ex);
         return uuid;
     }
 
-    private UUID logMessage(WebRequest request, String errorMessage, Exception ex) {
+    private UUID logMessage(WebRequest request, String errorMessage, Throwable ex) {
         UUID uuid = UUID.randomUUID();
         log.error("Requested URL: " + ((ServletWebRequest) request).getRequest().getRequestURI());
         log.error("UUID: " + uuid + " | " + errorMessage, ex);
