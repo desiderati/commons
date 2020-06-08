@@ -76,11 +76,17 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     private static final String HTTP_ERROR_PREFIX = "http_error_";
 
-    private static final String DEFAULT_MESSAGE =
+    private static final String DEFAULT_ERROR_MESSAGE =
         "The server encountered an unexpected condition that prevented it from fulfilling the request!";
+
+    private static final String DEFAULT_SWAGGER_API_ERROR_MESSAGE =
+        "There was an error while accessing Swagger API!";
 
     private static final String DEFAULT_VALIDATION_ERROR_MESSAGE =
         "There was an error while validating the request parameters!";
+
+    private static final String DEFAULT_SWAGGER_API_ERROR_CODE =
+        "SwaggerApi.message";
 
     private static final HttpStatus DEFAULT_HTTP_STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -128,21 +134,24 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     @ExceptionHandler(HttpStatusCodeException.class)
     public ResponseEntity<ResponseExceptionDTO> handleHttpStatusCodeException(HttpServletRequest request,
-                                                                               HttpStatusCodeException  ex) {
+                                                                              HttpStatusCodeException  ex) {
         return handleSwaggerException(request, ex, ex.getRawStatusCode() + " " + ex.getStatusText(),
             ex.getResponseBodyAsString(), ex.getResponseHeaders());
     }
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ResponseExceptionDTO> handleApiException(HttpServletRequest request, ApiException ex) {
-        return handleSwaggerException(request, ex, ex.getMessage(), ex.getResponseBody(), ex.getResponseHeaders());
+        String errorMessage =
+            getMessage(request.getLocale(), DEFAULT_SWAGGER_API_ERROR_CODE, DEFAULT_SWAGGER_API_ERROR_MESSAGE);
+        return handleSwaggerException(
+            request, ex, errorMessage, ex.getResponseBody(), ex.getResponseHeaders());
     }
 
     private ResponseEntity<ResponseExceptionDTO> handleSwaggerException(HttpServletRequest request, Exception exception,
             // We had to extract these parameters because the exceptions don't inherit the same parent class.
-            String exceptionMessage, String responseBody, Map<String, List<String>> responseHeaders) {
+            String errorMessage, String responseBody, Map<String, List<String>> responseHeaders) {
 
-        StringBuilder remoteExceptionStr = new StringBuilder(exceptionMessage);
+        StringBuilder remoteExceptionStr = new StringBuilder();
         if (responseHeaders != null) {
             remoteExceptionStr.append(System.lineSeparator()).append("Headers:").append(System.lineSeparator());
             for (final Map.Entry<String, List<String>> entry : responseHeaders.entrySet()) {
@@ -155,11 +164,11 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         Map<String, Object> responseErrorAttributes = null;
         if (responseBody != null) {
             remoteExceptionStr.append("Body:").append(System.lineSeparator());
-            responseException = deserializeApiResponseException(remoteExceptionStr, responseBody);
-            if (responseException == null) {
+            responseException = deserializeApiResponseException(responseBody);
+            if (!appendResponseStr(remoteExceptionStr, responseException)) {
                 // As fallback, we try to deserialize the response body into a map of objects.
-                responseErrorAttributes = deserializeApiResponseErrorAttributes(remoteExceptionStr, responseBody);
-                if (responseErrorAttributes == null) {
+                responseErrorAttributes = deserializeApiResponseErrorAttributes(responseBody);
+                if (!appendResponseStr(remoteExceptionStr, responseErrorAttributes)) {
                     log.warn("It is was not possible deserialize API using previous methods! " +
                         "Appending response body directly as String...");
                     remoteExceptionStr.append(responseBody);
@@ -170,9 +179,11 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         // We cannot use instanceOf because if the ApiException body has at least one property equal to one of
         // the properties of the ResponseExceptionDTO class, the deserialized object will be valid.
         if (responseException != null && responseException.getType().equals(ResponseExceptionDTO.class.getName())) {
-            return getResponseExceptionDTO(request, remoteExceptionStr, responseException);
+            return getResponseExceptionDTO(
+                request, responseException.getMessage() + remoteExceptionStr, responseException);
         } else if (responseErrorAttributes != null) {
-            return getResponseExceptionDTO(request, remoteExceptionStr, responseErrorAttributes);
+            return getResponseExceptionDTO(
+                request, errorMessage + remoteExceptionStr, responseErrorAttributes);
         }
 
         // Regardless of the return status of the Swagger request, we will generate the same standard error
@@ -182,43 +193,38 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     @NotNull
     private ResponseEntity<ResponseExceptionDTO> getResponseExceptionDTO(HttpServletRequest request,
-            StringBuilder remoteExceptionStr, ValidationResponseExceptionDTO responseException) {
+            String remoteExceptionStr, ValidationResponseExceptionDTO responseException) {
 
         if (DEFAULT_HTTP_STATUS.value() == responseException.getStatus()) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, remoteExceptionStr);
         }
 
-        UUID uuid = logMessage(request, remoteExceptionStr.toString());
+        UUID uuid = logMessage(request, remoteExceptionStr);
         return ResponseEntity.status(responseException.getStatus()).body(
             new ValidationResponseExceptionDTO(uuid, responseException.getErrorCode(), responseException.getMessage(),
                 responseException.getStatus(), responseException.getValidationMessages()));
     }
 
     @NotNull
-    private ResponseEntity<ResponseExceptionDTO> getResponseExceptionDTO(HttpServletRequest request, StringBuilder
-            remoteExceptionStr, Map<String, Object> responseErrorAttributes) {
+    private ResponseEntity<ResponseExceptionDTO> getResponseExceptionDTO(HttpServletRequest request,
+            String remoteExceptionStr, Map<String, Object> responseErrorAttributes) {
 
         if (DEFAULT_HTTP_STATUS.value() == (int) responseErrorAttributes.get(STATUS_ATTR)) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, remoteExceptionStr);
         }
 
         String errorCode = HTTP_ERROR_PREFIX + responseErrorAttributes.get(STATUS_ATTR);
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
-        UUID uuid = logMessage(request, remoteExceptionStr.toString());
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
+        UUID uuid = logMessage(request, remoteExceptionStr);
         return ResponseEntity.status((int) responseErrorAttributes.get(STATUS_ATTR)).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, (int) responseErrorAttributes.get(STATUS_ATTR)));
     }
 
-    private ValidationResponseExceptionDTO deserializeApiResponseException(StringBuilder remoteExceptionStr,
-                                                                           String responseBody) {
+    private ValidationResponseExceptionDTO deserializeApiResponseException(String responseBody) {
         try {
             TypeReference<ValidationResponseExceptionDTO> typeRef = new TypeReference<>(){};
             ObjectMapper mapper = new ObjectMapper();
-            ValidationResponseExceptionDTO responseException = mapper.readValue(responseBody, typeRef);
-            String prettyPrintedResponseBody =
-                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseException);
-            remoteExceptionStr.append(prettyPrintedResponseBody);
-            return responseException;
+            return mapper.readValue(responseBody, typeRef);
         } catch (IOException ex) {
             log.info("It is was not possible deserialize API exception body to response exception! Message: {}",
                 ex.getMessage());
@@ -231,20 +237,34 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
      *
      * @see DefaultErrorAttributes
      */
-    private Map<String, Object> deserializeApiResponseErrorAttributes(StringBuilder remoteExceptionStr,
-                                                                      String responseBody) {
+    private Map<String, Object> deserializeApiResponseErrorAttributes(String responseBody) {
         try {
             TypeReference<Map<String, Object>> typeRef = new TypeReference<>(){};
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> responseErrorAttributes = mapper.readValue(responseBody, typeRef);
-            String prettyPrintedResponseBody =
-                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseErrorAttributes);
-            remoteExceptionStr.append(prettyPrintedResponseBody);
-            return responseErrorAttributes;
+            return mapper.readValue(responseBody, typeRef);
         } catch (IOException ex) {
             log.info("It is was not possible deserialize API exception body to response error attributes! Message: {}",
                 ex.getMessage());
             return null;
+        }
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean appendResponseStr(@NonNull StringBuilder remoteExceptionStr, Object responseObject) {
+        if (responseObject == null) {
+            return false;
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String prettyPrintedResponseBody =
+                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject);
+            remoteExceptionStr.append(prettyPrintedResponseBody);
+            return true;
+        } catch (IOException ex) {
+            log.info("It is was not possible append the response exception neither the response error attributes! " +
+                "Message: {}", ex.getMessage());
+            return false;
         }
     }
 
@@ -292,7 +312,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     public ResponseEntity<ResponseExceptionDTO> handleJavaxConstraintViolationException(
             HttpServletRequest request, javax.validation.ConstraintViolationException ex) {
 
-        String errorCode = "validation_error_msg";
+        String errorCode = "DefaultValidation.message";
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, null);
         List<String> errors = new ArrayList<>();
@@ -316,7 +336,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             @NotNull HttpHeaders headers, @NotNull HttpStatus status, WebRequest request) {
 
-        String errorCode = "validation_error_msg";
+        String errorCode = "DefaultValidation.message";
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, null);
         List<String> errors = new ArrayList<>();
@@ -360,7 +380,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             HttpServletRequest request, ConstraintViolationException ex) {
 
         String errorCode = getConstraintViolationErrorCode(ex);
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, HttpStatus.CONFLICT.value()));
@@ -394,7 +414,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         }
 
         String errorCode = HTTP_ERROR_PREFIX + httpStatus.value();
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
@@ -409,7 +429,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         }
 
         String errorCode = HTTP_ERROR_PREFIX + httpStatus.value();
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
@@ -423,7 +443,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         }
 
         String errorCode = ex.getMessage();
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_MESSAGE, args);
+        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE, args);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));

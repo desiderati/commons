@@ -22,6 +22,11 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.3.9] - 2020-05-21
+- Configured the log level for some classes to avoid verbosity.
+- Better Swagger Api exception handling.
+- Created a new converter to handling messages while logging on AWS CloudWatch.
+
 #### [2.3.8] - 2020-05-21
 - Added handling for UndeclaredThrowableException.
 

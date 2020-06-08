@@ -18,23 +18,24 @@
  */
 package io.herd.common.logging;
 
-import ch.qos.logback.classic.pattern.ExtendedThrowableProxyConverter;
-import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.classic.pattern.MessageConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.CoreConstants;
 
 /**
  * @link https://stackoverflow.com/questions/53233934/aws-streaming-multi-line-log-files-from-cloudwatch-to-elk
  */
-public class AwsExtendedThrowableProxyConverter extends ExtendedThrowableProxyConverter {
+public class AwsMessageConverter extends MessageConverter {
 
     @Override
-    protected String throwableProxyToString(IThrowableProxy tp) {
+    public String convert(ILoggingEvent event) {
         if (LoggerUtils.IS_RUNNING_ON_AWS) {
-            String stackTraceWithoutNewLine =
-                LoggerUtils.replaceNewLineWithCarrierReturn(super.throwableProxyToString(tp));
-            return stackTraceWithoutNewLine + " " + CoreConstants.LINE_SEPARATOR;
+            String message = LoggerUtils.replaceNewLineWithCarrierReturn(super.convert(event));
+            return message.endsWith("\r") ?
+                LoggerUtils.removeLastChar(message) + " " + CoreConstants.LINE_SEPARATOR :
+                message;
         } else {
-            return super.throwableProxyToString(tp);
+            return super.convert(event);
         }
     }
 }

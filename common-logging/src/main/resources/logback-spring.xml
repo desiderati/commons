@@ -18,16 +18,17 @@
   ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   -->
 <configuration>
-    <conversionRule conversionWord="aEx"
-                    converterClass="io.herd.common.logging.AwsExtendedThrowableProxyConverter"/>
+    <conversionRule conversionWord="mx" converterClass="io.herd.common.logging.AwsMessageConverter"/>
+    <conversionRule conversionWord="aEx" converterClass="io.herd.common.logging.AwsExtendedThrowableProxyConverter"/>
 
     <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/app.log}"/>
-    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%t] %-40.40c{39} : %m%n%aEx"/>
+    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%t] %-40.40c{39} : %mx%n%aEx"/>
     <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
 
     <springProfile name="!dev &amp; !develop &amp; !development &amp; !hom &amp; !homolog &amp; !homologation &amp; !prd &amp; !prod &amp; !production">
+        <!-- When using coloring, the throwable  converter is automatically attached to the log message. -->
         <property name="CONSOLE_LOG_PATTERN"
-                  value="%yellow(%d{HH:mm:ss.SSS}) %highlight([%-5level]) %cyan(%-40.40logger{39}) : %white(%m%n%aEx)" />
+                  value="%yellow(%d{HH:mm:ss.SSS}) %highlight([%-5level]) %cyan(%-40.40logger{39}) : %white(%m%n)" />
         <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
 
         <root level="INFO">
