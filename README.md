@@ -1,7 +1,8 @@
 Commons Herd.io
 ---------------
 
-[![Build Status](https://github.com/desiderati/commons/workflows/Build%20Status/badge.svg)](https://github.com/desiderati/commons/actions?query=workflow%3A%22Build+Status%22)
+[![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
+[![Version](https://img.shields.io/badge/Version-2.3.9-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -22,7 +23,10 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [2.3.9] - 2020-05-21
+#### [2.3.10] - 2020-06-10
+- Added support to PushOver Notifications.
+
+#### [2.3.9] - 2020-06-07
 - Configured the log level for some classes to avoid verbosity.
 - Better Swagger Api exception handling.
 - Created a new converter to handling messages while logging on AWS CloudWatch.
