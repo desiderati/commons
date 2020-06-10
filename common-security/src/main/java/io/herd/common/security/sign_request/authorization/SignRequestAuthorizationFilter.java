@@ -33,6 +33,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -74,7 +75,7 @@ public class SignRequestAuthorizationFilter extends OncePerRequestFilter {
                                     @NotNull HttpServletResponse servletResponse,
                                     @NotNull FilterChain filterChain) throws ServletException, IOException {
 
-        HttpServletRequest signServletRequest = new SignRequestWrapper(servletRequest);
+        HttpServletRequest signServletRequest = new ContentCachingRequestWrapper(servletRequest);
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             Authentication authentication = null;
             try {
