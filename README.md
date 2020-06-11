@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-2.3.11-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-2.3.12-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -22,6 +22,9 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [2.3.12] - 2020-06-11
+- Reverting version: 2.3.11.
 
 #### [2.3.11] - 2020-06-10
 - Removed the classes: SignRequestWrapper and SignRequestServletInputStream. Now we are using: ContentCachingRequestWrapper!
