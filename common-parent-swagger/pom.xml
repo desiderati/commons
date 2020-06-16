@@ -52,6 +52,7 @@
         -->
         <swagger.generation.disabled>true</swagger.generation.disabled>
         <swagger.generation.language>java</swagger.generation.language>
+        <swagger.generation.keep-superfluous-files>false</swagger.generation.keep-superfluous-files>
 
         <!-- Supported values: okhttp-gson, resttemplate -->
         <swagger.generation.library>okhttp-gson</swagger.generation.library>
@@ -234,6 +235,7 @@
                                     <goal>clean</goal>
                                 </goals>
                                 <configuration>
+                                    <skip>${swagger.generation.keep-superfluous-files}</skip>
                                     <excludeDefaultDirectories>true</excludeDefaultDirectories>
                                     <filesets>
                                         <fileset>
