@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.Ordered;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -43,7 +42,7 @@ public class ThymeleafConfiguration {
 
     @Bean
     @Primary
-    public SpringTemplateEngine customTemplateEngine(ITemplateResolver defaultResolver) {
+    public SpringTemplateEngine customTemplateEngine(ITemplateResolver defaultResolver, MessageSource messageSource) {
         // Default Resolver.
         final SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         ((AbstractConfigurableTemplateResolver) defaultResolver).setOrder(Ordered.LOWEST_PRECEDENCE - 1);
@@ -59,7 +58,7 @@ public class ThymeleafConfiguration {
         templateEngine.addTemplateResolver(stringTemplateResolver());
 
         // Message source, internationalization specific to templates.
-        templateEngine.setTemplateEngineMessageSource(templateEngineMessageSource());
+        templateEngine.setTemplateEngineMessageSource(messageSource);
         return templateEngine;
     }
 
@@ -94,11 +93,5 @@ public class ThymeleafConfiguration {
         templateResolver.setTemplateMode("HTML");
         templateResolver.setCacheable(false);
         return templateResolver;
-    }
-
-    private MessageSource templateEngineMessageSource() {
-        final ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("i18n/templates");
-        return messageSource;
     }
 }

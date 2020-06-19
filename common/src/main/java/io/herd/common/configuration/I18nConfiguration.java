@@ -42,7 +42,7 @@ import java.util.Arrays;
 public class I18nConfiguration implements EnvironmentAware {
 
     private static final String[] i18nDefaultFiles =
-        new String[]{"classpath*:i18n/exceptions", "classpath*:i18n/http-exceptions",
+        new String[]{"classpath*:i18n/exceptions", "classpath*:i18n/http-exceptions", "classpath*:i18n/templates",
             "classpath*:i18n/default-validation-messages", "classpath*:i18n/validation-messages"};
 
     @Setter
