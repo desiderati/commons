@@ -16,37 +16,14 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.test.annotation;
+package io.herd.common.test.service;
 
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-import java.lang.annotation.*;
+@Service
+public class TestService {
 
-@Import({})
-@AutoConfigureCommon
-@DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Repository.class))
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ImportAutoConfiguration
-
-@Inherited
-@Documented
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@SuppressWarnings("unused")
-public @interface ServiceJpaTest {
-
-    /**
-     * Specifies the {@link Service}s to test.
-     */
-    @AliasFor(annotation = Import.class, attribute = "value")
-    Class<?>[] services() default {};
-
+    public String info() {
+        return "Test Service";
+    }
 }

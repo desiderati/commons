@@ -36,10 +36,7 @@ import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -119,13 +116,18 @@ public class MockitoLoader extends SpringBootContextLoader {
 
                 Object mockedBean = mockedBeans.get(dependencyType);
                 if (mockedBean == null) {
-                    log.info("Did not find a mocked bean for type {}", dependencyType);
+                    log.info("Did not find a mocked bean for type {}! Mocking a new one...", dependencyType);
                     mockedBean = Mockito.mock(dependencyType);
+
+                    // Just to avoid NPE while returning an Iterator.
+                    if (Iterable.class.isAssignableFrom(dependencyType)) {
+                       Mockito.when(((Collection<?>) mockedBean).iterator()).thenReturn(Collections.emptyIterator());
+                    }
 
                     // We could actually also try to instantiate the Impl if we feel the need.
                     mockedBeans.put(dependencyType, mockedBean);
                 } else {
-                    log.info("Returning mocked bean for type {}", dependencyType);
+                    log.debug("Returning mocked bean for type {}", dependencyType);
                 }
                 return mockedBean;
             }
