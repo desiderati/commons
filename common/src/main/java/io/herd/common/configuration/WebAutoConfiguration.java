@@ -45,6 +45,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import springfox.documentation.oas.web.OpenApiControllerWebMvc;
+import springfox.documentation.swagger.web.ApiResourceController;
+import springfox.documentation.swagger2.web.Swagger2ControllerWebMvc;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Type;
@@ -135,7 +138,7 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
                                                          @NonNull RequestMappingInfo mapping) {
                         Class<?> beanType = method.getDeclaringClass();
                         RestController restApiController = beanType.getAnnotation(RestController.class);
-                        if (restApiController != null) {
+                        if (restApiController != null && isNotSwaggerController(beanType)) {
                             PatternsRequestCondition apiPattern = new PatternsRequestCondition(apiBasePath)
                                 .combine(mapping.getPatternsCondition());
 
@@ -179,5 +182,11 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
     public ResponseExceptionDTOHttpMessageConverter responseExceptionDTOMessageConverter(
             @Qualifier("jacksonHttpMessageConverter") MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter) {
         return new ResponseExceptionDTOHttpMessageConverter(mappingJackson2HttpMessageConverter);
+    }
+
+    private boolean isNotSwaggerController(Class<?> beanType) {
+        return !ApiResourceController.class.isAssignableFrom(beanType)
+            && !Swagger2ControllerWebMvc.class.isAssignableFrom(beanType)
+            && !OpenApiControllerWebMvc.class.isAssignableFrom(beanType);
     }
 }

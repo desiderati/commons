@@ -49,7 +49,7 @@ import java.util.function.Predicate;
 @EnableSwagger2WebMvc
 @ConditionalOnWebApplication
 @ConditionalOnProperty(name = "springfox.swagger.enabled", havingValue = "true")
-@PropertySource("classpath:swagger.properties")
+@PropertySource("classpath:springfox.properties")
 @Import({
     // Support to Spring Data Rest with Swagger
     RepositoryRestMvcAutoConfiguration.class,

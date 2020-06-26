@@ -111,7 +111,7 @@
                                 <configuration>
                                     <skip>${swagger.json-file.download.disabled}</skip>
                                     <target>
-                                        <get src="${swagger.json-file.download.url}/swagger-ui/api-docs"
+                                        <get src="${swagger.json-file.download.url}/swagger/api-docs"
                                              dest="${project.basedir}/src/main/resources/${swagger.json-file}"
                                              verbose="false" usetimestamp="true"/>
                                     </target>

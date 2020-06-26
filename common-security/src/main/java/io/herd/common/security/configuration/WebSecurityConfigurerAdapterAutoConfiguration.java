@@ -68,6 +68,12 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
     @Value("${security.sign-request.authorization.enabled:false}")
     private boolean signRequestAuthorizationEnabled;
 
+    @Value("${springfox.documentation.swagger.v2.path}")
+    private String springFoxSwaggerPath;
+
+    @Value("${springfox.documentation.open-api.v3.path}")
+    private String springFoxOpenApiPath;
+
     @Autowired(required = false) // Prevent circular dependency.
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -164,9 +170,11 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
         web.ignoring()
             // We enable all Swagger RESTs.
             .antMatchers("/swagger-resources/**")
-            .antMatchers("/swagger-ui/**")
             .antMatchers("/swagger-ui.html")
-            .antMatchers("/webjars/springfox-swagger-ui/**")
+            .antMatchers("/swagger/**")
+            .antMatchers("/webjars/**")
+            .antMatchers(springFoxSwaggerPath)
+            .antMatchers(springFoxOpenApiPath)
 
             // We enable all Actuator RESTs.
             .antMatchers("/actuator/**")
