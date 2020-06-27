@@ -168,22 +168,21 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
 
         // Default public endpoints. Security should not be enabled for these!
         web.ignoring()
-            // We enable all Swagger RESTs.
-            .antMatchers("/swagger-resources/**")
-            .antMatchers("/swagger-ui.html")
-            .antMatchers("/swagger/**")
-            .antMatchers("/webjars/**")
-            .antMatchers(springFoxSwaggerPath)
-            .antMatchers(springFoxOpenApiPath)
+            // Default error page.
+            .antMatchers("/error")
 
             // We enable all Actuator RESTs.
             .antMatchers("/actuator/**")
 
-            // It enables all calls to the public API.
-            .antMatchers(defaultApiBasePath + "/public/**")
+            // We enable all Swagger RESTs.
+            .antMatchers("/swagger-resources/**")
+            .antMatchers("/swagger-ui/**")
+            .antMatchers("/webjars/**")
+            .antMatchers(springFoxSwaggerPath)
+            .antMatchers(springFoxOpenApiPath)
 
-            // Default error page.
-            .antMatchers("/error");
+            // It enables all calls to the public API.
+            .antMatchers(defaultApiBasePath + "/public/**");
     }
 
     private HttpFirewall allowUrlEncodedSlashHttpFirewall() {

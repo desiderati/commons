@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-2.3.16-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-2.3.17-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -22,6 +22,9 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [2.3.17] - 2020-06-26
+- Fixed a bug with the Springfox Swagger (The webjars path has changed).
 
 #### [2.3.16] - 2020-06-26
 - Fixed a bug with the Springfox Swagger.
