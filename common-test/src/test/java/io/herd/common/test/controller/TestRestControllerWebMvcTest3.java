@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  *  Other option will be removing the API's bae path from URL.
  */
+//@AutoConfigureCommonWeb // Without it, the controllers will not be prefixed!
 @WebMvcTest(controllers = TestRestController.class)
 class TestRestControllerWebMvcTest3 {
 
@@ -42,11 +43,11 @@ class TestRestControllerWebMvcTest3 {
     private MockMvc mockMvc;
 
     @MockBean
-    private TestService testService;
+    private TestService testServiceMock;
 
     @BeforeEach
     void setup() {
-        Mockito.when(testService.info()).thenReturn("Test Service");
+        Mockito.when(testServiceMock.info()).thenReturn("Test Service");
     }
 
     @Test
@@ -68,5 +69,4 @@ class TestRestControllerWebMvcTest3 {
         String body = result.getResponse().getContentAsString();
         assertThat(body).isEqualTo("Test Service");
     }
-
 }

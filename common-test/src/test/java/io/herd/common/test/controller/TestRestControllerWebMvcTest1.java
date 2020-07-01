@@ -38,11 +38,11 @@ import org.springframework.test.context.ContextConfiguration;
 @WebMvcTest(controllers = TestRestController.class)
 public class TestRestControllerWebMvcTest1 extends AbstractTestRestControllerTest {
 
-    @Autowired
-    private TestService testService;
+    @Autowired // Will be a Mock!
+    private TestService testServiceMock;
 
     @BeforeEach
     void setup() {
-        Mockito.when(testService.info()).thenReturn("Test Service");
+        Mockito.when(testServiceMock.info()).thenReturn("Test Service");
     }
 }

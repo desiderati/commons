@@ -18,7 +18,7 @@
  */
 package io.herd.common.test.controller;
 
-import io.herd.common.test.annotation.AutoConfigureCommon;
+import io.herd.common.test.annotation.AutoConfigureCommonWeb;
 import io.herd.common.test.service.TestService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * You should avoid this approach since you will proliferate the API's base path through your tests.
  */
-@AutoConfigureCommon
+@AutoConfigureCommonWeb // This will prefix all controllers with the API's base path.
 @WebMvcTest(controllers = TestRestController.class)
 class TestRestControllerWebMvcTest2 {
 
@@ -50,11 +50,11 @@ class TestRestControllerWebMvcTest2 {
     private MockMvc mockMvc;
 
     @MockBean
-    private TestService testService;
+    private TestService testServiceMock;
 
     @BeforeEach
     void setup() {
-        Mockito.when(testService.info()).thenReturn("Test Service");
+        Mockito.when(testServiceMock.info()).thenReturn("Test Service");
     }
 
     @Test
@@ -76,5 +76,4 @@ class TestRestControllerWebMvcTest2 {
         String body = result.getResponse().getContentAsString();
         assertThat(body).isEqualTo("Test Service");
     }
-
 }
