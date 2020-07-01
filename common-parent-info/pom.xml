@@ -74,7 +74,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>2.3.17</revision>
+        <revision>2.3.18</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>
@@ -345,7 +345,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.2.5.RELEASE</version>
                 <executions>
                     <execution>
                         <id>repackage</id>

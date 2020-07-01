@@ -44,6 +44,7 @@
 
         <swagger.json-file.download.disabled>true</swagger.json-file.download.disabled>
         <swagger.json-file.download.url>http://localhost:12345</swagger.json-file.download.url>
+        <swagger.json-file.download.api-docs-path>open-api/api-docs</swagger.json-file.download.api-docs-path>
         <swagger.json-file/>
 
         <!--
@@ -111,7 +112,7 @@
                                 <configuration>
                                     <skip>${swagger.json-file.download.disabled}</skip>
                                     <target>
-                                        <get src="${swagger.json-file.download.url}/swagger/api-docs"
+                                        <get src="${swagger.json-file.download.url}/${swagger.json-file.download.api-docs-path}"
                                              dest="${project.basedir}/src/main/resources/${swagger.json-file}"
                                              verbose="false" usetimestamp="true"/>
                                     </target>
@@ -136,9 +137,9 @@
                                     <pluginExecutors>
                                         <pluginExecutor>
                                             <plugin>
-                                                <groupId>io.swagger</groupId>
+                                                <groupId>io.swagger.codegen.v3</groupId>
                                                 <artifactId>swagger-codegen-maven-plugin</artifactId>
-                                                <version>2.4.10</version>
+                                                <version>3.0.20</version>
                                             </plugin>
                                             <goal>generate</goal>
                                             <configuration>
@@ -173,7 +174,6 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>2.2.5.RELEASE</version>
                         <executions>
                             <execution>
                                 <id>start-thin-server-application</id>
@@ -291,7 +291,8 @@
             <groupId>org.threeten</groupId>
             <artifactId>threetenbp</artifactId>
         </dependency>
-        <dependency> <!-- We had to force this to have compatibility with Apollo GraphQL. -->
+        <dependency>
+            <!-- We had to force this to have compatibility with Apollo GraphQL. -->
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
         </dependency>

@@ -22,11 +22,13 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
@@ -39,6 +41,13 @@ import java.util.Arrays;
 @Slf4j
 @Configuration
 @PropertySource("classpath:i18n.properties")
+@Import({
+    // Spring Cloud uses RefreshAutoConfiguration to add the refresh scope to your application.
+    // By default, this auto-configuration isn't included in the auto-configuration that's
+    // enabled by @WebMvcTest. You can enable extra auto-configuration by adding
+    // @ImportAutoConfiguration(RefreshAutoConfiguration.class) to your tests.
+    RefreshAutoConfiguration.class
+})
 public class I18nConfiguration implements EnvironmentAware {
 
     private static final String[] i18nDefaultFiles =

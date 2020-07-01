@@ -25,7 +25,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.*;
@@ -39,12 +38,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 @ComponentScan("io.herd.common.data")
 @EnableConfigurationProperties({DatabaseProperties.class, SwaggerClientProperties.class})
 @Import({
-    // Spring Cloud uses RefreshAutoConfiguration to add the refresh scope to your application.
-    // By default, this auto-configuration isn't included in the auto-configuration that's
-    // enabled by @WebMvcTest. You can enable extra auto-configuration by adding
-    // @ImportAutoConfiguration(RefreshAutoConfiguration.class) to your tests.
-    RefreshAutoConfiguration.class,
-
     // Need to me auto-loaded too.
     I18nConfiguration.class,
     ThymeleafConfiguration.class
