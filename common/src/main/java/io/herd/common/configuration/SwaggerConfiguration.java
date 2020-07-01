@@ -33,10 +33,10 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.data.rest.configuration.SpringDataRestConfiguration;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +46,7 @@ import java.util.function.Predicate;
  * Use this configuration whenever you need to expose application controllers ({@link RestController}) via Swagger.
  */
 @Configuration
-@EnableSwagger2WebMvc
+@EnableOpenApi
 @ConditionalOnWebApplication
 @ConditionalOnProperty(name = "springfox.swagger.enabled", havingValue = "true")
 @PropertySource("classpath:springfox.properties")
