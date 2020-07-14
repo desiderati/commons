@@ -1,4 +1,4 @@
-# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
+# This workflow will build a package using Maven and then publish it to GitHub Packages when a release is created.
 # For more information see: https://github.com/actions/setup-java#apache-maven-with-a-settings-path
 name: Build
 
@@ -24,7 +24,6 @@ jobs:
         with:
           java-version: 11
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml.
-          settings-path: ${{ github.workspace }} # Location for the settings.xml file.
 
       - name: Configure GIT
         run: |
@@ -46,15 +45,17 @@ jobs:
             ${{ runner.os }}-
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        # mvn -B: Batch mode causes Maven to not display "Progress: 125/150kB" style lines when running.
+        # Must be 'clean package', instead of 'clean test', otherwise this error will occur: "Artifact has not been packaged yet!"
+        run: mvn -B clean package
 
-      - name: Create Tag Version
-        run: mvn scm:tag -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}
+      #- name: Create Tag Version
+      #  run: mvn -B scm:tag -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}
 
-      - name: Publish to GitHub Packages Apache Maven
-        run: mvn deploy -Dmaven.test.skip=true -s ${{ github.workspace }}/settings.xml
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      #- name: Publish to GitHub Packages Apache Maven
+      #  run: mvn -B deploy -Dmaven.test.skip=true
+      #  env:
+      #    GITHUB_TOKEN: ${{ github.token }}
 
       - name: Push Build Status Notifications
         if: ${{ always() }}
