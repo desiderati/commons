@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-2.3.19-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-2.3.20-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -22,6 +22,10 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [2.3.20] - 2020-07-10
+- Node 12.18.2 and NPM 6.14.5.
+- SpringFox v3.0.0.
 
 #### [2.3.19] - 2020-07-01
 - Replaced the annotation @EnableSwagger2WebMvc by @EnableOpenApi. 

@@ -49,13 +49,13 @@ jobs:
         # Must be 'clean package', instead of 'clean test', otherwise this error will occur: "Artifact has not been packaged yet!"
         run: mvn -B clean package
 
-      #- name: Create Tag Version
-      #  run: mvn -B scm:tag -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}
+      - name: Create Tag Version
+        run: mvn -B scm:tag -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}
 
-      #- name: Publish to GitHub Packages Apache Maven
-      #  run: mvn -B deploy -Dmaven.test.skip=true
-      #  env:
-      #    GITHUB_TOKEN: ${{ github.token }}
+      - name: Publish to GitHub Packages Apache Maven
+        run: mvn -B deploy -Dmaven.test.skip=true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Push Build Status Notifications
         if: ${{ always() }}
