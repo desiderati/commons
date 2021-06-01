@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2021 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,6 +29,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
@@ -47,6 +48,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionException;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,12 +63,16 @@ import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
+@Validated
 @ConditionalOnWebApplication
 @ConditionalOnSingleCandidate(ExceptionHandlingController.class)
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
@@ -79,14 +85,17 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     private static final String DEFAULT_ERROR_MESSAGE =
         "The server encountered an unexpected condition that prevented it from fulfilling the request!";
 
+    private static final String DEFAULT_SWAGGER_API_ERROR_CODE =
+        "SwaggerApi.message";
+
     private static final String DEFAULT_SWAGGER_API_ERROR_MESSAGE =
         "There was an error while accessing Swagger API!";
 
+    private static final String DEFAULT_VALIDATION_ERROR_CODE =
+        "DefaultValidation.message";
+
     private static final String DEFAULT_VALIDATION_ERROR_MESSAGE =
         "There was an error while validating the request parameters!";
-
-    private static final String DEFAULT_SWAGGER_API_ERROR_CODE =
-        "SwaggerApi.message";
 
     private static final HttpStatus DEFAULT_HTTP_STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -95,13 +104,27 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     @Setter
     private MessageSource messageSource;
 
+    private final List<Class<?>> shouldLogAsWarning;
+
     @Autowired
-    public ExceptionHandlingController(ModelMapper modelMapper) {
+    public ExceptionHandlingController(
+        @Value("${app.exception-handler.should-log-as-warning}") @NotEmpty List<@NotBlank String> shouldLogAsWarning,
+        ModelMapper modelMapper
+    ) {
+        this.shouldLogAsWarning = shouldLogAsWarning.stream().map(ex -> {
+            try {
+                return Class.forName(ex);
+            } catch (ClassNotFoundException cnfe) {
+                throw new IllegalStateException("Class not found for exception: " + ex, cnfe);
+            }
+        }).collect(Collectors.toList());
         this.modelMapper = modelMapper;
     }
 
     @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ResponseExceptionDTO> handleThrowable(HttpServletRequest request, Throwable ex) {
+    public ResponseEntity<ResponseExceptionDTO> handleThrowable(
+        HttpServletRequest request, Throwable ex
+    ) {
         ResponseEntity<ResponseExceptionDTO> responseEntity = handleApiExceptionCopycat(request, ex);
         if (responseEntity != null) {
             return responseEntity;
@@ -110,14 +133,15 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         Throwable rootCause = ExceptionUtils.getRootCause(ex);
         if (rootCause instanceof javax.validation.ConstraintViolationException) {
             return handleJavaxConstraintViolationException(
-                request, (javax.validation.ConstraintViolationException) rootCause);
+                request, (javax.validation.ConstraintViolationException) rootCause
+            );
         }
 
         return handleHttpErrorException(request, DEFAULT_HTTP_STATUS, ex);
     }
 
     /**
-     * Cases where the ApiException is in another package than the default.
+     * Cases where the {@link ApiException} is in another package than the default.
      */
     private ResponseEntity<ResponseExceptionDTO> handleApiExceptionCopycat(HttpServletRequest request, Throwable ex) {
         if (!(ex instanceof ApiException) && ex.getClass().getName().endsWith("ApiException")) {
@@ -125,7 +149,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             if (apiException.getCode() != 0 && apiException.getResponseBody() != null
                 && !apiException.getResponseHeaders().isEmpty()) {
 
-                log.info("Transforming " + ex.getClass().getName() + " into " + ApiException.class.getName());
+                log.debug("Transforming " + ex.getClass().getName() + " into " + ApiException.class.getName());
                 return handleApiException(request, apiException);
             }
         }
@@ -133,8 +157,9 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     }
 
     @ExceptionHandler(HttpStatusCodeException.class)
-    public ResponseEntity<ResponseExceptionDTO> handleHttpStatusCodeException(HttpServletRequest request,
-                                                                              HttpStatusCodeException  ex) {
+    public ResponseEntity<ResponseExceptionDTO> handleHttpStatusCodeException(
+        HttpServletRequest request, HttpStatusCodeException ex
+    ) {
         return handleSwaggerException(request, ex, ex.getRawStatusCode() + " " + ex.getStatusText(),
             ex.getResponseBodyAsString(), ex.getResponseHeaders());
     }
@@ -143,14 +168,17 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     public ResponseEntity<ResponseExceptionDTO> handleApiException(HttpServletRequest request, ApiException ex) {
         String errorMessage =
             getMessage(request.getLocale(), DEFAULT_SWAGGER_API_ERROR_CODE, DEFAULT_SWAGGER_API_ERROR_MESSAGE);
+
         return handleSwaggerException(
-            request, ex, errorMessage, ex.getResponseBody(), ex.getResponseHeaders());
+            request, ex, errorMessage, ex.getResponseBody(), ex.getResponseHeaders()
+        );
     }
 
-    private ResponseEntity<ResponseExceptionDTO> handleSwaggerException(HttpServletRequest request, Exception exception,
-            // We had to extract these parameters because the exceptions don't inherit the same parent class.
-            String errorMessage, String responseBody, Map<String, List<String>> responseHeaders) {
-
+    private ResponseEntity<ResponseExceptionDTO> handleSwaggerException(
+        HttpServletRequest request, Exception exception,
+        // We had to extract these parameters because the exceptions don't inherit the same parent class.
+        String errorMessage, String responseBody, Map<String, List<String>> responseHeaders
+    ) {
         StringBuilder remoteExceptionStr = new StringBuilder();
         if (responseHeaders != null) {
             remoteExceptionStr.append(System.lineSeparator()).append("Headers:").append(System.lineSeparator());
@@ -180,10 +208,12 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         // the properties of the ResponseExceptionDTO class, the deserialized object will be valid.
         if (responseException != null && responseException.getType().equals(ResponseExceptionDTO.class.getName())) {
             return getResponseExceptionDTO(
-                request, responseException.getMessage() + remoteExceptionStr, responseException);
+                request, responseException.getMessage() + remoteExceptionStr, responseException
+            );
         } else if (responseErrorAttributes != null) {
             return getResponseExceptionDTO(
-                request, errorMessage + remoteExceptionStr, responseErrorAttributes);
+                request, errorMessage + remoteExceptionStr, responseErrorAttributes
+            );
         }
 
         // Regardless of the return status of the Swagger request, we will generate the same standard error
@@ -192,23 +222,29 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     }
 
     @NotNull
-    private ResponseEntity<ResponseExceptionDTO> getResponseExceptionDTO(HttpServletRequest request,
-            String remoteExceptionStr, ValidationResponseExceptionDTO responseException) {
-
+    private ResponseEntity<ResponseExceptionDTO> getResponseExceptionDTO(
+        HttpServletRequest request, String remoteExceptionStr, ValidationResponseExceptionDTO responseException
+    ) {
         if (DEFAULT_HTTP_STATUS.value() == responseException.getStatus()) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, remoteExceptionStr);
         }
 
         UUID uuid = logMessage(request, remoteExceptionStr);
         return ResponseEntity.status(responseException.getStatus()).body(
-            new ValidationResponseExceptionDTO(uuid, responseException.getErrorCode(), responseException.getMessage(),
-                responseException.getStatus(), responseException.getValidationMessages()));
+            new ValidationResponseExceptionDTO(
+                uuid,
+                responseException.getErrorCode(),
+                responseException.getMessage(),
+                responseException.getStatus(),
+                responseException.getValidationMessages()
+            )
+        );
     }
 
     @NotNull
-    private ResponseEntity<ResponseExceptionDTO> getResponseExceptionDTO(HttpServletRequest request,
-            String remoteExceptionStr, Map<String, Object> responseErrorAttributes) {
-
+    private ResponseEntity<ResponseExceptionDTO> getResponseExceptionDTO(
+        HttpServletRequest request, String remoteExceptionStr, Map<String, Object> responseErrorAttributes
+    ) {
         if (DEFAULT_HTTP_STATUS.value() == (int) responseErrorAttributes.get(STATUS_ATTR)) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, remoteExceptionStr);
         }
@@ -217,17 +253,21 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logMessage(request, remoteExceptionStr);
         return ResponseEntity.status((int) responseErrorAttributes.get(STATUS_ATTR)).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, (int) responseErrorAttributes.get(STATUS_ATTR)));
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, (int) responseErrorAttributes.get(STATUS_ATTR)
+            )
+        );
     }
 
     private ValidationResponseExceptionDTO deserializeApiResponseException(String responseBody) {
         try {
-            TypeReference<ValidationResponseExceptionDTO> typeRef = new TypeReference<>(){};
+            TypeReference<ValidationResponseExceptionDTO> typeRef = new TypeReference<>() {
+            };
+
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(responseBody, typeRef);
         } catch (IOException ex) {
-            log.info("It is was not possible deserialize API exception body to response exception! Message: {}",
-                ex.getMessage());
+            log.info("It is was not possible deserialize API exception body to response exception! " +
+                "Message: {}", ex.getMessage());
             return null;
         }
     }
@@ -239,12 +279,14 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
      */
     private Map<String, Object> deserializeApiResponseErrorAttributes(String responseBody) {
         try {
-            TypeReference<Map<String, Object>> typeRef = new TypeReference<>(){};
+            TypeReference<Map<String, Object>> typeRef = new TypeReference<>() {
+            };
+
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(responseBody, typeRef);
         } catch (IOException ex) {
-            log.info("It is was not possible deserialize API exception body to response error attributes! Message: {}",
-                ex.getMessage());
+            log.info("It is was not possible deserialize API exception body to response error attributes! " +
+                "Message: {}", ex.getMessage());
             return null;
         }
     }
@@ -262,7 +304,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             remoteExceptionStr.append(prettyPrintedResponseBody);
             return true;
         } catch (IOException ex) {
-            log.info("It is was not possible append the response exception neither the response error attributes! " +
+            log.info("It is was not possible append the response exception, neither the response error attributes! " +
                 "Message: {}", ex.getMessage());
             return false;
         }
@@ -270,37 +312,43 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     @ExceptionHandler({IllegalArgumentApplicationException.class, IllegalStateApplicationException.class})
     public ResponseEntity<ResponseExceptionDTO> handleIllegalArgumentStateApplicationException(
-            HttpServletRequest request, ApplicationException ex) {
+        HttpServletRequest request, ApplicationException ex
+    ) {
         return handleApplicationException(request, HttpStatus.NOT_ACCEPTABLE, ex);
     }
 
     @ExceptionHandler(SecurityApplicationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleSecurityApplicationException(
-        HttpServletRequest request, SecurityApplicationException ex) {
+        HttpServletRequest request, SecurityApplicationException ex
+    ) {
         return handleApplicationException(request, HttpStatus.UNAUTHORIZED, ex);
     }
 
     @ExceptionHandler(ResourceNotFoundApplicationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundApplicationException(
-            HttpServletRequest request, ResourceNotFoundApplicationException ex) {
+        HttpServletRequest request, ResourceNotFoundApplicationException ex
+    ) {
         return handleApplicationException(request, HttpStatus.NOT_FOUND, ex);
     }
 
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleApplicationException(
-            HttpServletRequest request, ApplicationException ex) {
+        HttpServletRequest request, ApplicationException ex
+    ) {
         return handleApplicationException(request, DEFAULT_HTTP_STATUS, ex);
     }
 
     @NonNull
     private ResponseEntity<ResponseExceptionDTO> handleApplicationException(
-            HttpServletRequest request, HttpStatus httpStatus, ApplicationException ex) {
+        HttpServletRequest request, HttpStatus httpStatus, ApplicationException ex
+    ) {
         return handleException(request, httpStatus, ex, ex.getArgs());
     }
 
     @ExceptionHandler(RestApiException.class)
     public ResponseEntity<ResponseExceptionDTO> handleRestApiException(
-            HttpServletRequest request, RestApiException ex) {
+        HttpServletRequest request, RestApiException ex
+    ) {
         HttpStatus httpStatus = getHttpStatus(ex);
         return handleException(request, httpStatus, ex, ex.getArgs());
     }
@@ -310,21 +358,33 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
      */
     @ExceptionHandler(javax.validation.ConstraintViolationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleJavaxConstraintViolationException(
-            HttpServletRequest request, javax.validation.ConstraintViolationException ex) {
+        HttpServletRequest request, javax.validation.ConstraintViolationException ex
+    ) {
+        String errorMsg = getMessage(
+            request.getLocale(), DEFAULT_VALIDATION_ERROR_CODE, DEFAULT_VALIDATION_ERROR_MESSAGE
+        );
 
-        String errorCode = "DefaultValidation.message";
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
-        UUID uuid = logMessage(request, errorMsg, null);
-        List<String> errors = new ArrayList<>();
+        List<String> validationErrors = new ArrayList<>();
+        StringBuilder validationErrorsMsg = new StringBuilder();
         for (final ConstraintViolation<?> constraintViolation : ex.getConstraintViolations()) {
-            String fieldErrorMsg = constraintViolation.getPropertyPath() + ":" + constraintViolation.getMessage();
-            errors.add(fieldErrorMsg);
-            log.error("Validation: " + fieldErrorMsg);
+            String validationErrorMsg = constraintViolation.getPropertyPath() + ":" + constraintViolation.getMessage();
+            validationErrors.add(validationErrorMsg);
+            validationErrorsMsg
+                .append(System.lineSeparator())
+                .append("Validation: ")
+                .append(validationErrorMsg);
         }
 
+        UUID uuid = logWarnMessage(request, errorMsg + validationErrorsMsg);
         ValidationResponseExceptionDTO responseException =
             new ValidationResponseExceptionDTO(
-                uuid, errorCode, errorMsg, HttpStatus.BAD_REQUEST.value(), errors.toArray(new String[]{}));
+                uuid,
+                DEFAULT_VALIDATION_ERROR_CODE,
+                errorMsg,
+                HttpStatus.BAD_REQUEST.value(),
+                validationErrors.toArray(new String[]{})
+            );
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseException);
     }
 
@@ -333,29 +393,44 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
      */
     @NotNull
     @Override
-    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-            @NotNull HttpHeaders headers, @NotNull HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleMethodArgumentNotValid(
+        MethodArgumentNotValidException ex,
+        @NotNull HttpHeaders headers,
+        @NotNull HttpStatus status,
+        WebRequest request
+    ) {
+        String errorMsg = getMessage(
+            request.getLocale(), DEFAULT_VALIDATION_ERROR_CODE, DEFAULT_VALIDATION_ERROR_MESSAGE
+        );
 
-        String errorCode = "DefaultValidation.message";
-        String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_VALIDATION_ERROR_MESSAGE);
-        UUID uuid = logMessage(request, errorMsg, null);
-        List<String> errors = new ArrayList<>();
+        List<String> validationErrors = new ArrayList<>();
+        StringBuilder validationErrorsMsg = new StringBuilder();
         for (final FieldError error : ex.getBindingResult().getFieldErrors()) {
-            String fieldErrorMsg = error.getField() + ":" + error.getDefaultMessage();
-            errors.add(fieldErrorMsg);
-            log.error("Validation: " + fieldErrorMsg);
+            String validationErrorMsg = error.getField() + ":" + error.getDefaultMessage();
+            validationErrors.add(validationErrorMsg);
+            validationErrorsMsg
+                .append(System.lineSeparator())
+                .append("Validation: ")
+                .append(validationErrorMsg);
         }
 
+        UUID uuid = logWarnMessage(request, errorMsg + validationErrorsMsg);
         ValidationResponseExceptionDTO responseException =
             new ValidationResponseExceptionDTO(
-                uuid, errorCode, errorMsg, HttpStatus.BAD_REQUEST.value(), errors.toArray(new String[]{}));
+                uuid,
+                DEFAULT_VALIDATION_ERROR_CODE,
+                errorMsg,
+                HttpStatus.BAD_REQUEST.value(),
+                validationErrors.toArray(new String[]{})
+            );
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseException);
     }
 
     @ExceptionHandler(TransactionException.class)
     public ResponseEntity<ResponseExceptionDTO> handleTransactionException(
-            HttpServletRequest request, TransactionException ex) {
-
+        HttpServletRequest request, TransactionException ex
+    ) {
         ConstraintViolationException constraintEx = getConstraintViolationException(ex.getCause());
         if (constraintEx != null) {
             return handleConstraintViolationException(request, constraintEx);
@@ -366,8 +441,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ResponseExceptionDTO> handleDataIntegrityViolationException(
-            HttpServletRequest request, DataIntegrityViolationException ex) {
-
+        HttpServletRequest request, DataIntegrityViolationException ex
+    ) {
         ConstraintViolationException constraintEx = getConstraintViolationException(ex.getCause());
         if (constraintEx != null) {
             return handleConstraintViolationException(request, constraintEx);
@@ -377,8 +452,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     }
 
     private ResponseEntity<ResponseExceptionDTO> handleConstraintViolationException(
-            HttpServletRequest request, ConstraintViolationException ex) {
-
+        HttpServletRequest request, ConstraintViolationException ex
+    ) {
         String errorCode = getConstraintViolationErrorCode(ex);
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
@@ -388,42 +463,49 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     @ExceptionHandler(EmptyResultDataAccessException.class)
     public ResponseEntity<ResponseExceptionDTO> handleEmptyResultDataAccessException(
-            HttpServletRequest request, EmptyResultDataAccessException ex) {
+        HttpServletRequest request, EmptyResultDataAccessException ex
+    ) {
         return handleHttpErrorException(request, HttpStatus.NOT_FOUND, ex);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundException(
-        HttpServletRequest request, ResourceNotFoundException ex) {
+        HttpServletRequest request, ResourceNotFoundException ex
+    ) {
         return handleHttpErrorException(request, HttpStatus.NOT_FOUND, ex);
     }
 
     @ExceptionHandler(UndeclaredThrowableException.class)
     public ResponseEntity<ResponseExceptionDTO> handleResourceNotFoundException(
-            HttpServletRequest request, UndeclaredThrowableException ex) {
+        HttpServletRequest request, UndeclaredThrowableException ex
+    ) {
         return handleThrowable(request, ex.getUndeclaredThrowable());
     }
 
     @NotNull
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(@NotNull Exception ex, @Nullable Object body,
-            @NotNull HttpHeaders headers, @NotNull HttpStatus httpStatus, @NotNull WebRequest request) {
-
+    protected ResponseEntity<Object> handleExceptionInternal(
+        @NotNull Exception ex,
+        @Nullable Object body,
+        @NotNull HttpHeaders headers,
+        @NotNull HttpStatus httpStatus,
+        @NotNull WebRequest request
+    ) {
         if (DEFAULT_HTTP_STATUS.equals(httpStatus)) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, RequestAttributes.SCOPE_REQUEST);
         }
 
         String errorCode = HTTP_ERROR_PREFIX + httpStatus.value();
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
-        UUID uuid = logMessage(request, errorMsg, ex);
+        UUID uuid = logErrorMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
             new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
     }
 
     @NotNull
     protected ResponseEntity<ResponseExceptionDTO> handleHttpErrorException(
-            HttpServletRequest request, HttpStatus httpStatus, Throwable ex) {
-
+        HttpServletRequest request, HttpStatus httpStatus, Throwable ex
+    ) {
         if (DEFAULT_HTTP_STATUS.equals(httpStatus)) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex);
         }
@@ -436,8 +518,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     }
 
     private ResponseEntity<ResponseExceptionDTO> handleException(
-            HttpServletRequest request, HttpStatus httpStatus, Exception ex, Serializable... args) {
-
+        HttpServletRequest request, HttpStatus httpStatus, Exception ex, Serializable... args
+    ) {
         if (DEFAULT_HTTP_STATUS.equals(httpStatus)) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex);
         }
@@ -455,15 +537,39 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     private UUID logMessage(HttpServletRequest request, String errorMessage, Throwable ex) {
         UUID uuid = UUID.randomUUID();
-        log.error("Requested URL: " + request.getRequestURL());
-        log.error("UUID: " + uuid + " | " + errorMessage, ex);
+        String msg = "Requested URL: " + request.getRequestURL()
+            + System.lineSeparator() + "Error UUID: " + uuid + " | " + errorMessage;
+        if (shouldLogAsWarning(ex)) {
+            log.warn(msg, ex);
+        } else {
+            log.error(msg, ex);
+        }
         return uuid;
     }
 
-    private UUID logMessage(WebRequest request, String errorMessage, Throwable ex) {
+    private boolean shouldLogAsWarning(Throwable throwable) {
+        return shouldLogAsWarning.stream()
+            .anyMatch(ex -> throwable != null && throwable.getClass().isAssignableFrom(ex));
+    }
+
+    private UUID logWarnMessage(HttpServletRequest request, String errorMessage) {
         UUID uuid = UUID.randomUUID();
-        log.error("Requested URL: " + ((ServletWebRequest) request).getRequest().getRequestURI());
-        log.error("UUID: " + uuid + " | " + errorMessage, ex);
+        log.warn("Requested URL: " + request.getRequestURL()
+            + System.lineSeparator() + "Error UUID: " + uuid + " | " + errorMessage);
+        return uuid;
+    }
+
+    private UUID logWarnMessage(WebRequest request, String errorMessage) {
+        UUID uuid = UUID.randomUUID();
+        log.warn("Requested URL: " + ((ServletWebRequest) request).getRequest().getRequestURI()
+            + System.lineSeparator() + "Error UUID: " + uuid + " | " + errorMessage);
+        return uuid;
+    }
+
+    private UUID logErrorMessage(WebRequest request, String errorMessage, Throwable ex) {
+        UUID uuid = UUID.randomUUID();
+        log.error("Requested URL: " + ((ServletWebRequest) request).getRequest().getRequestURI()
+            + System.lineSeparator() + "Error UUID: " + uuid + " | " + errorMessage, ex);
         return uuid;
     }
 

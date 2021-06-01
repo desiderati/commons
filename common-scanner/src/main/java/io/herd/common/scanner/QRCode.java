@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2021 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,24 +33,28 @@ public class QRCode implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private final UUID id;
+    private UUID id;
 
-    private final String content;
+    private String content;
 
-    @Setter(AccessLevel.PACKAGE)
     @Transient
+    @Setter(AccessLevel.PACKAGE)
     private byte[] image;
 
     /**
      * Generates a QRCode with content as UUID.
      */
     QRCode() {
-        id = UUID.randomUUID();
-        content = id.toString();
+        setId(UUID.randomUUID());
     }
 
     QRCode(String content) {
         id = UUID.randomUUID();
         this.content = content;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+        this.content = id.toString();
     }
 }

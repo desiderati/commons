@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2021 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,6 +23,7 @@ import io.herd.common.exception.ResponseExceptionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Slf4j
 @ConditionalOnWebApplication
@@ -40,13 +44,17 @@ import javax.servlet.http.HttpServletRequest;
 public class SecurityExceptionHandlingController extends ExceptionHandlingController {
 
     @Autowired
-    public SecurityExceptionHandlingController(ModelMapper modelMapper) {
-        super(modelMapper);
+    public SecurityExceptionHandlingController(
+        @Value("${app.exception-handler.should-log-as-warning}") @NotEmpty List<@NotBlank String> shouldLogAsWarning,
+        ModelMapper modelMapper
+    ) {
+        super(shouldLogAsWarning, modelMapper);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ResponseExceptionDTO> handleAccessDeniedException(
-            HttpServletRequest request, AccessDeniedException ex) {
+        HttpServletRequest request, AccessDeniedException ex
+    ) {
         return handleHttpErrorException(request, HttpStatus.FORBIDDEN, ex);
     }
 }

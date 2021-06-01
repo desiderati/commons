@@ -26,6 +26,11 @@
       "defaultValue": "/api"
     },
     {
+      "name": "app.exception-handler.should-log-as-warning",
+      "type": "java.lang.String",
+      "description": "Exceptions list which should be recorded in the log as a warning."
+    },
+    {
       "name": "app.database.username",
       "type": "java.lang.String",
       "description": "The owner of database.",
