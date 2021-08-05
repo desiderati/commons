@@ -69,7 +69,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Validated
@@ -104,20 +103,29 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     @Setter
     private MessageSource messageSource;
 
-    private final List<Class<?>> shouldLogAsWarning;
+    private final Map<Class<?>, List<String>> shouldLogAsWarning;
 
     @Autowired
     public ExceptionHandlingController(
         @Value("${app.exception-handler.should-log-as-warning}") @NotEmpty List<@NotBlank String> shouldLogAsWarning,
         ModelMapper modelMapper
     ) {
-        this.shouldLogAsWarning = shouldLogAsWarning.stream().map(ex -> {
+        this.shouldLogAsWarning = new HashMap<>();
+        shouldLogAsWarning.forEach(ex -> {
+            String[] exParts = ex.split(":");
             try {
-                return Class.forName(ex);
+                List<String> msgsList = new ArrayList<>();
+                if (exParts.length > 1) {
+                    for (int i = 1; i < exParts.length; i++) {
+                        msgsList.add(exParts[1]);
+                    }
+                }
+                this.shouldLogAsWarning.put(Class.forName(exParts[0]), msgsList);
             } catch (ClassNotFoundException cnfe) {
-                throw new IllegalStateException("Class not found for exception: " + ex, cnfe);
+                throw new IllegalStateException("Class not found for exception: " + exParts[0], cnfe);
             }
-        }).collect(Collectors.toList());
+        });
+
         this.modelMapper = modelMapper;
     }
 
@@ -537,39 +545,57 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     private UUID logMessage(HttpServletRequest request, String errorMessage, Throwable ex) {
         UUID uuid = UUID.randomUUID();
-        String msg = "Requested URL: " + request.getRequestURL()
-            + System.lineSeparator() + "Error UUID: " + uuid + " | " + errorMessage;
         if (shouldLogAsWarning(ex)) {
+            String msg = "Requested URL: " + request.getRequestURL()
+                + System.lineSeparator() + "\tWarn UUID: " + uuid + " | " + errorMessage;
             log.warn(msg, ex);
         } else {
+            String msg = "Requested URL: " + request.getRequestURL()
+                + System.lineSeparator() + "\tError UUID: " + uuid + " | " + errorMessage;
             log.error(msg, ex);
         }
         return uuid;
     }
 
     private boolean shouldLogAsWarning(Throwable throwable) {
-        return shouldLogAsWarning.stream()
-            .anyMatch(ex -> throwable != null && throwable.getClass().isAssignableFrom(ex));
+        return shouldLogAsWarning.entrySet().stream()
+            .anyMatch(entry -> {
+                boolean isSameClass = throwable != null && throwable.getClass().isAssignableFrom(entry.getKey());
+                if (isSameClass) {
+                    List<String> msgsList = entry.getValue();
+                    if (msgsList.size() == 0) {
+                        return true;
+                    } else {
+                        for (String msg : msgsList) {
+                            if (StringUtils.contains(throwable.getMessage(), msg)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            });
     }
 
     private UUID logWarnMessage(HttpServletRequest request, String errorMessage) {
         UUID uuid = UUID.randomUUID();
         log.warn("Requested URL: " + request.getRequestURL()
-            + System.lineSeparator() + "Error UUID: " + uuid + " | " + errorMessage);
+            + System.lineSeparator() + "\tWarn UUID: " + uuid + " | " + errorMessage);
         return uuid;
     }
 
     private UUID logWarnMessage(WebRequest request, String errorMessage) {
         UUID uuid = UUID.randomUUID();
         log.warn("Requested URL: " + ((ServletWebRequest) request).getRequest().getRequestURI()
-            + System.lineSeparator() + "Error UUID: " + uuid + " | " + errorMessage);
+            + System.lineSeparator() + "\tWarn UUID: " + uuid + " | " + errorMessage);
         return uuid;
     }
 
     private UUID logErrorMessage(WebRequest request, String errorMessage, Throwable ex) {
         UUID uuid = UUID.randomUUID();
         log.error("Requested URL: " + ((ServletWebRequest) request).getRequest().getRequestURI()
-            + System.lineSeparator() + "Error UUID: " + uuid + " | " + errorMessage, ex);
+            + System.lineSeparator() + "\tError UUID: " + uuid + " | " + errorMessage, ex);
         return uuid;
     }
 
