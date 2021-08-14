@@ -11,6 +11,10 @@
     {
       "name": "spring.web.cors",
       "type": "io.herd.common.configuration.CorsProperties"
+    },
+    {
+      "name": "spring.async",
+      "type": "io.herd.common.configuration.AsyncProperties"
     }
   ],
   "properties": [
@@ -106,6 +110,36 @@
       "type": "java.lang.String",
       "description": "Set the list of response headers other than 'simple', headers, i.e. Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, or Pragma, that an actual response might have and can be exposed. Note that '*' is not supported on this property.",
       "defaultValue": ["Authorization"]
+    },
+    {
+      "name": "spring.async.enabled",
+      "type": "java.lang.Boolean",
+      "description": "It defines if Async support will be enabled or not.",
+      "defaultValue": false
+    },
+    {
+      "name": "spring.async.initial-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Set the ThreadPoolExecutor's initial pool size. Default is 5.",
+      "defaultValue": 5
+    },
+    {
+      "name": "spring.async.max-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Set the ThreadPoolExecutor's maximum pool size. Default is 10.",
+      "defaultValue": 10
+    },
+    {
+      "name": "spring.async.queue-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Set the capacity for the ThreadPoolExecutor's BlockingQueue. Default is 25.",
+      "defaultValue": 25
+    },
+    {
+      "name": "spring.async.task-timeout",
+      "type": "java.lang.Integer",
+      "description": "Specify the amount of time, in milliseconds, before asynchronous request handling times out. Default is 300000.",
+      "defaultValue": 300000
     }
   ]
 }

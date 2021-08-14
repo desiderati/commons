@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2021 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -72,10 +72,12 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
     private final CorsProperties corsProperties;
 
     @Autowired
-    public WebAutoConfiguration(@Value("${app.api-base-path:/api}") String apiBasePath,
-                                @Qualifier("customValidator") Validator validator,
-                                ObjectProvider<EntityManager> entityManager, CorsProperties corsProperties) {
-
+    public WebAutoConfiguration(
+        @Value("${app.api-base-path:/api}") String apiBasePath,
+        @Qualifier("customValidator") Validator validator,
+        ObjectProvider<EntityManager> entityManager,
+        CorsProperties corsProperties
+    ) {
         this.apiBasePath = UrlUtils.sanitize(apiBasePath);
         log.info("Configuring API base path as: " + this.apiBasePath);
 
@@ -180,7 +182,8 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
 
     @Bean
     public ResponseExceptionDTOHttpMessageConverter responseExceptionDTOMessageConverter(
-            @Qualifier("jacksonHttpMessageConverter") MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter) {
+        @Qualifier("jacksonHttpMessageConverter") MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter
+    ) {
         return new ResponseExceptionDTOHttpMessageConverter(mappingJackson2HttpMessageConverter);
     }
 

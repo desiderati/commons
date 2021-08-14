@@ -2,7 +2,7 @@
 io.herd.common.test.annotation.AutoConfigureCommon=\
 io.herd.common.configuration.DefaultAutoConfiguration
 
-# AutoConfigureCommon auto-configuration imports
+# AutoConfigureCommonWeb auto-configuration imports
 io.herd.common.test.annotation.AutoConfigureCommonWeb=\
 io.herd.common.configuration.WebAutoConfiguration
 

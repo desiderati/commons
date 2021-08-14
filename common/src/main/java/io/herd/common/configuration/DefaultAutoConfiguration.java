@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2021 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -38,7 +38,8 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 @ComponentScan("io.herd.common.data")
 @EnableConfigurationProperties({DatabaseProperties.class, SwaggerClientProperties.class})
 @Import({
-    // Need to me auto-loaded too.
+    // Need to be auto-loaded too.
+    AsyncConfiguration.class,
     I18nConfiguration.class,
     ThymeleafConfiguration.class
 })
