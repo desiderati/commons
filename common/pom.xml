@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2020 - Felipe Desiderati
+  ~ Copyright (c) 2021 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -45,6 +45,17 @@
             <artifactId>common-logging</artifactId>
         </dependency>
 
+        <!-- Javax -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+
         <!-- Spring Starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -78,17 +89,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-        </dependency>
-
-        <!-- Javax -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
         </dependency>
 
         <!-- Needed if you are going to use the Hibernate Validator out of a web context. -->
@@ -192,8 +192,20 @@
 
         <!-- GraphQL Client -->
         <dependency>
+            <groupId>com.graphql-java-kickstart</groupId>
+            <artifactId>graphql-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java-extended-scalars</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.apollographql.apollo</groupId>
             <artifactId>apollo-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.apollographql.apollo</groupId>
+            <artifactId>apollo-coroutines-support</artifactId>
         </dependency>
 
         <!-- Swagger -->

@@ -74,7 +74,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>2.4.0</revision>
+        <revision>2.4.1</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>
@@ -84,6 +84,7 @@
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <maven.version>3.6.0</maven.version>
         <java.version>11</java.version>
+        <kotlin.version>1.3.71</kotlin.version>
 
         <!--
             There is no need to use Javadoc in our projects.
@@ -155,6 +156,7 @@
                 Install the sources along with your artifact.
             -->
             <plugin>
+                <!--suppress MavenModelInspection-->
                 <artifactId>maven-source-plugin</artifactId>
                 <executions>
                     <execution>
@@ -171,6 +173,7 @@
                 such as Maven version, JDK version.
             -->
             <plugin>
+                <!--suppress MavenModelInspection-->
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
@@ -238,6 +241,7 @@
                                 <ignoredResourcePattern>i18n/validation-messages(.*).properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>jwt.properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>liquibase.properties</ignoredResourcePattern>
+                                <ignoredResourcePattern>LICENSE.md</ignoredResourcePattern>
                                 <ignoredResourcePattern>mime.types</ignoredResourcePattern>
                             </ignoredResourcePatterns>
                             <ignoredDependencies>
@@ -275,6 +279,7 @@
                 with the active profiles factored in.
             -->
             <plugin>
+                <!--suppress MavenModelInspection-->
                 <artifactId>maven-help-plugin</artifactId>
                 <executions>
                     <execution>
@@ -294,6 +299,7 @@
             -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
+                <!--suppress MavenModelInspection-->
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                     <execution>
@@ -344,6 +350,7 @@
             -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
+                <!--suppress MavenModelInspection-->
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
                     <execution>
