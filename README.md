@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-2.4.1-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-2.4.2-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -22,6 +22,9 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [2.4.2] - 2021-09-14
+- Added the extra args to ResponseExceptionDTO. Fixed a bug in the ExceptionHandlingController related to ApiException handling.
 
 #### [2.4.1] - 2021-08-18
 - Added support to Spring + Kotlin. Changed the GraphQL version.

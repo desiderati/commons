@@ -103,7 +103,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     @Setter
     private MessageSource messageSource;
 
-    private final Map<Class<?>, List<String>> shouldLogAsWarning;
+    private final Map<String, List<String>> shouldLogAsWarning;
 
     @Autowired
     public ExceptionHandlingController(
@@ -120,7 +120,9 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
                         msgsList.add(exParts[1]);
                     }
                 }
-                this.shouldLogAsWarning.put(Class.forName(exParts[0]), msgsList);
+
+                var key = (exParts[0].equals("null")) ? "null" : Class.forName(exParts[0]).getName();
+                this.shouldLogAsWarning.put(key, msgsList);
             } catch (ClassNotFoundException cnfe) {
                 throw new IllegalStateException("Class not found for exception: " + exParts[0], cnfe);
             }
@@ -152,7 +154,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
      * Cases where the {@link ApiException} is in another package than the default.
      */
     private ResponseEntity<ResponseExceptionDTO> handleApiExceptionCopycat(HttpServletRequest request, Throwable ex) {
-        if (!(ex instanceof ApiException) && ex.getClass().getName().endsWith("ApiException")) {
+        if (ex instanceof ApiException) {
             ApiException apiException = modelMapper.map(ex, ApiException.class);
             if (apiException.getCode() != 0 && apiException.getResponseBody() != null
                 && !apiException.getResponseHeaders().isEmpty()) {
@@ -244,7 +246,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
                 responseException.getErrorCode(),
                 responseException.getMessage(),
                 responseException.getStatus(),
-                responseException.getValidationMessages()
+                responseException.getValidationMessages(),
+                responseException.getArgs()
             )
         );
     }
@@ -261,8 +264,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logMessage(request, remoteExceptionStr);
         return ResponseEntity.status((int) responseErrorAttributes.get(STATUS_ATTR)).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, (int) responseErrorAttributes.get(STATUS_ATTR)
-            )
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, (int) responseErrorAttributes.get(STATUS_ATTR))
         );
     }
 
@@ -466,7 +468,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, HttpStatus.CONFLICT.value()));
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, HttpStatus.CONFLICT.value())
+        );
     }
 
     @ExceptionHandler(EmptyResultDataAccessException.class)
@@ -507,7 +510,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logErrorMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value())
+        );
     }
 
     @NotNull
@@ -522,7 +526,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value())
+        );
     }
 
     private ResponseEntity<ResponseExceptionDTO> handleException(
@@ -536,7 +541,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         String errorMsg = getMessage(request.getLocale(), errorCode, DEFAULT_ERROR_MESSAGE, args);
         UUID uuid = logMessage(request, errorMsg, ex);
         return ResponseEntity.status(httpStatus).body(
-            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value()));
+            new ResponseExceptionDTO(uuid, errorCode, errorMsg, httpStatus.value(), args)
+        );
     }
 
     private UUID logMessage(HttpServletRequest request, String errorMessage) {
@@ -545,7 +551,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     private UUID logMessage(HttpServletRequest request, String errorMessage, Throwable ex) {
         UUID uuid = UUID.randomUUID();
-        if (shouldLogAsWarning(ex)) {
+        if (shouldLogAsWarning(ex, errorMessage)) {
             String msg = "Requested URL: " + request.getRequestURL()
                 + System.lineSeparator() + "\tWarn UUID: " + uuid + " | " + errorMessage;
             log.warn(msg, ex);
@@ -557,17 +563,32 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         return uuid;
     }
 
-    private boolean shouldLogAsWarning(Throwable throwable) {
+    private boolean shouldLogAsWarning(Throwable throwable, String errorMessage) {
         return shouldLogAsWarning.entrySet().stream()
             .anyMatch(entry -> {
-                boolean isSameClass = throwable != null && throwable.getClass().isAssignableFrom(entry.getKey());
+                String message = "";
+                boolean isSameClass = false;
+                try {
+                    if (throwable == null) {
+                        if (entry.getKey().equals("null")) {
+                            isSameClass = true;
+                            message = errorMessage;
+                        }
+                    } else {
+                        isSameClass = throwable.getClass().isAssignableFrom(Class.forName(entry.getKey()));
+                        message = throwable.getMessage();
+                    }
+                } catch (ClassNotFoundException cnfe) {
+                    // Ignore! Pois já existe uma validação no bootstrap da aplicação.
+                }
+
                 if (isSameClass) {
                     List<String> msgsList = entry.getValue();
                     if (msgsList.size() == 0) {
                         return true;
                     } else {
                         for (String msg : msgsList) {
-                            if (StringUtils.contains(throwable.getMessage(), msg)) {
+                            if (StringUtils.contains(message, msg)) {
                                 return true;
                             }
                         }

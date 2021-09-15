@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2021 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
@@ -31,10 +32,15 @@ public class ValidationResponseExceptionDTO extends ResponseExceptionDTO {
 
     private String[] validationMessages;
 
-    ValidationResponseExceptionDTO(UUID errorId, String errorCode, String message, int status,
-                                   String[] validationMessages) {
-
-        super(errorId, errorCode, message, status);
+    ValidationResponseExceptionDTO(
+        UUID errorId,
+        String errorCode,
+        String message,
+        int status,
+        String[] validationMessages,
+        Serializable... args
+    ) {
+        super(errorId, errorCode, message, status, args);
         this.validationMessages = validationMessages;
     }
 }

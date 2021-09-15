@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2021 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -41,10 +41,13 @@ public class ResponseExceptionDTO implements Serializable {
 
     private int status;
 
-    ResponseExceptionDTO(UUID errorId, String errorCode, String message, int status) {
+    private Serializable[] args = null;
+
+    ResponseExceptionDTO(UUID errorId, String errorCode, String message, int status, Serializable... args) {
         this.errorId = errorId;
         this.errorCode = errorCode;
         this.message = message;
         this.status = status;
+        this.args = args;
     }
 }
