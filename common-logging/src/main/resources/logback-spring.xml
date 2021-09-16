@@ -19,10 +19,9 @@
   -->
 <configuration>
     <conversionRule conversionWord="mx" converterClass="io.herd.common.logging.AwsMessageConverter"/>
-    <conversionRule conversionWord="aEx" converterClass="io.herd.common.logging.AwsExtendedThrowableProxyConverter"/>
 
     <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/app.log}"/>
-    <property name="FILE_LOG_PATTERN" value="${FILE_LOG_PATTERN:-%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%t] %-40.40c{39} : %mx%n%aEx}"/>
+    <property name="FILE_LOG_PATTERN" value="${FILE_LOG_PATTERN:-%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%t] %-40.40c{39} : %mx%n}"/>
     <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
 
     <springProfile name="!dev &amp; !develop &amp; !development &amp; !hom &amp; !homolog &amp; !homologation &amp; !prd &amp; !prod &amp; !production">

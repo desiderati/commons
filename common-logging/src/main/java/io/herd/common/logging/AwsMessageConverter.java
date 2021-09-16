@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2021 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,24 +18,41 @@
  */
 package io.herd.common.logging;
 
-import ch.qos.logback.classic.pattern.MessageConverter;
+import ch.qos.logback.classic.pattern.ExtendedThrowableProxyConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.core.CoreConstants;
 
 /**
  * @link https://stackoverflow.com/questions/53233934/aws-streaming-multi-line-log-files-from-cloudwatch-to-elk
  */
-public class AwsMessageConverter extends MessageConverter {
+public class AwsMessageConverter extends ExtendedThrowableProxyConverter {
 
     @Override
     public String convert(ILoggingEvent event) {
+        String message;
         if (LoggerUtils.IS_RUNNING_ON_AWS) {
-            String message = LoggerUtils.replaceNewLineWithCarrierReturn(super.convert(event));
-            return message.endsWith("\r") ?
-                LoggerUtils.removeLastChar(message) + " " + CoreConstants.LINE_SEPARATOR :
-                message;
+            message = LoggerUtils.replaceNewLineWithCarrierReturn(event.getFormattedMessage());
+            message = message.endsWith("\r") ? message : message + "\r";
+
+            IThrowableProxy tp = event.getThrowableProxy();
+            if (tp != null) {
+                String stackTraceWithoutNewLine =
+                    LoggerUtils.replaceNewLineWithCarrierReturn(super.throwableProxyToString(tp));
+                return message + "\t|\r\t" + stackTraceWithoutNewLine + " " + CoreConstants.LINE_SEPARATOR;
+            } else {
+                return message;
+            }
         } else {
-            return super.convert(event);
+            message = event.getFormattedMessage();
+
+            IThrowableProxy tp = event.getThrowableProxy();
+            if (tp != null) {
+                String stackTraceWithoutNewLine = super.throwableProxyToString(tp);
+                return message + CoreConstants.LINE_SEPARATOR + stackTraceWithoutNewLine;
+            } else {
+                return message;
+            }
         }
     }
 }
