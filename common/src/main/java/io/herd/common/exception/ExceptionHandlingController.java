@@ -116,9 +116,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             try {
                 List<String> msgsList = new ArrayList<>();
                 if (exParts.length > 1) {
-                    for (int i = 1; i < exParts.length; i++) {
-                        msgsList.add(exParts[1]);
-                    }
+                    msgsList.addAll(Arrays.asList(exParts).subList(1, exParts.length));
                 }
 
                 var key = (exParts[0].equals("null")) ? "null" : Class.forName(exParts[0]).getName();
