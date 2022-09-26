@@ -18,7 +18,7 @@
  */
 package io.herd.common.scanner;
 
-import io.herd.common.exception.ApplicationException;
+import io.herd.common.web.exception.ApplicationException;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;

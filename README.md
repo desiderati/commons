@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-2.4.4-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-2.4.5-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -22,6 +22,12 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [2.4.5] - 2022-09-22
+- Configured a new exception handler for GraphQL.
+- Moved some classes to package: **io.herd.common.web**.
+- Renamed package from **io.herd.common.tenant**, to: **io.herd.common.data.multitenant**.
+- Fixed a bug while compiling both Kotlin and Java files in a same module.
 
 #### [2.4.4] - 2021-09-17
 - Fixed a bug in the ExceptionHandlingController related to 'shouldLogAsWarning' functionality.

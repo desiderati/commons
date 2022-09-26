@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- *  Other option will be removing the API's bae path from URL.
+ *  Other option will be removing the API's base path from URL.
  */
 //@AutoConfigureCommonWeb // Without it, the controllers will not be prefixed!
 @WebMvcTest(controllers = TestRestController.class)

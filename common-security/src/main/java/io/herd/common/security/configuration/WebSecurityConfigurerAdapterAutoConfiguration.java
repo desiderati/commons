@@ -18,7 +18,7 @@
  */
 package io.herd.common.security.configuration;
 
-import io.herd.common.configuration.WebAutoConfiguration;
+import io.herd.common.web.configuration.WebAutoConfiguration;
 import io.herd.common.security.jwt.authentication.JwtAuthenticationFilter;
 import io.herd.common.security.jwt.authorization.JwtAuthorizationFilter;
 import io.herd.common.security.sign_request.authorization.SignRequestAuthorizationFilter;
@@ -172,7 +172,7 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
             .antMatchers("/error")
 
             // We enable all Actuator RESTs.
-            .antMatchers("/actuator/**")
+            .antMatchers(defaultApiBasePath + "/actuator/**")
 
             // We enable all Swagger RESTs.
             .antMatchers("/swagger-resources/**")
@@ -182,7 +182,11 @@ public class WebSecurityConfigurerAdapterAutoConfiguration extends WebSecurityCo
             .antMatchers(springFoxOpenApiPath)
 
             // It enables all calls to the public API.
-            .antMatchers(defaultApiBasePath + "/public/**");
+            .antMatchers(defaultApiBasePath + "/public/**")
+
+            // GraphQL Support.
+            .antMatchers("/vendor/graphiql/**")
+            .antMatchers(defaultApiBasePath + "/graphiql");
     }
 
     private HttpFirewall allowUrlEncodedSlashHttpFirewall() {

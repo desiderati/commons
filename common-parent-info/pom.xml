@@ -74,7 +74,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>2.4.4</revision>
+        <revision>2.4.5</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>
@@ -84,7 +84,12 @@
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <maven.version>3.6.0</maven.version>
         <java.version>11</java.version>
-        <kotlin.version>1.3.71</kotlin.version>
+
+        <!--
+            Somente mudar para a versão 1.6.0 do Kotlin em diante, caso este Bug tenha sido resolvido!
+            https://github.com/mapstruct/mapstruct/discussions/3030
+        -->
+        <kotlin.version>1.4.32</kotlin.version>
 
         <!--
             There is no need to use Javadoc in our projects.

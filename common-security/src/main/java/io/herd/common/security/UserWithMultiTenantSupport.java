@@ -32,8 +32,11 @@ public class UserWithMultiTenantSupport extends User implements MultiTenantSuppo
 
     private String tenant;
 
-    public UserWithMultiTenantSupport(String username, String password,
-                                      Collection<? extends GrantedAuthority> authorities, String tenant) {
+    public UserWithMultiTenantSupport(
+        String username, String password,
+        Collection<? extends GrantedAuthority> authorities,
+        String tenant
+    ) {
         super(username, password, authorities);
         this.tenant = tenant;
     }

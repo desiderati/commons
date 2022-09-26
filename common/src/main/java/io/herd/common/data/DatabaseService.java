@@ -18,7 +18,6 @@
  */
 package io.herd.common.data;
 
-import io.herd.common.configuration.DatabaseProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;

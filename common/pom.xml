@@ -254,6 +254,12 @@
             <artifactId>liquibase-core</artifactId>
         </dependency>
 
+        <!-- Hibernate Types -->
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>hibernate-types-52</artifactId>
+        </dependency>
+
         <!-- Databases -->
         <dependency>
             <groupId>org.hsqldb</groupId>

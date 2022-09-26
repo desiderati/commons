@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -20,7 +20,6 @@ package io.herd.common.data.jpa;
 
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-import org.springframework.util.ClassUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -36,18 +35,28 @@ import java.io.Serializable;
  */
 @MappedSuperclass
 @SuppressWarnings("unused")
-public abstract class AbstractPersistableIdentity<I extends Serializable> implements Persistable<I>, Identity<I> {
+public abstract class AbstractPersistableIdentity<I extends Serializable> extends AbstractEntity<I> implements Persistable<I>, Identity<I> {
+
+    public AbstractPersistableIdentity() {
+        this(null);
+    }
+
+    public AbstractPersistableIdentity(I id) {
+        super(id);
+        this.id = id;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private I id;
 
     @Override
-    public I getId() {
+    public final I getId() {
         return id;
     }
 
-    protected void setId(final I id) {
+    protected final void setId(final I id) {
+        super.setEntityId(id);
         this.id = id;
     }
 
@@ -57,39 +66,8 @@ public abstract class AbstractPersistableIdentity<I extends Serializable> implem
      * @see Persistable#isNew()
      */
     @Transient // DATAJPA-622
-    public boolean isNew() {
+    public final boolean isNew() {
         return null == getId();
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Entity of type %s with id: %s", getClass().getName(), getId());
-    }
-
-    @Override
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-    public boolean equals(Object obj) {
-        if (null == obj) {
-            return false;
-        }
-
-        if (this == obj) {
-            return true;
-        }
-
-        if (!getClass().equals(ClassUtils.getUserClass(obj))) {
-            return false;
-        }
-
-        AbstractPersistableIdentity<?> that = (AbstractPersistableIdentity<?>) obj;
-        return null != getId() && getId().equals(that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        int hashCode = 17;
-        hashCode += null == getId() ? 0 : getId().hashCode() * 31;
-        return hashCode;
     }
 }
 

@@ -18,7 +18,7 @@
  */
 package io.herd.common.notification;
 
-import io.herd.common.exception.ApplicationException;
+import io.herd.common.web.exception.ApplicationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.atmosphere.config.managed.Encoder;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,11 +19,9 @@
 package io.herd.common.configuration;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -33,14 +31,6 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptor;
-import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
-import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.concurrent.Callable;
 
 @Slf4j
 @Configuration
@@ -72,37 +62,6 @@ public class AsyncConfiguration implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new SimpleAsyncUncaughtExceptionHandler();
-    }
-
-    /** Configure async support for Spring MVC. */
-    @Bean
-    public WebMvcConfigurer webMvcConfigurerConfigurer(
-        @Qualifier("defaultAsyncTaskExecutor") AsyncTaskExecutor taskExecutor,
-        CallableProcessingInterceptor callableProcessingInterceptor
-    ) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void configureAsyncSupport(@NotNull AsyncSupportConfigurer configurer) {
-                log.info("Configuring Spring MVC with asynchronous task executor...");
-                configurer.setDefaultTimeout(asyncProperties.getTaskTimeout()).setTaskExecutor(taskExecutor);
-                configurer.registerCallableInterceptors(callableProcessingInterceptor);
-                WebMvcConfigurer.super.configureAsyncSupport(configurer);
-            }
-        };
-    }
-
-    @Bean
-    public CallableProcessingInterceptor callableProcessingInterceptor() {
-        return new TimeoutCallableProcessingInterceptor() {
-            @Override
-            public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
-                log.error(
-                    "Timeout while executing asynchronous request: {}",
-                    ((HttpServletRequest) request.getNativeRequest()).getRequestURI()
-                );
-                return super.handleTimeout(request, task);
-            }
-        };
     }
 }
 

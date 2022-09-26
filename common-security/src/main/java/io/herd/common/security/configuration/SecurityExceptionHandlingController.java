@@ -18,8 +18,8 @@
  */
 package io.herd.common.security.configuration;
 
-import io.herd.common.exception.ExceptionHandlingController;
-import io.herd.common.exception.ResponseExceptionDTO;
+import io.herd.common.web.exception.ExceptionHandlingController;
+import io.herd.common.web.exception.ResponseExceptionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

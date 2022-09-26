@@ -18,7 +18,7 @@
  */
 package io.herd.common.security.sign_request.authorization;
 
-import io.herd.common.exception.ApplicationException;
+import io.herd.common.web.exception.ApplicationException;
 
 public class SignRequestAuthorizationException extends ApplicationException {
 

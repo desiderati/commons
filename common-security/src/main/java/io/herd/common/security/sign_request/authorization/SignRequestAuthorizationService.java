@@ -19,7 +19,7 @@
 package io.herd.common.security.sign_request.authorization;
 
 import com.squareup.okhttp.Request;
-import io.herd.common.exception.ApplicationException;
+import io.herd.common.web.exception.ApplicationException;
 import io.herd.common.security.sign_request.authorization.SignRequestAuthorizationClientProperties.SignValidation;
 import io.herd.common.validation.ValidationUtils;
 import lombok.extern.slf4j.Slf4j;

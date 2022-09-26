@@ -20,9 +20,9 @@ package io.herd.common.security.configuration;
 
 import io.herd.common.security.jwt.JwtTokenExtractor;
 import io.herd.common.security.jwt.authentication.JwtAuthenticationTokenConfigurer;
-import io.herd.common.security.jwt.authentication.JwtDefaultAuthenticationConverter;
-import io.herd.common.security.jwt.authentication.JwtDefaultAuthenticationTokenConfigurer;
-import io.herd.common.security.jwt.authorization.JwtDefaultTokenExtractor;
+import io.herd.common.security.jwt.authentication.DefaultJwtAuthenticationConverter;
+import io.herd.common.security.jwt.authentication.DefaultJwtAuthenticationTokenConfigurer;
+import io.herd.common.security.jwt.authorization.DefaultJwtTokenExtractor;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -45,20 +45,20 @@ public class WebSecurityAutoConfiguration {
     @ConditionalOnMissingBean(AuthenticationConverter.class)
     @ConditionalOnProperty(name = "security.jwt.authentication.enabled", havingValue = "true")
     public AuthenticationConverter authenticationConverter() {
-        return new JwtDefaultAuthenticationConverter();
+        return new DefaultJwtAuthenticationConverter();
     }
 
     @Bean
     @ConditionalOnMissingBean(JwtAuthenticationTokenConfigurer.class)
     @ConditionalOnProperty(name = "security.jwt.authentication.enabled", havingValue = "true")
     public JwtAuthenticationTokenConfigurer jwtAuthenticationTokenConfigurer() {
-        return new JwtDefaultAuthenticationTokenConfigurer();
+        return new DefaultJwtAuthenticationTokenConfigurer();
     }
 
     @Bean
     @ConditionalOnMissingBean(JwtTokenExtractor.class)
     @ConditionalOnProperty(name = "security.jwt.authorization.enabled", havingValue = "true")
     public JwtTokenExtractor<Authentication> jwtTokenExtractor() {
-        return new JwtDefaultTokenExtractor();
+        return new DefaultJwtTokenExtractor();
     }
 }

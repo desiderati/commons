@@ -30,7 +30,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
-import io.herd.common.exception.ApplicationException;
+import io.herd.common.web.exception.ApplicationException;
 import io.herd.common.google.configuration.GoogleCalendarProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

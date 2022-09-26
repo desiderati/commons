@@ -18,7 +18,7 @@
  */
 package io.herd.common.security.sign_request.authorization;
 
-import io.herd.common.tenant.MultiTenantContext;
+import io.herd.common.data.multitenant.MultiTenantContext;
 import io.herd.common.security.MultiTenantSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

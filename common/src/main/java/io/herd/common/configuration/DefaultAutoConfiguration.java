@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,6 +18,7 @@
  */
 package io.herd.common.configuration;
 
+import io.herd.common.data.DatabaseProperties;
 import liquibase.integration.spring.SpringLiquibase;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -36,7 +37,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 @AutoConfigureBefore({ValidationAutoConfiguration.class})
 @PropertySource("classpath:application-common.properties")
 @ComponentScan("io.herd.common.data")
-@EnableConfigurationProperties({DatabaseProperties.class, SwaggerClientProperties.class})
+@EnableConfigurationProperties(DatabaseProperties.class)
 @Import({
     // Need to be auto-loaded too.
     AsyncConfiguration.class,

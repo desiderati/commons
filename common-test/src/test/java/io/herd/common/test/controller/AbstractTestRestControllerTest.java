@@ -18,7 +18,7 @@
  */
 package io.herd.common.test.controller;
 
-import io.herd.common.test.annotation.AutoConfigureCommon;
+import io.herd.common.test.annotation.AutoConfigureCommonWeb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,7 @@ public abstract class AbstractTestRestControllerTest {
 
     /**
      * If you don't define this parameter but have configured the API's base path in your application,
-     * you must use the {@link AutoConfigureCommon} annotation, if in your tests you have set the URL
+     * you must use the {@link AutoConfigureCommonWeb} annotation, if in your tests you have set the URL
      * with the API base path directly.
      *
      * @see TestRestControllerWebMvcTest2

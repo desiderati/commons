@@ -4,13 +4,13 @@ io.herd.common.configuration.DefaultAutoConfiguration
 
 # AutoConfigureCommonWeb auto-configuration imports
 io.herd.common.test.annotation.AutoConfigureCommonWeb=\
-io.herd.common.configuration.WebAutoConfiguration
+io.herd.common.web.configuration.WebAutoConfiguration
 
-# AutoConfigureCommonTenant auto-configuration imports
-io.herd.common.test.annotation.AutoConfigureCommonTenant=\
+# AutoConfigureCommonDataMultiTenant auto-configuration imports
+io.herd.common.test.annotation.AutoConfigureCommonDataMultiTenant=\
 io.herd.common.configuration.DefaultAutoConfiguration,\
-io.herd.common.tenant.configuration.MultiTenantAutoConfiguration,\
-io.herd.common.tenant.configuration.MultiTenantLiquibaseAutoConfiguration
+io.herd.common.data.multitenant.configuration.MultiTenantAutoConfiguration,\
+io.herd.common.data.multitenant.configuration.MultiTenantLiquibaseAutoConfiguration
 
 # AutoConfigureCommonSecurity auto-configuration imports
 io.herd.common.test.annotation.AutoConfigureCommonSecurity=\

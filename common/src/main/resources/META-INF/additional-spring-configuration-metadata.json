@@ -1,16 +1,16 @@
 {
   "groups": [
     {
-      "name": "app.datasource",
-      "type": "io.herd.common.configuration.DatabaseProperties"
+      "name": "app.database.config",
+      "type": "io.herd.common.data.DatabaseProperties"
     },
     {
-      "name": "app.multitenant",
-      "type": "io.herd.common.tenant.configuration.MultiTenantProperties"
+      "name": "app.database.multitenant",
+      "type": "io.herd.common.data.multitenant.configuration.MultiTenantProperties"
     },
     {
       "name": "spring.web.cors",
-      "type": "io.herd.common.configuration.CorsProperties"
+      "type": "io.herd.common.web.configuration.CorsProperties"
     },
     {
       "name": "spring.async",
@@ -58,14 +58,14 @@
       "defaultValue": "SET SCHEMA ''${schemaName}''"
     },
     {
-      "name": "app.multitenant.default-tenant",
+      "name": "app.database.multitenant.default-tenant",
       "type": "java.lang.String",
       "description": "Default Tenant.",
       "defaultValue": "public"
     },
     {
-      "name": "app.multitenant.strategy",
-      "type": "io.herd.common.tenant.configuration.MultiTenantProperties$Strategy",
+      "name": "app.database.multitenant.strategy",
+      "type": "io.herd.common.data.multitenant.configuration.MultiTenantProperties$Strategy",
       "description": "Multi Tenant Strategy.",
       "defaultValue": "NONE"
     },
