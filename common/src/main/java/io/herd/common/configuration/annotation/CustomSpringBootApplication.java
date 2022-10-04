@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.lang.annotation.*;
 
@@ -36,30 +35,25 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 
-@EnableJpaRepositories
-@EntityScan
-
 // NOTE Felipe Desiderati: Do not define the annotation below, otherwise Spring Boot will not configure
 // Proxies correctly. Transaction management is automatically configured through application.properties.
 // See: org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration
 //@EnableTransactionManagement
 @ComponentScan
+@EntityScan
 @PropertySource("")
 @SpringBootApplication
 @SuppressWarnings("unused")
 public @interface CustomSpringBootApplication {
 
-    @AliasFor(annotation = EnableJpaRepositories.class, attribute = "value")
-    String[] jpaRepositoryScan() default {};
+    @AliasFor(annotation = ComponentScan.class, attribute = "value")
+    String[] componentScan() default {""};
 
     @AliasFor(annotation = EntityScan.class, attribute = "value")
     String[] entityScan() default {};
 
     @AliasFor(annotation = PropertySource.class, attribute = "value")
     String[] propertySource() default {"classpath:application.properties"};
-
-    @AliasFor(annotation = ComponentScan.class, attribute = "value")
-    String[] componentScan() default {""};
 
 }
 

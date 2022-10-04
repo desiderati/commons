@@ -18,14 +18,10 @@
  */
 package io.herd.common.configuration;
 
-import io.herd.common.data.DatabaseProperties;
-import liquibase.integration.spring.SpringLiquibase;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.*;
@@ -36,8 +32,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 @EnableAspectJAutoProxy // Enables support for handling components marked with AspectJ's @Aspect annotation.
 @AutoConfigureBefore({ValidationAutoConfiguration.class})
 @PropertySource("classpath:application-common.properties")
-@ComponentScan("io.herd.common.data")
-@EnableConfigurationProperties(DatabaseProperties.class)
 @Import({
     // Need to be auto-loaded too.
     AsyncConfiguration.class,
@@ -64,17 +58,5 @@ public class DefaultAutoConfiguration {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.setValidationMessageSource(messageSource);
         return validator;
-    }
-
-    /**
-     * Even with Liquibase lib on classpath, Liquibase will only be loaded if property enabled is true.
-     * This should be a default behavior for the auto configuration.
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", havingValue = "false", matchIfMissing = true)
-    public SpringLiquibase liquibase() {
-        SpringLiquibase springLiquibase = new SpringLiquibase();
-        springLiquibase.setShouldRun(false);
-        return springLiquibase;
     }
 }

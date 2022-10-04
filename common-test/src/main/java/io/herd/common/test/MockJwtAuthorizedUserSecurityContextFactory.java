@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -41,7 +41,9 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
  *    ...
  * }</pre>
  *
- * @link https://docs.spring.io/spring-security/site/docs/4.0.x/reference/htmlsingle/#test-method-withsecuritycontext
+ * <a href="https://docs.spring.io/spring-security/site/docs/4.0.x/reference/htmlsingle/#test-method-withsecuritycontext">
+ * Spring Security Reference - @WithSecurityContext
+ * </a>
  */
 public class MockJwtAuthorizedUserSecurityContextFactory
         implements WithSecurityContextFactory<WithMockJwtAuthorizedUser>, ApplicationContextAware {

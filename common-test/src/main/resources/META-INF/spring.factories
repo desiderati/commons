@@ -2,20 +2,20 @@
 io.herd.common.test.annotation.AutoConfigureCommon=\
 io.herd.common.configuration.DefaultAutoConfiguration
 
+# AutoConfigureCommonDataJpa auto-configuration imports
+io.herd.common.test.annotation.AutoConfigureCommonDataJpa=\
+io.herd.common.data.jpa.configuration.JpaAutoConfiguration,\
+io.herd.common.data.multitenant.configuration.MultiTenantAutoConfiguration,\
+io.herd.common.data.multitenant.configuration.MultiTenantLiquibaseAutoConfiguration
+
 # AutoConfigureCommonWeb auto-configuration imports
 io.herd.common.test.annotation.AutoConfigureCommonWeb=\
 io.herd.common.web.configuration.WebAutoConfiguration
 
-# AutoConfigureCommonDataMultiTenant auto-configuration imports
-io.herd.common.test.annotation.AutoConfigureCommonDataMultiTenant=\
-io.herd.common.configuration.DefaultAutoConfiguration,\
-io.herd.common.data.multitenant.configuration.MultiTenantAutoConfiguration,\
-io.herd.common.data.multitenant.configuration.MultiTenantLiquibaseAutoConfiguration
-
-# AutoConfigureCommonSecurity auto-configuration imports
-io.herd.common.test.annotation.AutoConfigureCommonSecurity=\
-io.herd.common.security.configuration.WebSecurityAutoConfiguration,\
-io.herd.common.security.configuration.WebSecurityConfigurerAdapterAutoConfiguration
+# AutoConfigureCommonWebSecurity auto-configuration imports
+io.herd.common.test.annotation.AutoConfigureCommonWebSecurity=\
+io.herd.common.web.security.configuration.WebSecurityAutoConfiguration,\
+io.herd.common.web.security.configuration.WebSecurityConfigurerAdapterAutoConfiguration
 
 # TestExecutionListeners
 org.springframework.test.context.TestExecutionListener=\

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,13 +18,13 @@
  */
 package io.herd.common.scanner;
 
-import io.herd.common.web.exception.ApplicationException;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import io.herd.common.exception.ApplicationException;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

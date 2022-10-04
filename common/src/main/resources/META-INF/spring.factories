@@ -4,7 +4,4 @@ io.herd.common.configuration.ExternalPropertiesFileValidationInitializer
 
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.herd.common.configuration.DefaultAutoConfiguration,\
-io.herd.common.web.configuration.WebAutoConfiguration,\
-io.herd.common.data.multitenant.configuration.MultiTenantAutoConfiguration,\
-io.herd.common.data.multitenant.configuration.MultiTenantLiquibaseAutoConfiguration
+io.herd.common.configuration.DefaultAutoConfiguration

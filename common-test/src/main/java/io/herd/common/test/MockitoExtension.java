@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.mock;
  * Until now, there is no official JUnit5 extension implementation from Mockito,
  * so we’ll use the default implementation provided by the JUnit team.
  */
+@SuppressWarnings("unused")
 public class MockitoExtension implements TestInstancePostProcessor, ParameterResolver {
 
     @Override

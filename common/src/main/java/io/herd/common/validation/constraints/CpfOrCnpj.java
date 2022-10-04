@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,10 +37,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * @see Cnpj
  */
 @Pattern(regexp =
-    "^([0-9]{3}\\.[0-9]{3}\\.[0-9]{3}-[0-9]{2})$|" +
-    "^([0-9]{11})$|" +
-    "^([0-9]{2}\\.[0-9]{3}\\.[0-9]{3}/[0-9]{4}-[0-9]{2})$|" +
-    "^([0-9]{14})$")
+    "^(\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})$|" +
+    "^(\\d{11})$|" +
+    "^(\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2})$|" +
+    "^(\\d{14})$")
 
 // We need to exclude the cases below as they pass through the module validation, but they are invalid.
 @Pattern(regexp = "^(?:(?!000\\.?000\\.?000-?00).)*$")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,7 +30,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
-import io.herd.common.web.exception.ApplicationException;
+import io.herd.common.exception.ApplicationException;
 import io.herd.common.google.configuration.GoogleCalendarProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +76,8 @@ public class GoogleCalendarService {
 
     private Credential getCredential(final HttpTransport httpTransport) throws IOException {
         InputStream in = GoogleCalendarService.class.getResourceAsStream(googleCalendarProperties.getApiSecretJson());
+
+        assert in != null;
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         File credentialsFolder = new File(googleCalendarProperties.getCredentialsFolder());

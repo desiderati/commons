@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 - Felipe Desiderati
+ * Copyright (c) 2022 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,7 +24,9 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.core.CoreConstants;
 
 /**
- * @link https://stackoverflow.com/questions/53233934/aws-streaming-multi-line-log-files-from-cloudwatch-to-elk
+ * <a href="https://stackoverflow.com/questions/53233934/aws-streaming-multi-line-log-files-from-cloudwatch-to-elk">
+ * AWS streaming multi-line log files from CloudWatch to ELK
+ * </a>
  */
 public class AwsMessageConverter extends ExtendedThrowableProxyConverter {
 

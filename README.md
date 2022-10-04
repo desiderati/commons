@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-2.4.5-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-2.5.0-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -13,7 +13,7 @@ For more information, see the projects:
 * [common-jms](common-jms/README.md)
 * [common-logging](common-logging/README.md)
 * [common-logging-test](common-logging-test/README.md)
-* [common-security](common-security/README.md)
+* [common-web-security](common-web-security/README.md)
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
@@ -23,6 +23,10 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [2.5.0] - 2022-09-22
+- Fixed a Bug involving the auto configuration order between **WebAutoConfiguration** and **HibernateJpaAutoConfiguration**. 
+- Created the modules: **common-data-jpa**, **common-data-multitenant**, **common-web**, **common-web-notification**, **common-web-security**.
+
 #### [2.4.5] - 2022-09-22
 - Configured a new exception handler for GraphQL.
 - Moved some classes to package: **io.herd.common.web**.
@@ -30,13 +34,13 @@ All project changes will be documented in this file.
 - Fixed a bug while compiling both Kotlin and Java files in a same module.
 
 #### [2.4.4] - 2021-09-17
-- Fixed a bug in the ExceptionHandlingController related to 'shouldLogAsWarning' functionality.
+- Fixed a bug in the **ExceptionHandlingController** related to 'shouldLogAsWarning' functionality.
 
 #### [2.4.3] - 2021-09-15
 - Improvements in better logging while using AWS.
 
 #### [2.4.2] - 2021-09-14
-- Added the extra args to ResponseExceptionDTO. Fixed a bug in the ExceptionHandlingController related to ApiException handling.
+- Added the extra args to ResponseExceptionDTO. Fixed a bug in the **ExceptionHandlingController** related to **ApiException** handling.
 
 #### [2.4.1] - 2021-08-18
 - Added support to Spring + Kotlin. Changed the GraphQL version.

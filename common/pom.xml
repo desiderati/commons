@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2021 - Felipe Desiderati
+  ~ Copyright (c) 2022 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -45,32 +45,14 @@
             <artifactId>common-logging</artifactId>
         </dependency>
 
-        <!-- Javax -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-
         <!-- Spring Starters -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-rest</artifactId>
-            <exclusions>
-                <!-- Use Undertown instead! -->
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -79,10 +61,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter</artifactId>
         </dependency>
 
         <!-- Spring -->
@@ -182,88 +160,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-
-        <!-- Connection Pool -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-
-        <!-- GraphQL Client -->
-        <dependency>
-            <groupId>com.graphql-java-kickstart</groupId>
-            <artifactId>graphql-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java-extended-scalars</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.apollographql.apollo</groupId>
-            <artifactId>apollo-runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.apollographql.apollo</groupId>
-            <artifactId>apollo-coroutines-support</artifactId>
-        </dependency>
-
-        <!-- Swagger -->
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-boot-starter</artifactId>
-        </dependency>
-
-        <!-- To run Swagger Client Api. Only if choose 'okhttp-gson' library. -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.gsonfire</groupId>
-            <artifactId>gson-fire</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.threeten</groupId>
-            <artifactId>threetenbp</artifactId>
-        </dependency>
-        <dependency> <!-- We had to force this to have compatibility with Apollo GraphQL. -->
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp</groupId>
-            <artifactId>logging-interceptor</artifactId>
-        </dependency>
-
-        <!-- Liquibase -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-
-        <!-- Hibernate Types -->
-        <dependency>
-            <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-52</artifactId>
-        </dependency>
-
-        <!-- Databases -->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
         </dependency>
     </dependencies>
 

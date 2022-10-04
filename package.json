@@ -1,6 +1,6 @@
 {
   "name": "commons-herd.io",
-  "version": "1.0.0",
+  "version": "2.5.0",
   "scripts": {
     "mvn:deploy": "mvn -B -e -fn -Dmaven.wagon.http.pool=false clean deploy"
   },

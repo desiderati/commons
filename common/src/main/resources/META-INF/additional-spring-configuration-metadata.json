@@ -1,18 +1,6 @@
 {
   "groups": [
     {
-      "name": "app.database.config",
-      "type": "io.herd.common.data.DatabaseProperties"
-    },
-    {
-      "name": "app.database.multitenant",
-      "type": "io.herd.common.data.multitenant.configuration.MultiTenantProperties"
-    },
-    {
-      "name": "spring.web.cors",
-      "type": "io.herd.common.web.configuration.CorsProperties"
-    },
-    {
       "name": "spring.async",
       "type": "io.herd.common.configuration.AsyncProperties"
     }
@@ -22,94 +10,6 @@
       "name": "app.system-id",
       "type": "java.util.UUID",
       "description": "System Id."
-    },
-    {
-      "name": "app.api-base-path",
-      "type": "java.lang.String",
-      "description": "Default prefix used by all RESTs.",
-      "defaultValue": "/api"
-    },
-    {
-      "name": "app.exception-handler.should-log-as-warning",
-      "type": "java.lang.String",
-      "description": "Exceptions list which should be recorded in the log as a warning."
-    },
-    {
-      "name": "app.database.username",
-      "type": "java.lang.String",
-      "description": "The owner of database.",
-      "defaultValue": "app"
-    },
-    {
-      "name": "app.database.table-prefix",
-      "type": "java.lang.String",
-      "description": "The prefix to be used by all system tables."
-    },
-    {
-      "name": "app.database.ddl-create-schema",
-      "type": "java.lang.String",
-      "description": "The DDL for schema creation.",
-      "defaultValue": "CREATE SCHEMA IF NOT EXISTS ${schemaName}"
-    },
-    {
-      "name": "app.database.ddl-change-schema",
-      "type": "java.lang.String",
-      "description": "The DDL for schema change.",
-      "defaultValue": "SET SCHEMA ''${schemaName}''"
-    },
-    {
-      "name": "app.database.multitenant.default-tenant",
-      "type": "java.lang.String",
-      "description": "Default Tenant.",
-      "defaultValue": "public"
-    },
-    {
-      "name": "app.database.multitenant.strategy",
-      "type": "io.herd.common.data.multitenant.configuration.MultiTenantProperties$Strategy",
-      "description": "Multi Tenant Strategy.",
-      "defaultValue": "NONE"
-    },
-    {
-      "name": "springfox.swagger.enabled",
-      "type": "java.lang.Boolean",
-      "description": "It defines if Swagger will be enabled or not.",
-      "defaultValue": true
-    },
-    {
-      "name": "springfox.swagger.package-to-scan",
-      "type": "java.lang.String",
-      "description": "Package that will be scanned to retrieve all endpoints to be exposed.",
-      "defaultValue": ""
-    },
-    {
-      "name": "springfox.swagger.paths-to-expose",
-      "type": "java.lang.String",
-      "description": "Only the paths defined here will be exposed on Swagger UI.",
-      "defaultValue": "/v.*,/public/v.*"
-    },
-    {
-      "name": "spring.web.cors.allowed-methods",
-      "type": "java.lang.String",
-      "description": "Set the HTTP methods to allow, e.g. GET, POST, etc. The special value '*' allows all methods.",
-      "defaultValue": ["GET", "POST", "PUT", "PATCH", "DELETE"]
-    },
-    {
-      "name": "spring.web.cors.allowed-headers",
-      "type": "java.lang.String",
-      "description": "Set the list of headers that a preflight request can list as allowed for use during an actual request. The special value '*', may be used to allow all headers. By default all headers are allowed.",
-      "defaultValue": ["*"]
-    },
-    {
-      "name": "spring.web.cors.allowed-origins",
-      "type": "java.lang.String",
-      "description": "The list of allowed origins that be specific origins, e.g. 'https://domain1.com', or '*' for all origins. By default, all origins are allowed.",
-      "defaultValue": ["*"]
-    },
-    {
-      "name": "spring.web.cors.exposed-headers",
-      "type": "java.lang.String",
-      "description": "Set the list of response headers other than 'simple', headers, i.e. Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, or Pragma, that an actual response might have and can be exposed. Note that '*' is not supported on this property.",
-      "defaultValue": ["Authorization"]
     },
     {
       "name": "spring.async.enabled",
