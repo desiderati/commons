@@ -30,14 +30,17 @@ abstract class AbstractEntity<T : Serializable>(
         if (null == other) {
             return false
         }
+
         if (this === other) {
             return true
         }
-        if (javaClass != ProxyUtils.getUserClass(other)) {
+
+        if (javaClass != ProxyUtils.getUserClass(other) && other !is AbstractEntity<*>) {
             return false
         }
+
         val that = other as AbstractEntity<*>
-        return null != this.entityId && this.entityId == that.entityId
+        return this.entityId == that.entityId
     }
 
     @Override

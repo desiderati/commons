@@ -81,7 +81,7 @@
         <guava.version>29.0-jre</guava.version>
         <hibernate-types-52.version>2.19.2</hibernate-types-52.version>
         <hikaricp.version>3.4.2</hikaricp.version>
-        <hsqldb.version>2.5.0</hsqldb.version>
+        <hsqldb.version>2.5.1</hsqldb.version>
         <httpclient.version>4.5.12</httpclient.version>
         <jackson-module.version>2.10.3</jackson-module.version>
         <javax.inject.version>1</javax.inject.version>

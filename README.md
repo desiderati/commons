@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-2.5.0-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-2.5.1-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -23,8 +23,11 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [2.5.0] - 2022-09-22
-- Fixed a Bug involving the auto configuration order between **WebAutoConfiguration** and **HibernateJpaAutoConfiguration**. 
+#### [2.5.1] - 2022-10-05
+- Fixed a Bug the **equals(...)** method on **AbstractEntity** class.
+
+#### [2.5.0] - 2022-10-04
+- Fixed a Bug involving the auto configuration order between **WebAutoConfiguration** and **HibernateJpaAutoConfiguration**.
 - Created the modules: **common-data-jpa**, **common-data-multitenant**, **common-web**, **common-web-notification**, **common-web-security**.
 
 #### [2.4.5] - 2022-09-22
