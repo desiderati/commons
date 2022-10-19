@@ -39,8 +39,10 @@ class AbstractEntityTest {
 
         val enhancer = Enhancer()
         enhancer.setSuperclass(ClassePai::class.java)
-        enhancer.setCallback(MethodInterceptor { _, method, _, _ ->
-            logger.info("Invoked method: {}", method.name)
+        enhancer.setCallback(MethodInterceptor { obj, method, args, proxy ->
+            val ret = proxy.invokeSuper(obj, args)
+            logger.info("Invoked method: {}, with return: {}", method.name, ret)
+            ret
         })
         val classePai3: ClassePai = enhancer.create(arrayOf(java.lang.Long::class.java), arrayOf(1L)) as ClassePai
         assertTrue(classePai1 == classePai3)
@@ -57,8 +59,10 @@ class AbstractEntityTest {
 
         val enhancer = Enhancer()
         enhancer.setSuperclass(ClassePai::class.java)
-        enhancer.setCallback(MethodInterceptor { _, method, _, _ ->
-            logger.info("Invoked method: {}", method.name)
+        enhancer.setCallback(MethodInterceptor { obj, method, args, proxy ->
+            val ret = proxy.invokeSuper(obj, args)
+            logger.info("Invoked method: {}, with return: {}", method.name, ret)
+            ret
         })
         val classePai3: ClassePai = enhancer.create() as ClassePai
         assertTrue(classePai1 == classePai3)
@@ -75,8 +79,10 @@ class AbstractEntityTest {
 
         val enhancer = Enhancer()
         enhancer.setSuperclass(ClassePai::class.java)
-        enhancer.setCallback(MethodInterceptor { _, method, _, _ ->
-            logger.info("Invoked method: {}", method.name)
+        enhancer.setCallback(MethodInterceptor { obj, method, args, proxy ->
+            val ret = proxy.invokeSuper(obj, args)
+            logger.info("Invoked method: {}, with return: {}", method.name, ret)
+            ret
         })
         val classePai3: ClassePai = enhancer.create(arrayOf(java.lang.Long::class.java), arrayOf(2L)) as ClassePai
         assertFalse(classePai1 == classePai3)
@@ -86,7 +92,11 @@ class AbstractEntityTest {
     }
 }
 
-internal open class ClassePai(id: Long? = null) : AbstractEntity<Long>(id)
+internal open class ClassePai(private var id: Long? = null) : AbstractEntity<Long>() {
+    override fun getId(): Long? {
+        return id
+    }
+}
 
 internal class ClasseFilha(
     id: Long? = null,

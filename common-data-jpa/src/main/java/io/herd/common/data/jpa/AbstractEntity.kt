@@ -21,9 +21,10 @@ package io.herd.common.data.jpa
 import org.springframework.data.util.ProxyUtils
 import java.io.Serializable
 
-abstract class AbstractEntity<T : Serializable>(
-    var entityId: T? = null
-) {
+abstract class AbstractEntity<I : Serializable> : Identity<I> {
+
+    @Override
+    abstract override fun getId() : I?
 
     @Override
     override fun equals(other: Any?): Boolean {
@@ -40,18 +41,18 @@ abstract class AbstractEntity<T : Serializable>(
         }
 
         val that = other as AbstractEntity<*>
-        return this.entityId == that.entityId
+        return this.id == that.id
     }
 
     @Override
     override fun hashCode(): Int {
         var hashCode = 17
-        hashCode = 31 * hashCode + (entityId?.hashCode() ?: 0)
+        hashCode += 31 * (id?.hashCode() ?: 0)
         return hashCode
     }
 
     @Override
     override fun toString(): String {
-        return this.javaClass.simpleName + "{" + "id=" + this.entityId + '}'
+        return this.javaClass.simpleName + "{" + "id=" + this.id + '}'
     }
 }

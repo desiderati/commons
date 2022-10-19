@@ -74,7 +74,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>2.5.1</revision>
+        <revision>2.5.2</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>

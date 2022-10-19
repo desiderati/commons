@@ -42,7 +42,6 @@ public abstract class AbstractPersistableIdentity<I extends Serializable> extend
     }
 
     public AbstractPersistableIdentity(I id) {
-        super(id);
         this.id = id;
     }
 
@@ -56,7 +55,6 @@ public abstract class AbstractPersistableIdentity<I extends Serializable> extend
     }
 
     protected final void setId(final I id) {
-        super.setEntityId(id);
         this.id = id;
     }
 
