@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -20,6 +20,11 @@ package io.herd.common.web.security.jwt.authorization;
 
 import io.herd.common.data.multitenant.MultiTenantContext;
 import io.herd.common.web.security.MultiTenantSupport;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -34,11 +39,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -63,7 +63,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
      */
     @Bean
     public FilterRegistrationBean<JwtAuthorizationFilter> jwtAuthorizationFilterRegistration(
-            @Qualifier("jwtAuthorizationFilter") JwtAuthorizationFilter filter
+        @Qualifier("jwtAuthorizationFilter") JwtAuthorizationFilter filter
     ) {
         FilterRegistrationBean<JwtAuthorizationFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
@@ -81,8 +81,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             Authentication authentication = null;
             try {
                 authentication = jwtAuthorizationService.verifyAuthentication(servletRequest);
-                if (authentication != null && authentication.getPrincipal() instanceof MultiTenantSupport) {
-                    MultiTenantSupport multiTenantSupport = (MultiTenantSupport) authentication.getPrincipal();
+                if (authentication != null
+                    && authentication.getPrincipal() instanceof MultiTenantSupport multiTenantSupport
+                ) {
                     if (StringUtils.isNotBlank(multiTenantSupport.getTenant())) {
                         MultiTenantContext.set(multiTenantSupport.getTenant());
                     }
@@ -91,8 +92,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 log.error("Authorization Failed: " + failed.getMessage(), failed);
             }
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-        else {
+        } else {
             log.debug("SecurityContextHolder already contains: '"
                 + SecurityContextHolder.getContext().getAuthentication() + "'");
         }

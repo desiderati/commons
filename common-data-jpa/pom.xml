@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 - Felipe Desiderati
+  ~ Copyright (c) 2023 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -57,7 +57,7 @@
         <!-- Hibernate Types -->
         <dependency>
             <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-52</artifactId>
+            <artifactId>hibernate-types-60</artifactId>
         </dependency>
 
         <!-- Databases -->

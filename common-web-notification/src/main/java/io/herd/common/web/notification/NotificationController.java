@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,14 +18,13 @@
  */
 package io.herd.common.web.notification;
 
+import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.atmosphere.config.service.*;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.BroadcasterFactory;
-
-import javax.inject.Inject;
 
 // Can not be singleton!
 @Slf4j
@@ -77,11 +76,11 @@ public class NotificationController {
     @Message(encoders = NotificationJacksonEncoder.class, decoders = NotificationJacksonDecoder.class)
     public Notification onMessage(AtmosphereResource resource, Notification notification) {
         if (notification.getUuid() == null) {
-            log.info("Notification message '{}' sent to all clients of broadcast '{}'",
+            log.trace("Notification message '{}' sent to all clients of broadcast '{}'",
                 notification.getMessage(), resource.getBroadcaster().getID()
             );
         } else {
-            log.info("Notification message '{}' sent to client {} of broadcast '{}'",
+            log.trace("Notification message '{}' sent to client {} of broadcast '{}'",
                 notification.getMessage(), notification.getUuid(), resource.getBroadcaster().getID()
             );
         }

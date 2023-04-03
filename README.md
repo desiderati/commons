@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-2.5.2-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-3.0.0.RELEASE-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -13,6 +13,7 @@ For more information, see the projects:
 * [common-jms](common-jms/README.md)
 * [common-logging](common-logging/README.md)
 * [common-logging-test](common-logging-test/README.md)
+* [common-web](common-web/README.md)
 * [common-web-security](common-web-security/README.md)
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
@@ -23,14 +24,26 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [3.0.0.RELEASE] - 2023-04-03
+- Added Spring Cloud Support.
+- Migrated from Apache ActiveMQ to Apache Artemis.
+- Migrated from Swagger to Open API.
+- Migration from JavaX project to Jakarta EE.
+- Migration to Spring Boot 3 and Spring 6.
+- New Version of Mongo Driver.
+- Removed support from Swagger, added support for Open API.
+- Support for Gradle 8.0.2 and Maven 3.9.1.
+- Support for Java 17 and Kotlin 1.18.
+- Support for Lombok project integrated with Kotlin.
+
 #### [2.5.2] - 2022-10-19
-- Fixed a Bug with the **Id** property on **AbstractEntity** class.
+- Fixed a Bug with the **ID** property on **AbstractEntity** class.
 
 #### [2.5.1] - 2022-10-05
 - Fixed a Bug in the **equals(...)** method on **AbstractEntity** class.
 
 #### [2.5.0] - 2022-10-04
-- Fixed a Bug involving the auto configuration order between **WebAutoConfiguration** and **HibernateJpaAutoConfiguration**.
+- Fixed a Bug involving the auto-configuration order between **WebAutoConfiguration** and **HibernateJpaAutoConfiguration**.
 - Created the modules: **common-data-jpa**, **common-data-multitenant**, **common-web**, **common-web-notification**, **common-web-security**.
 
 #### [2.4.5] - 2022-09-22
@@ -244,7 +257,7 @@ All project changes will be documented in this file.
 - Added support to the use of profiles with **LogBack**.
 
 #### [2.1.5] - 2020-01-27
-- Disabled default log configuration. This was an erroneous deploy!
+- Disabled default log configuration. This was an erroneous deployment!
 
 #### [2.1.4] - 2020-01-25
 - Better Swagger Thin Server configuration.
@@ -276,7 +289,7 @@ All project changes will be documented in this file.
 - New Spring Boot Version 2.2.2.
 - Some translation and minor fixes.
 - Better Swagger support. Now it will be available by default.
-  Fixed Bug: [Swagger auto configuration not working with Spring Data Rest](https://github.com/desiderati/commons/issues/4)
+  Fixed Bug: [Swagger auto-configuration not working with Spring Data Rest](https://github.com/desiderati/commons/issues/4)
 - Support to new exceptions: **ResourceNotFoundException** and **HttpRequestMethodNotSupportedException**.
 - Added support to Spring Actuator for all Spring Web applications.
 

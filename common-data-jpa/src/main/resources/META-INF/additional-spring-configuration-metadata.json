@@ -11,24 +11,18 @@
   ],
   "properties": [
     {
-      "name": "app.database.username",
-      "type": "java.lang.String",
-      "description": "The owner of database.",
-      "defaultValue": "app"
-    },
-    {
-      "name": "app.database.table-prefix",
+      "name": "app.database.config.table-prefix",
       "type": "java.lang.String",
       "description": "The prefix to be used by all system tables."
     },
     {
-      "name": "app.database.ddl-create-schema",
+      "name": "app.database.config.ddl-create-schema",
       "type": "java.lang.String",
       "description": "The DDL for schema creation.",
       "defaultValue": "CREATE SCHEMA IF NOT EXISTS ${schemaName}"
     },
     {
-      "name": "app.database.ddl-change-schema",
+      "name": "app.database.config.ddl-change-schema",
       "type": "java.lang.String",
       "description": "The DDL for schema change.",
       "defaultValue": "SET SCHEMA ''${schemaName}''"

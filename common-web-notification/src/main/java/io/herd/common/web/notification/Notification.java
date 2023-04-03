@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -20,6 +20,7 @@ package io.herd.common.web.notification;
 
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
@@ -28,6 +29,7 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 public class Notification implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 - Felipe Desiderati
+  ~ Copyright (c) 2023 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,12 +23,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.herd.common</groupId>
-        <artifactId>common-parent-swagger</artifactId>
+        <artifactId>common-parent-openapi-client</artifactId>
         <version>${revision}</version>
         <!--suppress MavenModelInspection-->
-        <relativePath>../common-parent-swagger</relativePath>
+        <relativePath>../common-parent-openapi-client</relativePath>
     </parent>
-    <artifactId>common-starter-swagger</artifactId>
+    <artifactId>common-starter-openapi-client</artifactId>
     <packaging>pom</packaging>
 
     <build>
@@ -53,8 +53,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
+            <groupId>io.herd.common</groupId>
+            <artifactId>common</artifactId>
         </dependency>
     </dependencies>
 

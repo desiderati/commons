@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,7 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 @UtilityClass
 public class UrlUtils {
 
-    // If you remove the static keyword, an compilation error occurs.
+    // If you remove the static keyword, a compilation error occurs.
     @SuppressWarnings("RedundantModifiersUtilityClassLombok")
     public static final String URL_PATH_SEPARATOR = "/";
 
@@ -42,5 +42,15 @@ public class UrlUtils {
             }
         }
         return path;
+    }
+
+    public String appendDoubleAsterisk(final String pathUrl) {
+        if (StringUtils.isBlank(pathUrl) || pathUrl.equals(URL_PATH_SEPARATOR)) {
+            return URL_PATH_SEPARATOR + "**";
+        } else {
+            return pathUrl.endsWith(URL_PATH_SEPARATOR) ?
+                pathUrl + "**" :
+                pathUrl + URL_PATH_SEPARATOR + "**";
+        }
     }
 }

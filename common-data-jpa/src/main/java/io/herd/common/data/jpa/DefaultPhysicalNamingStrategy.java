@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -20,9 +20,9 @@ package io.herd.common.data.jpa;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
-import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -38,14 +38,14 @@ import java.util.Properties;
  * the prefix to be used.
  */
 @Slf4j
-public class DefaultPhysicalNamingStrategy extends SpringPhysicalNamingStrategy {
+public class DefaultPhysicalNamingStrategy extends CamelCaseToUnderscoresNamingStrategy {
 
     private final String prefix;
 
     public DefaultPhysicalNamingStrategy() {
         prefix = getTablePrefix();
         if (prefix == null) {
-            log.info("Property 'app.database.table-prefix' not configured! Ignoring table prefix...");
+            log.info("Property 'app.database.config.table-prefix' not configured! Ignoring table prefix...");
         }
     }
 
@@ -60,7 +60,7 @@ public class DefaultPhysicalNamingStrategy extends SpringPhysicalNamingStrategy 
             for (Resource resource : resources) {
                 InputStream is = resource.getInputStream();
                 prop.load(is);
-                String prefixTmp = prop.getProperty("app.database.table-prefix");
+                String prefixTmp = prop.getProperty("app.database.config.table-prefix");
                 if (StringUtils.isNotBlank(prefixTmp)) {
                     return prefixTmp;
                 }
@@ -68,7 +68,7 @@ public class DefaultPhysicalNamingStrategy extends SpringPhysicalNamingStrategy 
             return null;
         } catch (Exception ex) {
             String errorMsg =
-                "It wasn't possible to load property 'app.database.table-prefix' from file: application.properties";
+                "It wasn't possible to load property 'app.database.config.table-prefix' from file: application.properties";
             log.info(errorMsg);
             log.debug(errorMsg, ex);
             return null;

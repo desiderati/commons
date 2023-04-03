@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,6 +19,9 @@
 package io.herd.common.web.security.jwt.authentication;
 
 import io.herd.common.web.security.jwt.JwtService;
+import jakarta.servlet.Filter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,10 +37,6 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.Filter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Authentication via JWT Token. To use this {@link Filter}, it will be necessary to define
@@ -63,7 +62,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Autowired
     public JwtAuthenticationFilter(
         JwtService jwtService,
-        @Value("${spring.web.security.jwt.authentication.login-url:/api/v1/login}") String loginUrl
+        @Value("${spring.web.security.jwt.authentication.login-url:/login}") String loginUrl
     ) {
         // Indicates whether this filter should attempt to process a login request.
         super(new AntPathRequestMatcher(loginUrl, "POST"));
@@ -73,6 +72,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
                     jwtAuthenticationTokenConfigurer.retrieveJwtTokenConfigurer(request, authentication));
             response.addHeader(HEADER_AUTHORIZATION, TOKEN_BEARER + token);
         });
+        setContinueChainBeforeSuccessfulAuthentication(false);
     }
 
     @Override
@@ -103,7 +103,8 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
      */
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> authenticationClientFilterRegistration(
-            @Qualifier("jwtAuthenticationFilter") JwtAuthenticationFilter filter) {
+        @Qualifier("jwtAuthenticationFilter") JwtAuthenticationFilter filter
+    ) {
         FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;

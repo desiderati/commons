@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -72,7 +72,7 @@ public class MockitoLoader extends SpringBootContextLoader {
     }
 
     /**
-     * It will be used to verify if some dependency wasn't satisfied and it will try to create a mock for it.
+     * It will be used to verify if some dependency wasn't satisfied, and it will try to create a mock for it.
      */
     private static class DefaultListableBeanFactoryDecorator extends DefaultListableBeanFactory {
 

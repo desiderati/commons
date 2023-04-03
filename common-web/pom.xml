@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 - Felipe Desiderati
+  ~ Copyright (c) 2023 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,10 +23,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.herd.common</groupId>
-        <artifactId>common-parent</artifactId>
+        <artifactId>common-parent-openapi-client</artifactId>
         <version>${revision}</version>
         <!--suppress MavenModelInspection-->
-        <relativePath>../common-parent</relativePath>
+        <relativePath>../common-parent-openapi-client</relativePath>
     </parent>
     <artifactId>common-web</artifactId>
 
@@ -36,15 +36,15 @@
             <artifactId>common-data-jpa</artifactId>
         </dependency>
 
-        <!-- Javax -->
+        <!-- Jakarta -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
         </dependency>
 
         <!-- Spring Starters -->
@@ -70,52 +70,14 @@
             <artifactId>graphql-java-extended-scalars</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.apollographql.apollo</groupId>
+            <groupId>com.apollographql.apollo3</groupId>
             <artifactId>apollo-runtime</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.apollographql.apollo</groupId>
-            <artifactId>apollo-coroutines-support</artifactId>
-        </dependency>
 
-        <!-- Swagger -->
+        <!-- Open API (formally Swagger API) -->
         <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-boot-starter</artifactId>
-        </dependency>
-
-        <!-- To run Swagger Client Api. Only if choose 'okhttp-gson' library. -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.gsonfire</groupId>
-            <artifactId>gson-fire</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.threeten</groupId>
-            <artifactId>threetenbp</artifactId>
-        </dependency>
-        <dependency> <!-- We had to force this to have compatibility with Apollo GraphQL. -->
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp</groupId>
-            <artifactId>logging-interceptor</artifactId>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
     </dependencies>
 

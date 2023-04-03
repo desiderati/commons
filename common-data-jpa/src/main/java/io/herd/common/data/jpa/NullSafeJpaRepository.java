@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,10 +39,6 @@ public class NullSafeJpaRepository {
 
     @Around("repositoryMethods()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        return NullSafeJpaRepository.processParameterAndReturnNullIfNull(joinPoint);
-    }
-
-    public static Object processParameterAndReturnNullIfNull(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
         if (args.length != 1) {
             return joinPoint.proceed();

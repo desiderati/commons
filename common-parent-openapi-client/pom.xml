@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 - Felipe Desiderati
+  ~ Copyright (c) 2023 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,44 +28,48 @@
         <!--suppress MavenModelInspection-->
         <relativePath>../common-parent</relativePath>
     </parent>
-    <artifactId>common-parent-swagger</artifactId>
+    <artifactId>common-parent-openapi-client</artifactId>
     <packaging>pom</packaging>
 
     <properties>
         <!--
             Each project can decide where to start or not the Thin Server to retrieve de JSON file.
-            By default it is disabled!
+            By default, it is disabled! You must import the dependency which contains the Thin Server.
         -->
-        <swagger.thin-server.disabled>true</swagger.thin-server.disabled>
-        <swagger.thin-server.start-class/>
-        <swagger.thin-server.max-attempts>20</swagger.thin-server.max-attempts>
-        <swagger.thin-server.timeout-between-attempts>15000</swagger.thin-server.timeout-between-attempts>
-        <swagger.thin-server.arguments>--spring.main.banner-mode=off,--server.port=12345</swagger.thin-server.arguments>
+        <openapi.thin-server.disabled>true</openapi.thin-server.disabled>
+        <openapi.thin-server.start-class/>
+        <openapi.thin-server.max-attempts>20</openapi.thin-server.max-attempts>
+        <openapi.thin-server.timeout-between-attempts>15000</openapi.thin-server.timeout-between-attempts>
+        <openapi.thin-server.arguments>--spring.main.banner-mode=off,--server.port=12345</openapi.thin-server.arguments>
 
-        <swagger.json-file.download.disabled>true</swagger.json-file.download.disabled>
-        <swagger.json-file.download.url>http://localhost:12345</swagger.json-file.download.url>
-        <swagger.json-file.download.api-docs-path>open-api/api-docs</swagger.json-file.download.api-docs-path>
-        <swagger.json-file/>
+        <openapi.json-file.download.disabled>true</openapi.json-file.download.disabled>
+        <openapi.json-file.download.url>http://localhost:12345</openapi.json-file.download.url>
+        <openapi.json-file.download.api-docs-path>api-docs</openapi.json-file.download.api-docs-path>
+        <openapi.json-file/>
 
         <!--
-            Each project can decide where to use or not the Swagger API.
-            By default it is disabled!
+            Each project can decide where to use or not the Open API.
+            By default, it is disabled!
         -->
-        <swagger.generation.disabled>true</swagger.generation.disabled>
-        <swagger.generation.language>java</swagger.generation.language>
-        <swagger.generation.keep-superfluous-files>false</swagger.generation.keep-superfluous-files>
+        <openapi.generation.disabled>true</openapi.generation.disabled>
 
-        <!-- Supported values: okhttp-gson, resttemplate -->
-        <swagger.generation.library>okhttp-gson</swagger.generation.library>
+        <!--
+            References:
+              * https://openapi-generator.tech/docs/generators/java/
+              * https://openapi-generator.tech/docs/generators/spring/
+        -->
+        <openapi.generation.language>java</openapi.generation.language>
+        <openapi.generation.keep-superfluous-files>false</openapi.generation.keep-superfluous-files>
 
-        <!-- See: https://generator.swagger.io/api/gen/clients/java (dateLibrary) -->
-        <swagger.generation.date-library>java8</swagger.generation.date-library>
+        <!-- Supported values: okhttp4-gson, resttemplate, ... -->
+        <openapi.generation.library>okhttp-gson</openapi.generation.library>
+        <openapi.generation.date-library>java8</openapi.generation.date-library>
 
-        <swagger.generation.package.api>io.swagger.client.api</swagger.generation.package.api>
-        <swagger.generation.package.model>io.swagger.client.api.model</swagger.generation.package.model>
-        <swagger.generation.package.invoker>io.swagger.client</swagger.generation.package.invoker>
-        <swagger.generation.output-dir>generated-sources/swagger</swagger.generation.output-dir>
-        <swagger.generation.source-dir>src/main/java</swagger.generation.source-dir>
+        <openapi.generation.package.api>io.openapi.client.api</openapi.generation.package.api>
+        <openapi.generation.package.model>io.openapi.client.api.model</openapi.generation.package.model>
+        <openapi.generation.package.invoker>io.openapi.client</openapi.generation.package.invoker>
+        <openapi.generation.output-dir>generated-sources/openapi</openapi.generation.output-dir>
+        <openapi.generation.source-dir>src/main/java</openapi.generation.source-dir>
     </properties>
 
     <build>
@@ -75,14 +79,14 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>add-generated-swagger-sources-dir</id>
+                        <id>add-generated-openapi-sources-dir</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${swagger.generation.output-dir}/${swagger.generation.source-dir}</source>
+                                <source>${openapi.generation.output-dir}/${openapi.generation.source-dir}</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -93,27 +97,28 @@
 
     <profiles>
         <!--
-            It was created a profile just to generate the Swagger Files, avoiding this task
+            It was created a profile just to generate the OPen API Files, avoiding this task
             being executed on each build.
         -->
         <profile>
-            <id>generate-swagger-sources</id>
+            <id>generate-openapi-sources</id>
             <build>
                 <plugins>
                     <plugin>
+                        <!--suppress MavenModelInspection-->
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>download-swagger.json-file</id>
+                                <id>download-openapi-json-file</id>
                                 <phase>generate-sources</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${swagger.json-file.download.disabled}</skip>
+                                    <skip>${openapi.json-file.download.disabled}</skip>
                                     <target>
-                                        <get src="${swagger.json-file.download.url}/${swagger.json-file.download.api-docs-path}"
-                                             dest="${project.basedir}/src/main/resources/${swagger.json-file}"
+                                        <get src="${openapi.json-file.download.url}/${openapi.json-file.download.api-docs-path}"
+                                             dest="${project.basedir}/src/main/resources/${openapi.json-file}"
                                              verbose="false" usetimestamp="true"/>
                                     </target>
                                 </configuration>
@@ -121,47 +126,59 @@
                         </executions>
                     </plugin>
                     <plugin>
+                        <!--suppress MavenModelInspection-->
                         <groupId>com.soebes.maven.plugins</groupId>
+                        <!--suppress MavenModelInspection-->
                         <artifactId>iterator-maven-plugin</artifactId>
+                        <!--suppress MavenModelInspection-->
                         <version>0.5.1</version>
                         <executions>
                             <execution>
-                                <id>generate-swagger-sources</id>
+                                <id>generate-openapi-sources</id>
                                 <phase>generate-sources</phase>
                                 <goals>
                                     <goal>iterator</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${swagger.generation.disabled}</skip>
-                                    <content>${swagger.json-file}</content>
+                                    <skip>${openapi.generation.disabled}</skip>
+                                    <content>${openapi.json-file}</content>
                                     <pluginExecutors>
                                         <pluginExecutor>
                                             <plugin>
-                                                <groupId>io.swagger.codegen.v3</groupId>
-                                                <artifactId>swagger-codegen-maven-plugin</artifactId>
-                                                <version>3.0.20</version>
+                                                <!-- Reference: https://github.com/OpenAPITools/openapi-generator/tree/master/modules/openapi-generator-maven-plugin -->
+                                                <groupId>org.openapitools</groupId>
+                                                <artifactId>openapi-generator-maven-plugin</artifactId>
+                                                <version>6.4.0</version>
                                             </plugin>
                                             <goal>generate</goal>
                                             <configuration>
                                                 <!--suppress MavenModelInspection-->
                                                 <inputSpec>${project.basedir}/src/main/resources/@item@</inputSpec>
-                                                <output>${project.basedir}/${swagger.generation.output-dir}</output>
-                                                <language>${swagger.generation.language}</language>
+                                                <output>${project.basedir}/${openapi.generation.output-dir}</output>
+                                                <generatorName>${openapi.generation.language}</generatorName>
                                                 <!--
                                                     Complete list of options:
                                                      * https://generator.swagger.io/api/gen/clients/java
                                                      * https://github.com/swagger-api/swagger-codegen/issues/7795
                                                 -->
                                                 <configOptions>
-                                                    <dateLibrary>${swagger.generation.date-library}</dateLibrary>
-                                                    <library>${swagger.generation.library}</library>
-                                                    <sourceFolder>${swagger.generation.source-dir}</sourceFolder>
-                                                    <!-- Use Java8 classes instead of third party equivalents. -->
-                                                    <java8>true</java8>
+                                                    <dateLibrary>${openapi.generation.date-library}</dateLibrary>
+                                                    <library>${openapi.generation.library}</library>
+                                                    <sourceFolder>${openapi.generation.source-dir}</sourceFolder>
+
+                                                    <!-- Use Java 11 classes instead of third party equivalents. -->
+                                                    <java11>true</java11>
+
+                                                    <!--
+                                                        Adds @JsonIgnoreProperties(ignoreUnknown = true) annotation
+                                                        to model classes.
+                                                    -->
+                                                    <ignoreUnknownJacksonAnnotation>true
+                                                    </ignoreUnknownJacksonAnnotation>
                                                 </configOptions>
-                                                <apiPackage>${swagger.generation.package.api}</apiPackage>
-                                                <modelPackage>${swagger.generation.package.model}</modelPackage>
-                                                <invokerPackage>${swagger.generation.package.invoker}</invokerPackage>
+                                                <apiPackage>${openapi.generation.package.api}</apiPackage>
+                                                <modelPackage>${openapi.generation.package.model}</modelPackage>
+                                                <invokerPackage>${openapi.generation.package.invoker}</invokerPackage>
                                                 <generateApiTests>false</generateApiTests>
                                                 <generateModelTests>false</generateModelTests>
                                             </configuration>
@@ -194,24 +211,24 @@
                             <profiles>
                                 <!--
                                     Specifying a different profile is useful because you can run
-                                    a thin version of your application and extract the Swagger API,
+                                    a thin version of your application and extract the Open API,
                                     without need to load all resources.
                                 -->
-                                <profile>swagger</profile>
+                                <profile>openapi</profile>
                             </profiles>
-                            <skip>${swagger.thin-server.disabled}</skip>
-                            <mainClass>${swagger.thin-server.start-class}</mainClass>
-                            <arguments>${swagger.thin-server.arguments}</arguments>
-                            <fork>false</fork>
-                            <maxAttempts>${swagger.thin-server.max-attempts}</maxAttempts>
-                            <wait>${swagger.thin-server.timeout-between-attempts}</wait>
+                            <skip>${openapi.thin-server.disabled}</skip>
+                            <mainClass>${openapi.thin-server.start-class}</mainClass>
+                            <arguments>${openapi.thin-server.arguments}</arguments>
+                            <maxAttempts>${openapi.thin-server.max-attempts}</maxAttempts>
+                            <wait>${openapi.thin-server.timeout-between-attempts}</wait>
                         </configuration>
                     </plugin>
                     <plugin>
+                        <!--suppress MavenModelInspection-->
                         <artifactId>maven-clean-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>clear-old-swagger-generated-files</id>
+                                <id>clear-old-openapi-generated-files</id>
                                 <phase>clean</phase>
                                 <goals>
                                     <goal>clean</goal>
@@ -219,7 +236,7 @@
                                 <configuration>
                                     <filesets>
                                         <fileset>
-                                            <directory>${project.basedir}/${swagger.generation.output-dir}</directory>
+                                            <directory>${project.basedir}/${openapi.generation.output-dir}</directory>
                                             <includes>
                                                 <include>**/*</include>
                                             </includes>
@@ -229,20 +246,20 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>clear-superfluous-swagger-generated-files</id>
+                                <id>clear-superfluous-openapi-generated-files</id>
                                 <phase>generate-sources</phase>
                                 <goals>
                                     <goal>clean</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${swagger.generation.keep-superfluous-files}</skip>
+                                    <skip>${openapi.generation.keep-superfluous-files}</skip>
                                     <excludeDefaultDirectories>true</excludeDefaultDirectories>
                                     <filesets>
                                         <fileset>
-                                            <directory>${project.basedir}/${swagger.generation.output-dir}</directory>
+                                            <directory>${project.basedir}/${openapi.generation.output-dir}</directory>
                                             <excludes>
-                                                <exclude>.swagger-codegen-ignore</exclude>
-                                                <exclude>.swagger-codegen/**</exclude>
+                                                <exclude>.openapi-generator-ignore</exclude>
+                                                <exclude>.openapi-generator/**</exclude>
                                                 <exclude>docs/**</exclude>
                                                 <exclude>src/main/java/**</exclude>
                                                 <exclude>SwaggerClient-php/docs/**</exclude>
@@ -265,44 +282,50 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-undertow</artifactId>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.spec.javax.annotation</groupId>
-                    <artifactId>jboss-annotations-api_1.2_spec</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- To run Swagger Client Api. Only if choose 'okhttp-gson' library. -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
+            <!-- @Nullable annotation -->
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
         </dependency>
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>io.gsonfire</groupId>
             <artifactId>gson-fire</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.threeten</groupId>
-            <artifactId>threetenbp</artifactId>
-        </dependency>
-        <dependency>
-            <!-- We had to force this to have compatibility with Apollo GraphQL. -->
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.squareup.okhttp</groupId>
+            <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.squareup.okhttp</groupId>
+            <groupId>com.squareup.okhttp3</groupId>
             <artifactId>logging-interceptor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
         </dependency>
     </dependencies>
 

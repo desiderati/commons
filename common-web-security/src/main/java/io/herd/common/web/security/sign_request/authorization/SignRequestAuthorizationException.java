@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -20,8 +20,11 @@ package io.herd.common.web.security.sign_request.authorization;
 
 import io.herd.common.exception.ApplicationException;
 
+import java.io.Serial;
+
 public class SignRequestAuthorizationException extends ApplicationException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unused")

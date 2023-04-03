@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,8 +33,8 @@ public abstract class AbstractTestRestControllerTest {
 
     /**
      * If you don't define this parameter but have configured the API's base path in your application,
-     * you must use the {@link AutoConfigureCommonWeb} annotation, if in your tests you have set the URL
-     * with the API base path directly.
+     * you must use the {@link AutoConfigureCommonWeb} annotation, if in your tests you have passed the URL
+     * containing the API base path.
      *
      * @see TestRestControllerWebMvcTest2
      * @see TestRestControllerWebMvcTest3

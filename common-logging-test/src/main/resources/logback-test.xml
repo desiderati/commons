@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 - Felipe Desiderati
+  ~ Copyright (c) 2023 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,7 @@
     <conversionRule conversionWord="wEx"
                     converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
 
+    <property name="CONSOLE_LOG_CHARSET" value="${CONSOLE_LOG_CHARSET:-utf-8}"/>
     <property name="CONSOLE_LOG_PATTERN"
               value="%yellow(%d{HH:mm:ss.SSS}) %highlight([%-5level]) %cyan(%-40.40logger{39}) : %white(%m%n%wEx)" />
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />

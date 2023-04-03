@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -20,7 +20,6 @@ package io.herd.common.data.multitenant.configuration;
 
 import io.herd.common.data.multitenant.MultiTenantConnectionProvider;
 import io.herd.common.data.multitenant.MultiTenantIdentifierResolver;
-import org.hibernate.MultiTenancyStrategy;
 import org.hibernate.cfg.AvailableSettings;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -43,8 +42,8 @@ import org.springframework.context.annotation.FilterType;
 })
 @EnableConfigurationProperties(MultiTenantProperties.class)
 @ConditionalOnProperty(prefix = "app.database.multitenant", name = "strategy", havingValue = "schema")
-// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
 @ComponentScan(basePackages = "io.herd.common.data.multitenant",
+    // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
 public class MultiTenantAutoConfiguration {
@@ -58,7 +57,6 @@ public class MultiTenantAutoConfiguration {
         MultiTenantIdentifierResolver multiTenantIdentifierResolver
     ) {
         return hibernateProperties -> {
-            hibernateProperties.put(AvailableSettings.MULTI_TENANT, MultiTenancyStrategy.SCHEMA);
             hibernateProperties.put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
             hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, multiTenantIdentifierResolver);
         };

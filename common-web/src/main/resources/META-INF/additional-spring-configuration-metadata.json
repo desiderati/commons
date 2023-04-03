@@ -13,19 +13,19 @@
       "defaultValue": "/api"
     },
     {
-      "name": "springfox.swagger.enabled",
+      "name": "springdoc.enabled",
       "type": "java.lang.Boolean",
-      "description": "It defines if Swagger will be enabled or not.",
+      "description": "It defines if Open API (ormelly Swagger API) will be enabled or not.",
       "defaultValue": true
     },
     {
-      "name": "springfox.swagger.package-to-scan",
+      "name": "springdoc.package-to-scan",
       "type": "java.lang.String",
       "description": "Package that will be scanned to retrieve all endpoints to be exposed.",
       "defaultValue": ""
     },
     {
-      "name": "springfox.swagger.paths-to-expose",
+      "name": "springdoc.paths-to-expose",
       "type": "java.lang.String",
       "description": "Only the paths defined here will be exposed on Swagger UI.",
       "defaultValue": "/v.*,/public/v.*"

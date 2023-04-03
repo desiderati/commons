@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -42,14 +42,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * You should avoid this approach since you will proliferate the API's base path through your tests.
  */
+@WebMvcTest // Since we're configuring the whole Web Context, there's no need to load the TestRestController.
 @AutoConfigureCommonWeb // This will prefix all controllers with the API's base path.
-@WebMvcTest(controllers = TestRestController.class)
 class TestRestControllerWebMvcTest2 {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockBean // Another way of creating a Mocked Bean without using the MockitoLoader.
     private TestService testServiceMock;
 
     @BeforeEach

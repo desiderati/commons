@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,7 @@ package io.herd.common.data.multitenant.configuration;
 import io.herd.common.data.multitenant.LiquibaseSchemaRetriever;
 import io.herd.common.data.multitenant.LiquibaseSchemaUpdater;
 import io.herd.common.data.multitenant.MultiTenantConnectionProvider;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
@@ -34,7 +35,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 
 @Configuration
@@ -42,8 +42,8 @@ import java.util.Collections;
 @EnableConfigurationProperties(LiquibaseProperties.class)
 @ConditionalOnBean(MultiTenantConnectionProvider.class)
 @ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", havingValue = "true")
-// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
 @ComponentScan(basePackages = "io.herd.common.data.multitenant",
+    // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
 public class MultiTenantLiquibaseAutoConfiguration {

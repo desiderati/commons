@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,10 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Base64;
+import java.util.Date;
 
 @Slf4j
 @Service
@@ -119,13 +121,15 @@ public class JwtService {
     public String generateToken(JwtTokenConfigurer configurer) {
         Claims tokenPayload = Jwts.claims();
         configurer.configure(tokenPayload);
-        tokenPayload.setExpiration(DateTime.now().plusHours(expirationPeriod).toDate());
+        tokenPayload.setExpiration(
+            Date.from(LocalDateTime.now().plusHours(expirationPeriod).toInstant(ZoneOffset.UTC))
+        );
 
         JwtBuilder builder = Jwts.builder().setClaims(tokenPayload);
         if (jwtEncryptionMethod == JwtEncryptionMethod.ASYMMETRIC) {
-            builder.signWith(SignatureAlgorithm.RS256, getPrivateKey());
+            builder.signWith(getPrivateKey(), SignatureAlgorithm.RS512);
         } else if (jwtEncryptionMethod == JwtEncryptionMethod.SYMMETRIC) {
-            builder.signWith(SignatureAlgorithm.HS256, getSecretKey());
+            builder.signWith(getSecretKey(), SignatureAlgorithm.HS512);
         } else {
             throw new IllegalStateException("Invalid encryption method! This exception should not happen at all.");
         }
@@ -133,16 +137,16 @@ public class JwtService {
     }
 
     public <T> T extractTokenPayload(String token, JwtTokenExtractor<T> extractor) {
-        JwtParser parser = Jwts.parser();
+        JwtParserBuilder parserBuilder = Jwts.parserBuilder();
         if (jwtEncryptionMethod == JwtEncryptionMethod.ASYMMETRIC) {
-            parser.setSigningKey(getPublicKey());
+            parserBuilder.setSigningKey(getPublicKey());
         } else if (jwtEncryptionMethod == JwtEncryptionMethod.SYMMETRIC) {
-            parser.setSigningKey(getSecretKey());
+            parserBuilder.setSigningKey(getSecretKey());
         } else {
             throw new IllegalStateException("Invalid encryption method! This exception should not happen at all.");
         }
 
-        Claims tokenPayload = parser.parseClaimsJws(token).getBody();
+        Claims tokenPayload = parserBuilder.build().parseClaimsJws(token).getBody();
         return extractor.extract(tokenPayload);
     }
 }

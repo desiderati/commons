@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,7 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 
 public class DefaultJwtAuthenticationTokenConfigurer implements JwtAuthenticationTokenConfigurer {
@@ -39,8 +39,7 @@ public class DefaultJwtAuthenticationTokenConfigurer implements JwtAuthenticatio
                 authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
 
-            if (authentication.getPrincipal() instanceof MultiTenantSupport) {
-                MultiTenantSupport multiTenantSupport = (MultiTenantSupport) authentication.getPrincipal();
+            if (authentication.getPrincipal() instanceof MultiTenantSupport multiTenantSupport) {
                 tokenPayload.put(JwtService.TENANT_ATTRIBUTE, multiTenantSupport.getTenant());
             }
         };

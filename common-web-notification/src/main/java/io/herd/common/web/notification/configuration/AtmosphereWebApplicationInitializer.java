@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,6 +18,9 @@
  */
 package io.herd.common.web.notification.configuration;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.atmosphere.cpr.*;
@@ -30,9 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.web.WebApplicationInitializer;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -43,8 +43,8 @@ import static org.atmosphere.cpr.ApplicationConfig.BROADCASTER_SHARABLE_THREAD_P
 
 @Slf4j
 @Configuration
-// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
 @ComponentScan(basePackages = "io.herd.common.web.notification",
+    // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
 public class AtmosphereWebApplicationInitializer extends ContainerInitializer

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,7 +18,6 @@
  */
 package io.herd.common.data.mongodb;
 
-import io.herd.common.data.jpa.NullSafeJpaRepository;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -35,8 +34,17 @@ public class NullSafeMongoRepository {
     }
 
     @Around("repositoryMethods()")
-    @SuppressWarnings("squid:S112")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        return NullSafeJpaRepository.processParameterAndReturnNullIfNull(joinPoint);
+        Object[] args = joinPoint.getArgs();
+        if (args.length != 1) {
+            return joinPoint.proceed();
+        }
+
+        Object obj = args[0];
+        if (obj == null || (obj instanceof Iterable && !((Iterable<?>) obj).iterator().hasNext())) {
+            return null;
+        }
+
+        return joinPoint.proceed();
     }
 }

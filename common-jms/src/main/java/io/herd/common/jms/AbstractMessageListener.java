@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
 
 /**
- * {@link javax.jms.MessageListener} responsible for reading messages sent to the standard queue.
+ * {@link jakarta.jms.MessageListener} responsible for reading messages sent to the standard queue.
  *
  * @see JmsAutoConfiguration#queue(String)
  */
@@ -38,6 +38,6 @@ public abstract class AbstractMessageListener<M extends Message> {
         log.info("Message {} received and processed with success!", message.getId());
     }
 
-    @SuppressWarnings({"squid:S00112"}) // Must thrown a generic exception.
+    @SuppressWarnings({"squid:S00112"}) // Must have thrown a generic exception.
     protected abstract void doReceive(M message) throws Exception;
 }

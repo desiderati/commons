@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ import java.util.UUID;
 @ToString(exclude = "image")
 public class QRCode implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id

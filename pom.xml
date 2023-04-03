@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 - Felipe Desiderati
+  ~ Copyright (c) 2023 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,13 +48,15 @@
         <module>./common-parent</module>
         <module>./common-parent-info</module>
         <module>./common-parent-static</module>
-        <module>./common-parent-swagger</module>
+        <module>./common-parent-openapi-client</module>
         <module>./common-scanner</module>
         <module>./common-web</module>
         <module>./common-web-notification</module>
         <module>./common-web-security</module>
         <module>./common-starter</module>
-        <module>./common-starter-swagger</module>
+        <module>./common-starter-openapi-client</module>
+        <module>./common-starter-web</module>
+        <module>./common-starter-web-openapi-client</module>
         <module>./common-test</module>
     </modules>
 

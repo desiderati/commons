@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,6 +18,7 @@
  */
 package io.herd.common.web.configuration;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,37 +26,33 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.Base64;
-
 @Getter
 @Setter
 @Validated
 @Component // I don't know why, but without it, the properties file is not loaded.
-@PropertySource("classpath:swagger-client.properties")
-@ConfigurationProperties(prefix = "swagger.client")
-public class SwaggerClientProperties {
+@PropertySource("classpath:springdoc.properties")
+@ConfigurationProperties(prefix = "springdoc.api-info")
+public class SpringDocProperties {
 
     @NotBlank
-    private String host;
+    private String title;
 
     @NotBlank
-    private String basePath;
+    private String description;
 
-    private String authUser;
-    private String authPass;
+    @NotBlank
+    private String version;
 
-    @NotNull
-    @Min(value = 0)
-    private Integer timeout = 0; // Timeout in seconds. (0 = No Timeout)
+    @NotBlank
+    private String licenseName;
 
-    public String getBasicAuthorizationHeader() {
-        if (authUser != null && authPass != null) {
-            return "Basic " + new String(Base64.getEncoder().encode(
-                (authUser + ":" + authPass).getBytes()));
-        }
-        return null;
-    }
+    @NotBlank
+    private String licenseUrl;
+
+    @NotBlank
+    private String wikiDescription;
+
+    @NotBlank
+    private String wikiUrl;
+
 }

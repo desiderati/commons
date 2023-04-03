@@ -13,13 +13,13 @@ Generation of public and private keys to use with JWT
 -----------------------------------------------------
 
 ```
-ssh-keygen -t rsa -b 1024 -f jwtRS256.key
+ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS512.key
 
-openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-cat jwtRS256.key.pub
+openssl rsa -in jwtRS512.key -pubout -outform PEM -out jwtRS512.key.pub
+cat jwtRS512.key.pub
 
-openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in jwtRS256.key -out jwtRS256.pkcs8.key
-cat jwtRS256.pkcs8.key
+openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in jwtRS512.key -out jwtRS512.pkcs8.key
+cat jwtRS512.pkcs8.key
 ```
 
 Generating the API access key and identifier

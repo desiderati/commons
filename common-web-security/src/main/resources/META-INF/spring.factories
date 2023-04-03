@@ -1,4 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.herd.common.web.security.configuration.WebSecurityAutoConfiguration,\
-io.herd.common.web.security.configuration.WebSecurityConfigurerAdapterAutoConfiguration

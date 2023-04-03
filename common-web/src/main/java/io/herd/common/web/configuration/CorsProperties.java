@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,33 +18,50 @@
  */
 package io.herd.common.web.configuration;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
+@Slf4j
 @Getter
 @Setter
-@Validated
-@Component
-@ConfigurationProperties(prefix = "spring.web.cors")
+@NoArgsConstructor
 public class CorsProperties {
 
     @NotEmpty
-    private List<@NotBlank String> allowedMethods = List.of("GET", "POST", "PUT", "PATCH", "DELETE");
+    private List<@NotBlank String> allowedMethods;
 
     @NotEmpty
-    private List<@NotBlank String> allowedHeaders = List.of("*");
+    private List<@NotBlank String> allowedHeaders;
 
     @NotEmpty
-    private List<@NotBlank String> allowedOrigins = List.of("*");
+    private List<@NotBlank String> allowedOrigins;
 
     @NotEmpty
-    private List<@NotBlank String> exposedHeaders = List.of("Authorization");
+    private List<@NotBlank String> exposedHeaders;
 
+    public void addCorsMappings(final @NonNull CorsRegistry registry, final @NonNull String mapping) {
+        registry.addMapping(mapping)
+            .allowedMethods(getAllowedMethods().toArray(new String[]{}))
+            .allowedHeaders(getAllowedHeaders().toArray(new String[]{}))
+            .allowedOrigins(getAllowedOrigins().toArray(new String[]{}))
+            .exposedHeaders(getExposedHeaders().toArray(new String[]{}));
+
+        log.info("""
+                Registering CORS configuration for: {}
+                \t[AllowedMethods: {}, AllowedHeaders: {}, AllowedOrigins: {}, ExposedHeaders: {}]""",
+            mapping,
+            String.join(",", getAllowedMethods()),
+            String.join(",", getAllowedHeaders()),
+            String.join(",", getAllowedOrigins()),
+            String.join(",", getExposedHeaders())
+        );
+    }
 }

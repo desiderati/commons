@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,11 +18,12 @@
  */
 package io.herd.common.web.security.sign_request.authorization;
 
-import com.squareup.okhttp.Request;
 import io.herd.common.exception.ApplicationException;
 import io.herd.common.validation.ValidationUtils;
 import io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationClientProperties.SignValidation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +32,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -48,7 +48,7 @@ import static io.herd.common.web.security.sign_request.authorization.SignRequest
 /**
  * We cannot associate the creation of this Bean to the variable
  * <code>spring.web.security.sign-request.authorization.enabled</code> = true,
- * as it can be used to sign requests when used by a Swagger client.
+ * as it can be used to sign requests when used by an Open API client.
  */
 @Slf4j
 @Service
@@ -73,7 +73,7 @@ public class SignRequestAuthorizationService {
     }
 
     /**
-     * Method responsible for signing the request using API Secret and API Id. Used commonly by the Swagger Clients.
+     * Method responsible for signing the request using API Secret and API ID. Used commonly by the Open API Clients.
      */
     @SuppressWarnings("unused")
     public Request sign(Request request) {
@@ -89,7 +89,10 @@ public class SignRequestAuthorizationService {
                 .secret(signRequestAuthorizationClientProperties.getSecretKey()).build().sign();
 
             newRequest = newRequest.newBuilder()
-                .addHeader(HEADER_AUTHORIZATION, TOKEN_SIGNED_REQUEST + " " + signRequestAuthorizationClientProperties.getId() + ":" + sign)
+                .addHeader(
+                    HEADER_AUTHORIZATION,
+                    TOKEN_SIGNED_REQUEST + " " + signRequestAuthorizationClientProperties.getId() + ":" + sign
+                )
                 .build();
             return newRequest;
         } catch (Exception e) {

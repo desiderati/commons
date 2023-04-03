@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -32,8 +32,8 @@ import org.springframework.context.annotation.*;
 // Do not use this annotation in a auto-configuration file.
 //@EnableJpaRepositories
 
-// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
 @ComponentScan(basePackages = "io.herd.common.data.jpa",
+    // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
 @EnableConfigurationProperties(DatabaseProperties.class)
@@ -45,7 +45,7 @@ public class JpaAutoConfiguration {
 
     /**
      * Even with Liquibase lib on classpath, Liquibase will only be loaded if property enabled is true.
-     * This should be a default behavior for the auto configuration.
+     * This should be a default behavior for the auto-configuration.
      */
     @Bean
     @ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", havingValue = "false", matchIfMissing = true)

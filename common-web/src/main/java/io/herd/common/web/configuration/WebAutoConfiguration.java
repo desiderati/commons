@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,21 +18,31 @@
  */
 package io.herd.common.web.configuration;
 
+import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebAutoConfiguration;
 import io.herd.common.data.jpa.configuration.JpaAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.exception.ResponseExceptionDTOHttpMessageConverter;
 import io.herd.common.web.graphql.exception.GraphQLExceptionHandler;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.metamodel.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springdoc.webmvc.api.MultipleOpenApiActuatorResource;
+import org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource;
+import org.springdoc.webmvc.api.OpenApiActuatorResource;
+import org.springdoc.webmvc.api.OpenApiWebMvcResource;
+import org.springdoc.webmvc.ui.SwaggerConfigResource;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.*;
@@ -42,27 +52,28 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.condition.PathPatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import springfox.documentation.oas.web.OpenApiControllerWebMvc;
-import springfox.documentation.swagger.web.ApiResourceController;
-import springfox.documentation.swagger2.web.Swagger2ControllerWebMvc;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.Type;
 import java.lang.reflect.Method;
 
 import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
 
 @Slf4j
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
-@AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
-@EnableConfigurationProperties({CorsProperties.class, SwaggerClientProperties.class})
+@AutoConfigureAfter({HibernateJpaAutoConfiguration.class, GraphQLWebAutoConfiguration.class})
+@EnableWebMvc
+@EnableConfigurationProperties(OpenApiClientProperties.class)
 @PropertySource("classpath:application-common-web.properties")
 @ComponentScan({
     "io.herd.common.web.exception",
@@ -73,31 +84,51 @@ import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
     AsyncWebConfiguration.class,
     JpaAutoConfiguration.class,
     JpaWebAutoConfiguration.class,
-    SwaggerConfiguration.class
+    OpenApiConfiguration.class
 })
-public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestConfigurer {
+public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigurer, RepositoryRestConfigurer {
 
     private final String apiBasePath;
-
     private final Validator validator;
-
     private final EntityManager entityManager;
-
-    private final CorsProperties corsProperties;
+    private CorsProperties webCorsProperties;
 
     @Autowired
     public WebAutoConfiguration(
         @Value("${app.api-base-path:/api}") String apiBasePath,
         @Qualifier("customValidator") Validator validator,
-        ObjectProvider<EntityManager> entityManager,
-        CorsProperties corsProperties
+        ObjectProvider<EntityManager> entityManager
     ) {
         this.apiBasePath = UrlUtils.sanitize(apiBasePath);
-        log.info("Configuring API base path as: " + this.apiBasePath);
+        log.info("Configuring REST API base path as: " + this.apiBasePath);
 
         this.validator = validator;
         this.entityManager = entityManager.getIfAvailable();
-        this.corsProperties = corsProperties;
+    }
+
+    @Autowired(required = false) // Lazy binding.
+    public void setWebCorsProperties(
+        @Qualifier("webCorsProperties") CorsProperties webCorsProperties
+    ) {
+        this.webCorsProperties = webCorsProperties;
+    }
+
+    @Bean("webCorsProperties")
+    @Validated
+    @ConfigurationProperties(prefix = "spring.web.cors")
+    public CorsProperties webCorsProperties() {
+        return new CorsProperties();
+    }
+
+    @Bean("graphqlCorsProperties")
+    @Validated
+    @ConditionalOnProperty(
+        value = "graphql.servlet.enabled",
+        havingValue = "true",
+        matchIfMissing = true)
+    @ConfigurationProperties("graphql.servlet.cors")
+    public CorsProperties graphqlCorsProperties() {
+        return new CorsProperties();
     }
 
     /**
@@ -121,58 +152,74 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
      * Set up Cross-Origin Resource Sharing (CORS).
      * <p>
      * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-cors-global">
-     *     Global CORS configuration
+     * Global CORS configuration
      * </a>
      */
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
-        String mapping =
-            apiBasePath.equals(URL_PATH_SEPARATOR) ?
-                apiBasePath + "**" :
-                apiBasePath + URL_PATH_SEPARATOR + "**";
-
-        registry.addMapping(mapping)
-            .allowedMethods(corsProperties.getAllowedMethods().toArray(new String[]{}))
-            .allowedHeaders(corsProperties.getAllowedHeaders().toArray(new String[]{}))
-            .allowedOrigins(corsProperties.getAllowedOrigins().toArray(new String[]{}))
-            .exposedHeaders(corsProperties.getExposedHeaders().toArray(new String[]{}));
+        webCorsProperties.addCorsMappings(registry, UrlUtils.appendDoubleAsterisk(apiBasePath));
     }
 
     /**
      * Ensures that all RESTs will be prefixed with {@link #defaultApiBasePath()}.
-     * Use the versions /v1, /v2, ... within the {@link RestController}.
      */
-    @Bean
-    public WebMvcRegistrations webMvcRegistrationsHandlerMapping() {
-        return new WebMvcRegistrations() {
+    @Override
+    public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
+        return new RequestMappingHandlerMapping() {
 
             @Override
-            public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
-                return new RequestMappingHandlerMapping() {
+            protected void registerHandlerMethod(
+                @NonNull Object handler,
+                @NonNull Method method,
+                @NonNull RequestMappingInfo mapping
+            ) {
+                Class<?> beanType = method.getDeclaringClass();
+                RestController restApiController = beanType.getAnnotation(RestController.class);
+                if (restApiController != null && isNotOpenApiController(beanType)) {
 
-                    @Override
-                    protected void registerHandlerMethod(@NonNull Object handler, @NonNull Method method,
-                                                         @NonNull RequestMappingInfo mapping) {
-                        Class<?> beanType = method.getDeclaringClass();
-                        RestController restApiController = beanType.getAnnotation(RestController.class);
-                        if (restApiController != null && isNotSwaggerController(beanType)) {
-                            PatternsRequestCondition apiPattern = new PatternsRequestCondition(apiBasePath)
-                                .combine(mapping.getPatternsCondition());
+                    String[] pathPatterns;
+                    if (mapping.getPathPatternsCondition() != null) {
+                        pathPatterns =
+                            new PathPatternsRequestCondition(
+                                PathPatternParser.defaultInstance,
+                                apiBasePath
+                            ).combine(mapping.getPathPatternsCondition()).getPatterns().stream()
+                                .map(PathPattern::getPatternString)
+                                .toArray(String[]::new);
 
-                            mapping = new RequestMappingInfo(mapping.getName(), apiPattern,
-                                mapping.getMethodsCondition(), mapping.getParamsCondition(),
-                                mapping.getHeadersCondition(), mapping.getConsumesCondition(),
-                                mapping.getProducesCondition(), mapping.getCustomCondition());
-                        }
-                        super.registerHandlerMethod(handler, method, mapping);
+                    } else if (mapping.getPatternsCondition() != null) {
+                        pathPatterns =
+                            new PatternsRequestCondition(apiBasePath)
+                                .combine(mapping.getPatternsCondition())
+                                .getPatterns()
+                                .toArray(String[]::new);
+                    } else {
+                        throw new IllegalStateException(); // It should never happen!
                     }
-                };
+
+                    mapping = mapping.mutate().paths(pathPatterns).build();
+                }
+                super.registerHandlerMethod(handler, method, mapping);
             }
         };
     }
 
+    private boolean isNotOpenApiController(Class<?> beanType) {
+        return !SwaggerConfigResource.class.isAssignableFrom(beanType)
+            && !OpenApiWebMvcResource.class.isAssignableFrom(beanType)
+            && !OpenApiActuatorResource.class.isAssignableFrom(beanType)
+            && !MultipleOpenApiWebMvcResource.class.isAssignableFrom(beanType)
+            && !MultipleOpenApiActuatorResource.class.isAssignableFrom(beanType);
+    }
+
+    /**
+     * Ensures that all Repository RESTs will be prefixed with {@link #defaultApiBasePath()}.
+     */
     @Override
-    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration repositoryRestConfiguration) {
+    public void configureRepositoryRestConfiguration(
+        RepositoryRestConfiguration repositoryRestConfiguration,
+        CorsRegistry corsRegistry
+    ) {
         // Forces the Spring Data Rest to return the Id of the object being handled.
         if (entityManager != null) {
             repositoryRestConfiguration.exposeIdsFor(
@@ -184,14 +231,15 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
         // Only repositories annotated with @RepositoryRestResource are exposed, unless their exported flag
         // is set to false.
         repositoryRestConfiguration.setRepositoryDetectionStrategy(
-            RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
+            RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED
+        );
 
         // Felipe Desiderati: Spring Data Rest should allow to define the complete path
         // on annotation @RepositoryRestResource.
         // See: https://stackoverflow.com/questions/30396953/how-to-customize-spring-data-rest-to-use-a-multi-segment-path-for-a-repository-r
         // Configures the Base Path. It can be redefined using property: spring.data.rest.base-path
         if (StringUtils.isBlank(repositoryRestConfiguration.getBasePath().getPath())) {
-            repositoryRestConfiguration.setBasePath(apiBasePath + URL_PATH_SEPARATOR + "v1");
+            repositoryRestConfiguration.setBasePath(apiBasePath + URL_PATH_SEPARATOR);
         }
     }
 
@@ -202,16 +250,9 @@ public class WebAutoConfiguration implements WebMvcConfigurer, RepositoryRestCon
         return new ResponseExceptionDTOHttpMessageConverter(mappingJackson2HttpMessageConverter);
     }
 
-    private boolean isNotSwaggerController(Class<?> beanType) {
-        return !ApiResourceController.class.isAssignableFrom(beanType)
-            && !Swagger2ControllerWebMvc.class.isAssignableFrom(beanType)
-            && !OpenApiControllerWebMvc.class.isAssignableFrom(beanType);
-    }
-
     @Bean
     @ConditionalOnMissingBean(GraphQLExceptionHandler.class)
     public GraphQLExceptionHandler graphQLExceptionHandler(MessageSource messageSource) {
         return new GraphQLExceptionHandler(messageSource);
     }
 }
-

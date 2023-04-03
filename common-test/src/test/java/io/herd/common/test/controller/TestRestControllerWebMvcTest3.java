@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,9 +33,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- *  Other option will be removing the API's base path from URL.
+ *  Other option will be removing the API's base path from the URLs below.
  */
-//@AutoConfigureCommonWeb // Without it, the controllers will not be prefixed!
+//@AutoConfigureCommonWeb // Without it, the controllers will not be prefixed with the API base path!
 @WebMvcTest(controllers = TestRestController.class)
 class TestRestControllerWebMvcTest3 {
 

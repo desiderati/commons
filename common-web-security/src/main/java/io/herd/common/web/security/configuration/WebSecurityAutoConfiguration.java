@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,28 +18,122 @@
  */
 package io.herd.common.web.security.configuration;
 
+import io.herd.common.web.UrlUtils;
+import io.herd.common.web.configuration.CorsProperties;
+import io.herd.common.web.configuration.WebAutoConfiguration;
 import io.herd.common.web.security.jwt.JwtTokenExtractor;
 import io.herd.common.web.security.jwt.authentication.DefaultJwtAuthenticationConverter;
 import io.herd.common.web.security.jwt.authentication.DefaultJwtAuthenticationTokenConfigurer;
+import io.herd.common.web.security.jwt.authentication.JwtAuthenticationFilter;
 import io.herd.common.web.security.jwt.authentication.JwtAuthenticationTokenConfigurer;
 import io.herd.common.web.security.jwt.authorization.DefaultJwtTokenExtractor;
+import io.herd.common.web.security.jwt.authorization.JwtAuthorizationFilter;
+import io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationFilter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.NonNull;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationConverter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+@Slf4j
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
-// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
+@EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true)
+@PropertySource("classpath:application-common-web-security.properties")
 @ComponentScan(basePackages = "io.herd.common.web.security",
+    // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
-@PropertySource("classpath:application-common-web-security.properties")
-@Import(WebSecurityConfigurerAdapterAutoConfiguration.class) // To be used with @WebMvcTest
-public class WebSecurityAutoConfiguration {
+@Import(WebAutoConfiguration.class) // To be used with @WebMvcTest
+public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
+
+    @Value("${spring.web.security.default.authentication.enabled:false}")
+    private boolean defaultAuthenticationEnabled;
+
+    @Value("${spring.web.security.jwt.authentication.enabled:false}")
+    private boolean jwtAuthenticationEnabled;
+
+    @Value("${spring.web.security.jwt.authentication.login-url:/login}")
+    private String jwtAuthenticationLoginUrl;
+
+    @Value("${spring.web.security.jwt.authorization.enabled:false}")
+    private boolean jwtAuthorizationEnabled;
+
+    @Value("${spring.web.security.sign-request.authorization.enabled:false}")
+    private boolean signRequestAuthorizationEnabled;
+
+    @Value("${springdoc.api-docs.path:/api-docs}")
+    private String springDocOpenApiPath;
+
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private JwtAuthorizationFilter jwtAuthorizationFilter;
+    private SignRequestAuthorizationFilter signRequestAuthorizationFilter;
+    private String defaultApiBasePath;
+    private CorsProperties webSecurityCorsProperties;
+    private CorsFilter graphQLCorsFilter;
+
+    @Autowired(required = false) // Prevent circular dependency.
+    public void setJwtAuthenticationFilter(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    @Autowired(required = false) // Prevent circular dependency.
+    public void setJwtAuthorizationFilter(JwtAuthorizationFilter jwtAuthorizationFilter) {
+        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
+    }
+
+    @Autowired(required = false) // Prevent circular dependency.
+    public void setSignRequestAuthorizationFilter(SignRequestAuthorizationFilter signRequestAuthorizationFilter) {
+        this.signRequestAuthorizationFilter = signRequestAuthorizationFilter;
+    }
+
+    @Autowired(required = false) // Prevent circular dependency.
+    public void setDefaultApiBasePath(String defaultApiBasePath) {
+        this.defaultApiBasePath = defaultApiBasePath;
+    }
+
+    @Autowired(required = false) // Lazy binding.
+    public void setWebSecurityCorsProperties(
+        @Qualifier("webSecurityCorsProperties") CorsProperties webSecurityCorsProperties
+    ) {
+        this.webSecurityCorsProperties = webSecurityCorsProperties;
+    }
+
+    @Autowired(required = false) // Only defined if CORS enabled for GraphQL.
+    public void setGraphQLCorsFilter(@Qualifier("corsConfigurer") CorsFilter graphQLCorsFilter) {
+        this.graphQLCorsFilter = graphQLCorsFilter;
+    }
+
+    @Bean("webSecurityCorsProperties")
+    @Validated
+    @ConfigurationProperties(prefix = "spring.web.security.jwt.authentication.cors")
+    public CorsProperties webSecurityCorsProperties() {
+        return new CorsProperties();
+    }
 
     @Bean
     @ConditionalOnMissingBean(AuthenticationConverter.class)
@@ -60,5 +154,143 @@ public class WebSecurityAutoConfiguration {
     @ConditionalOnProperty(name = "spring.web.security.jwt.authorization.enabled", havingValue = "true")
     public JwtTokenExtractor<Authentication> jwtTokenExtractor() {
         return new DefaultJwtTokenExtractor();
+    }
+
+    /**
+     * Set up Cross-Origin Resource Sharing (CORS).
+     * <p>
+     * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-cors-global">
+     * Global CORS configuration
+     * </a>
+     */
+    @Override
+    public void addCorsMappings(final @NonNull CorsRegistry registry) {
+        if (jwtAuthenticationEnabled) {
+            webSecurityCorsProperties.addCorsMappings(
+                registry,
+                UrlUtils.appendDoubleAsterisk(jwtAuthenticationLoginUrl)
+            );
+        }
+    }
+
+    /**
+     * This method allows configuration of web-based security at a resource level, based on a selection match.
+     * E.g. The example below restricts the URLs that start with /admin/ to users that have ADMIN role, and
+     * declares that any other URLs need to be successfully authenticated.
+     * <pre>
+     * public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+     *     http.authorizeRequests()
+     *         .antMatchers("/admin/**").hasRole("ADMIN")
+     *         .anyRequest().authenticated();
+     * }
+     * </pre>
+     */
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        // We don't need to enable CSRF support because our Token is invulnerable.
+        // And also because with it enabled, we will not be able to call our back-end
+        // from the front-end.
+        httpSecurity.csrf().disable();
+
+        // If the GraphQL CORS filter is enabled, it must be registered before the authentication filters!
+        if (graphQLCorsFilter != null) {
+            httpSecurity.addFilter(graphQLCorsFilter);
+        }
+
+        // We have to enable Cross-Origin Resource Sharing.
+        httpSecurity.cors();
+
+        // TODO Felipe Desiderati: Permitir que possa ser personalizado esta sessão.
+        // We can perform custom exception handling if authentication fails.
+        // For instance, if some error occurs during the login process a 403 custom error page will be displayed!
+        //httpSecurity.exceptionHandling().authenticationEntryPoint(new Http403ForbiddenEntryPoint());
+
+        // We do not wish to enable session. Only if default authentication is enabled.
+        httpSecurity.sessionManagement().sessionCreationPolicy(
+            defaultAuthenticationEnabled ?
+                SessionCreationPolicy.IF_REQUIRED :
+                SessionCreationPolicy.STATELESS);
+
+        // Disables page caching.
+        httpSecurity.headers().cacheControl();
+
+        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorizeRequests =
+            httpSecurity.authorizeHttpRequests();
+        if (!defaultAuthenticationEnabled
+            && !jwtAuthenticationEnabled
+            && !jwtAuthorizationEnabled
+            && !signRequestAuthorizationEnabled
+        ) {
+            // If none configured, it uses the default behavior.
+            authorizeRequests.anyRequest().permitAll();
+
+        } else {
+            // Default public endpoints. Security should not be enabled for these!
+
+            // Default error page.
+            authorizeRequests
+                .requestMatchers(HttpMethod.GET, "/error")
+                .permitAll();
+
+            // We enable all Actuator RESTs.
+            authorizeRequests
+                .requestMatchers(HttpMethod.GET, "/actuator/**")
+                .permitAll();
+
+            // We enable all Open API (formally Swagger API) RESTs.
+            authorizeRequests.requestMatchers(HttpMethod.GET, "/swagger-resources/**").permitAll();
+            authorizeRequests.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
+            authorizeRequests.requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll();
+            authorizeRequests.requestMatchers(HttpMethod.GET, "/webjars/**").permitAll();
+            authorizeRequests.requestMatchers(HttpMethod.GET, springDocOpenApiPath).permitAll();
+
+            // It enables all calls to the public API.
+            authorizeRequests.requestMatchers(defaultApiBasePath + "/public/**").permitAll();
+
+            // GraphQL Support.
+            authorizeRequests.requestMatchers("/graphiql").permitAll();
+            authorizeRequests.requestMatchers("/graphiql/**").permitAll();
+
+            if (jwtAuthenticationEnabled) {
+                // Login URL.
+                authorizeRequests = authorizeRequests.requestMatchers(HttpMethod.POST, jwtAuthenticationLoginUrl).permitAll();
+                httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            }
+
+            if (jwtAuthorizationEnabled) {
+                httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+            }
+
+            if (signRequestAuthorizationEnabled) {
+                httpSecurity.addFilterBefore(signRequestAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+            }
+
+            if (defaultAuthenticationEnabled) {
+                authorizeRequests.anyRequest().authenticated()
+                    // Será habilitado o filtro: UsernamePasswordAuthenticationFilter
+                    .and().formLogin()
+                    .and().httpBasic();
+            } else {
+                authorizeRequests.anyRequest().authenticated();
+            }
+        }
+
+        return httpSecurity.build();
+    }
+
+    /**
+     * This method is used for configuration settings that impact global security (ignore resources, set debug mode,
+     * reject requests by implementing a custom firewall definition). For example, the following method would cause
+     * any request that starts with /context-path/** to be ignored for authentication purposes.
+     */
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+    }
+
+    private HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+        DefaultHttpFirewall firewall = new DefaultHttpFirewall();
+        firewall.setAllowUrlEncodedSlash(true);
+        return firewall;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - Felipe Desiderati
+ * Copyright (c) 2023 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,23 +18,17 @@
  */
 package io.herd.common.jms.configuration;
 
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Queue;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.RedeliveryPolicy;
-import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.broker.TransportConnector;
-import org.apache.activemq.broker.region.policy.DeadLetterStrategy;
-import org.apache.activemq.broker.region.policy.IndividualDeadLetterStrategy;
-import org.apache.activemq.broker.region.policy.PolicyEntry;
-import org.apache.activemq.broker.region.policy.PolicyMap;
-import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
-import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration;
+import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.context.annotation.*;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
@@ -43,18 +37,14 @@ import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 import org.springframework.util.ErrorHandler;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Queue;
-import java.net.URI;
-
 @Slf4j
 @EnableJms
 @Configuration(proxyBeanMethods = false)
-@AutoConfigureAfter(ActiveMQAutoConfiguration.class)
-@Import({ActiveMQAutoConfiguration.class, org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration.class})
+@AutoConfigureAfter(ArtemisAutoConfiguration.class)
+@Import({ArtemisAutoConfiguration.class, org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration.class})
 @PropertySource({"classpath:application-common-jms.properties", "classpath:jms.properties"})
-// Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
 @ComponentScan(basePackages = "io.herd.common.jms",
+    // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
 public class JmsAutoConfiguration {
@@ -68,8 +58,10 @@ public class JmsAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "jms.dlq", name = "enabled", havingValue = "true")
-    public Queue dlqQueue(@Value("${jms.dlq.queue-prefix}") String queueDlqPrefix,
-                          @Value("${jms.default-queue.name}") String queueName) {
+    public Queue dlqQueue(
+        @Value("${jms.dlq.queue-prefix}") String queueDlqPrefix,
+        @Value("${jms.default-queue.name}") String queueName
+    ) {
         return new ActiveMQQueue(queueDlqPrefix + queueName);
     }
 
@@ -80,50 +72,11 @@ public class JmsAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "jms.dlq", name = "enabled", havingValue = "true")
-    public Queue responseDlqQueue(@Value("${jms.dlq.queue-prefix}") String queueDlqPrefix,
-                                  @Value("${jms.default-response-queue.name}") String responseQueueName) {
+    public Queue responseDlqQueue(
+        @Value("${jms.dlq.queue-prefix}") String queueDlqPrefix,
+        @Value("${jms.default-response-queue.name}") String responseQueueName
+    ) {
         return new ActiveMQQueue(queueDlqPrefix + responseQueueName);
-    }
-
-    /**
-     * We registered an embedded queue manager.
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "jms.broker", name = "enabled", havingValue = "true")
-    public BrokerService brokerService(@Value("${spring.activemq.broker-url}") String brokerUrl,
-                                       @Value("${jms.broker.data-directory}") String dataDirectory,
-                                       DeadLetterStrategy deadLetterStrategy) throws Exception {
-
-        TransportConnector connector = new TransportConnector();
-        connector.setUri(new URI(brokerUrl));
-
-        BrokerService broker = new BrokerService();
-        broker.addConnector(connector);
-        broker.setUseShutdownHook(false);
-        broker.setSystemExitOnShutdown(true);
-        broker.setDataDirectory(dataDirectory);
-
-        if (deadLetterStrategy != null) {
-            PolicyEntry policy = new PolicyEntry();
-            policy.setDeadLetterStrategy(deadLetterStrategy);
-
-            PolicyMap policyMap = new PolicyMap();
-            policyMap.setDefaultEntry(policy);
-            broker.setDestinationPolicy(policyMap);
-        }
-        return broker;
-    }
-
-    /**
-     * We registered a DLQ for the input queue.
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "jms.dlq", name = "enabled", havingValue = "true")
-    public DeadLetterStrategy deadLetterStrategy(@Value("${jms.dlq.queue-prefix}") String queueDlqPrefix) {
-        IndividualDeadLetterStrategy strategy = new IndividualDeadLetterStrategy();
-        strategy.setProcessNonPersistent(true);
-        strategy.setQueuePrefix(queueDlqPrefix);
-        return strategy;
     }
 
     /**
@@ -132,28 +85,14 @@ public class JmsAutoConfiguration {
      */
     @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
-            DefaultJmsListenerContainerFactoryConfigurer configurer,
-            ConnectionFactory connectionFactory, @Qualifier("jmsErrorHandler") ErrorHandler errorHandler) {
+        DefaultJmsListenerContainerFactoryConfigurer configurer,
+        @Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory,
+        @Qualifier("jmsErrorHandler") ErrorHandler errorHandler
+    ) {
 
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configurer.configure(factory, connectionFactory);
         factory.setErrorHandler(errorHandler);
-
-        @SuppressWarnings("squid:S1135")
-        // TODO Felipe Desiderati: Expor estas configurações via arquivo de propriedades quando for necessário modificá-las!
-        RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-        redeliveryPolicy.setBackOffMultiplier(3);
-        redeliveryPolicy.setInitialRedeliveryDelay(1000);
-        redeliveryPolicy.setRedeliveryDelay(3000);
-        redeliveryPolicy.setUseExponentialBackOff(true);
-        redeliveryPolicy.setMaximumRedeliveries(5);
-        if (connectionFactory instanceof ActiveMQConnectionFactory) {
-            ((ActiveMQConnectionFactory) connectionFactory).setRedeliveryPolicy(redeliveryPolicy);
-        } else {
-            log.warn("It's not possible configure redelivery policy on " +
-                "connection factory! Using default values instead.");
-        }
-
         return factory;
     }
 
