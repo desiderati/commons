@@ -60,7 +60,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Slf4j
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnWebApplication
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 @PropertySource("classpath:application-common-web-security.properties")
@@ -96,34 +96,36 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     private CorsProperties webSecurityCorsProperties;
     private CorsFilter graphQLCorsFilter;
 
-    @Autowired(required = false) // Prevent circular dependency.
-    public void setJwtAuthenticationFilter(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
-
-    @Autowired(required = false) // Prevent circular dependency.
-    public void setJwtAuthorizationFilter(JwtAuthorizationFilter jwtAuthorizationFilter) {
-        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
-    }
-
-    @Autowired(required = false) // Prevent circular dependency.
-    public void setSignRequestAuthorizationFilter(SignRequestAuthorizationFilter signRequestAuthorizationFilter) {
-        this.signRequestAuthorizationFilter = signRequestAuthorizationFilter;
-    }
-
-    @Autowired(required = false) // Prevent circular dependency.
+    @Autowired
     public void setDefaultApiBasePath(String defaultApiBasePath) {
         this.defaultApiBasePath = defaultApiBasePath;
     }
 
-    @Autowired(required = false) // Lazy binding.
+    @Autowired(required = false)
+    public void setJwtAuthenticationFilter(@Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    @Autowired(required = false)
+    public void setJwtAuthorizationFilter(@Lazy JwtAuthorizationFilter jwtAuthorizationFilter) {
+        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
+    }
+
+    @Autowired(required = false)
+    public void setSignRequestAuthorizationFilter(
+        @Lazy SignRequestAuthorizationFilter signRequestAuthorizationFilter
+    ) {
+        this.signRequestAuthorizationFilter = signRequestAuthorizationFilter;
+    }
+
+    @Autowired(required = false)
     public void setWebSecurityCorsProperties(
-        @Qualifier("webSecurityCorsProperties") CorsProperties webSecurityCorsProperties
+        @Lazy @Qualifier("webSecurityCorsProperties") CorsProperties webSecurityCorsProperties
     ) {
         this.webSecurityCorsProperties = webSecurityCorsProperties;
     }
 
-    @Autowired(required = false) // Only defined if CORS enabled for GraphQL.
+    @Autowired(required = false)
     public void setGraphQLCorsFilter(@Qualifier("corsConfigurer") CorsFilter graphQLCorsFilter) {
         this.graphQLCorsFilter = graphQLCorsFilter;
     }

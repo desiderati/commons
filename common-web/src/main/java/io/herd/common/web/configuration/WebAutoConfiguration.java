@@ -70,7 +70,7 @@ import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
 
 @Slf4j
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnWebApplication
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @AutoConfigureAfter({HibernateJpaAutoConfiguration.class, GraphQLWebAutoConfiguration.class})
 @EnableWebMvc
 @EnableConfigurationProperties(OpenApiClientProperties.class)
@@ -106,9 +106,9 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
         this.entityManager = entityManager.getIfAvailable();
     }
 
-    @Autowired(required = false) // Lazy binding.
+    @Autowired
     public void setWebCorsProperties(
-        @Qualifier("webCorsProperties") CorsProperties webCorsProperties
+        @Lazy @Qualifier("webCorsProperties") CorsProperties webCorsProperties
     ) {
         this.webCorsProperties = webCorsProperties;
     }

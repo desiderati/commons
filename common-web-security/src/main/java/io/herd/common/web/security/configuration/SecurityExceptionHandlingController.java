@@ -38,9 +38,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-
 @Slf4j
-@ConditionalOnWebApplication
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
 public class SecurityExceptionHandlingController extends ExceptionHandlingController {
 

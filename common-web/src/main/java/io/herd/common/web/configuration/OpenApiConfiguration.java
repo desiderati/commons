@@ -46,7 +46,7 @@ import java.util.List;
  * via Open API (formally Swagger API).
  */
 @Configuration
-@ConditionalOnWebApplication
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(name = "springdoc.enabled", havingValue = "true")
 @EnableConfigurationProperties(SpringDocProperties.class)
 @Import({
