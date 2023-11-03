@@ -38,8 +38,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -51,6 +53,7 @@ public class JwtService {
     private final JwtProperties jwtProperties;
     private final JwtEncryptionMethod jwtEncryptionMethod;
     private final int expirationPeriod;
+    private List<JwtServiceInterceptor> jwtServiceInterceptors = new ArrayList<>();
 
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
     private final PrivateKey privateKey = loadPrivateKey();
@@ -66,15 +69,18 @@ public class JwtService {
      * the constructor instead of the direct wired, because we may create the JwtService
      * without using the Spring Framework auto-injection.
      */
-    @Autowired
     public JwtService(
         JwtProperties jwtProperties,
         @Value("${spring.web.security.jwt.authentication.encryption-method:asymmetric}") JwtEncryptionMethod jwtEncryptionMethod,
-        @Value("${spring.web.security.jwt.authentication.expiration-period:1}") int expirationPeriod
+        @Value("${spring.web.security.jwt.authentication.expiration-period:1}") int expirationPeriod,
+        @Autowired(required = false) List<JwtServiceInterceptor> jwtServiceInterceptors
     ) {
         this.jwtProperties = jwtProperties;
         this.jwtEncryptionMethod = jwtEncryptionMethod;
         this.expirationPeriod = expirationPeriod;
+        if (jwtServiceInterceptors != null) {
+            this.jwtServiceInterceptors = jwtServiceInterceptors;
+        }
     }
 
     private PrivateKey loadPrivateKey() {
@@ -138,6 +144,7 @@ public class JwtService {
 
     public <T> T extractTokenPayload(String token, JwtTokenExtractor<T> extractor) {
         JwtParserBuilder parserBuilder = Jwts.parserBuilder();
+        parserBuilder.setClock(() -> Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
         if (jwtEncryptionMethod == JwtEncryptionMethod.ASYMMETRIC) {
             parserBuilder.setSigningKey(getPublicKey());
         } else if (jwtEncryptionMethod == JwtEncryptionMethod.SYMMETRIC) {
@@ -146,7 +153,12 @@ public class JwtService {
             throw new IllegalStateException("Invalid encryption method! This exception should not happen at all.");
         }
 
+        onBeforeExtractPayload(token);
         Claims tokenPayload = parserBuilder.build().parseClaimsJws(token).getBody();
         return extractor.extract(tokenPayload);
+    }
+
+    private void onBeforeExtractPayload(String token) {
+        jwtServiceInterceptors.forEach(jwtServiceInterceptor -> jwtServiceInterceptor.onBeforeExtractPayload(token));
     }
 }

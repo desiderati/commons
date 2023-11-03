@@ -18,28 +18,25 @@
  */
 package io.herd.common.google.configuration;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
+import io.herd.common.google.GoogleCaptchaService;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.*;
 
-@Getter
-@Setter
-@Validated
-@PropertySource("classpath:google-calendar.properties")
-@ConfigurationProperties(prefix = "google.calendar")
-public class GoogleCalendarProperties {
+@Configuration
+@EnableConfigurationProperties({GoogleCalendarProperties.class, GoogleCaptchaProperties.class})
+@ComponentScan(basePackages = "io.herd.common.google",
+    // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
+    excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
+)
+public class GoogleAutoConfiguration {
 
-    @NotBlank
-    private String applicationName;
-
-    @NotBlank
-    private String credentialsFolder;
-
-    @NotBlank
-    private String apiSecretJson;
-
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @ConditionalOnProperty(prefix = "google.captcha", name = "secret-key")
+    public GoogleCaptchaService googleCaptchaService(GoogleCaptchaProperties captchaProperties) {
+        return new GoogleCaptchaService(captchaProperties) ;
+    }
 }

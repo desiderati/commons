@@ -18,18 +18,34 @@
  */
 package io.herd.common.google.configuration;
 
-import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.validation.annotation.Validated;
 
-@Configuration
-@EnableConfigurationProperties(GoogleCalendarProperties.class)
-@ComponentScan(basePackages = "io.herd.common.google",
-    // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
-    excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
-)
-public class GoogleCalendarAutoConfiguration {
+@Getter
+@Setter
+@Validated
+@PropertySource("classpath:google-captcha.properties")
+@ConfigurationProperties(prefix = "google.captcha")
+public class GoogleCaptchaProperties {
+
+    @NotNull
+    private Integer maxRetries = 5;
+
+    @NotBlank
+    private String userAgent = "Mozilla/5.0";
+
+    @NotBlank
+    private String acceptLanguage = "en-US,en;q=0.5";
+
+    @NotBlank
+    private String siteVerifyUrl = "https://www.google.com/recaptcha/api/siteverify";
+
+    @NotBlank
+    private String secretKey;
 
 }

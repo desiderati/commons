@@ -28,9 +28,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DefaultJwtTokenExtractor implements JwtTokenExtractor<Authentication> {
 
@@ -38,9 +38,13 @@ public class DefaultJwtTokenExtractor implements JwtTokenExtractor<Authenticatio
     @SuppressWarnings("unchecked")
     public Authentication extract(Claims tokenPayload) {
         String username = tokenPayload.getSubject();
-        Collection<? extends GrantedAuthority> authorities =
-            ((List<String>) tokenPayload.get(JwtService.AUTHORITIES_ATTRIBUTE)).stream()
-                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+
+        Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
+        if (tokenPayload.get(JwtService.AUTHORITIES_ATTRIBUTE) != null) {
+            authorities =
+                ((List<String>) tokenPayload.get(JwtService.AUTHORITIES_ATTRIBUTE)).stream()
+                    .map(SimpleGrantedAuthority::new).toList();
+        }
 
         String tenant = (String) tokenPayload.get(JwtService.TENANT_ATTRIBUTE);
         User principal = (tenant != null) ?

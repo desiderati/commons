@@ -34,8 +34,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @ConditionalOnProperty(name = "spring.web.security.jwt.authorization.enabled", havingValue = "true")
 public class JwtAuthorizationService {
 
-    private static final String HEADER_AUTHORIZATION = "Authorization";
-    private static final String TOKEN_BEARER = "Bearer ";
+    public static final String HEADER_AUTHORIZATION = "Authorization";
+    public static final String TOKEN_BEARER = "Bearer ";
 
     private final JwtService jwtService;
     private JwtTokenExtractor<Authentication> jwtTokenExtractor;

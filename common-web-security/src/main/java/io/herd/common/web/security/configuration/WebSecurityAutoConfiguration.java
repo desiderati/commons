@@ -22,24 +22,22 @@ import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.CorsProperties;
 import io.herd.common.web.configuration.WebAutoConfiguration;
 import io.herd.common.web.security.jwt.JwtTokenExtractor;
-import io.herd.common.web.security.jwt.authentication.DefaultJwtAuthenticationConverter;
-import io.herd.common.web.security.jwt.authentication.DefaultJwtAuthenticationTokenConfigurer;
-import io.herd.common.web.security.jwt.authentication.JwtAuthenticationFilter;
-import io.herd.common.web.security.jwt.authentication.JwtAuthenticationTokenConfigurer;
+import io.herd.common.web.security.jwt.authentication.*;
 import io.herd.common.web.security.jwt.authorization.DefaultJwtTokenExtractor;
 import io.herd.common.web.security.jwt.authorization.JwtAuthorizationFilter;
 import io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationFilter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -54,6 +52,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -79,6 +78,15 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Value("${spring.web.security.jwt.authentication.login-url:/login}")
     private String jwtAuthenticationLoginUrl;
+
+    @Value("${spring.web.security.jwt.authentication.delegation.enabled:false}")
+    private boolean jwtDelegateAuthenticationEnabled;
+
+    @Value("${spring.web.security.jwt.authentication.delegation.base-path}")
+    private String jwtDelegateAuthenticationBasePath;
+
+    @Value("${spring.web.security.jwt.authentication.delegation.login-url:/login}")
+    private String jwtDelegateAuthenticationLoginUrl;
 
     @Value("${spring.web.security.jwt.authorization.enabled:false}")
     private boolean jwtAuthorizationEnabled;
@@ -141,7 +149,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @ConditionalOnMissingBean(AuthenticationConverter.class)
     @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
     public AuthenticationConverter authenticationConverter() {
-        return new DefaultJwtAuthenticationConverter();
+        return new DefaultJwtAuthenticationConverter(jwtDelegateAuthenticationEnabled);
     }
 
     @Bean
@@ -149,6 +157,26 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
     public JwtAuthenticationTokenConfigurer jwtAuthenticationTokenConfigurer() {
         return new DefaultJwtAuthenticationTokenConfigurer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtDelegateAuthenticationProvider.class)
+    @ConditionalOnExpression("${spring.web.security.jwt.authentication.enabled} and ${spring.web.security.jwt.authentication.delegation.enabled}")
+    public JwtDelegateAuthenticationProvider jwtDelegateAuthenticationProvider() {
+        if (StringUtils.isBlank(jwtDelegateAuthenticationBasePath)) {
+            throw new IllegalStateException("Authentication delegate base path should be defined!");
+        }
+
+        RestTemplate jwtDelegateAuthenticationRestTemplate =
+            new RestTemplateBuilder()
+                .defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
+                .rootUri(jwtDelegateAuthenticationBasePath)
+                .build();
+
+        return new JwtDelegateAuthenticationProvider(
+            jwtDelegateAuthenticationRestTemplate,
+            jwtDelegateAuthenticationLoginUrl
+        );
     }
 
     @Bean

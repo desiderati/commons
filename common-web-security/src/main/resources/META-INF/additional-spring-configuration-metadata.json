@@ -65,6 +65,23 @@
       "defaultValue": ["Authorization"]
     },
     {
+      "name": "spring.web.security.jwt.authentication.delegation.enabled",
+      "description": "It defines if JWT Authentication Delegation will be enabled or not. Process of retrieving the user/password from the Request Body and verifying if the password matches is delegated to another API.",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    },
+    {
+      "name": "spring.web.security.jwt.authentication.delegation.base-path",
+      "description": "It defines the base path for the JWT Authentication Delegation API.",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "spring.web.security.jwt.authentication.delegation.login-url",
+      "description": "Sets the URL that determines if authentication is required for the JWT Authentication Delegation API.",
+      "type": "java.lang.String",
+      "defaultValue": "/login"
+    },
+    {
       "name": "spring.web.security.jwt.authorization.enabled",
       "description": "It defines if JWT Authorization will be enabled or not.",
       "type": "java.lang.Boolean",
