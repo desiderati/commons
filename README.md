@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-3.1.0.RELEASE-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-3.1.1.RELEASE-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
 
@@ -23,6 +23,12 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [3.1.1.RELEASE] - 2023-11-23
+- Now the notification message for Atmosphere can be any object.
+- Added the Void GraphQL Scalar Type.
+- Some improvements in the security configuration involving the GraphQL.
+- JWT Token can be configured without expiration.
 
 #### [3.1.0.RELEASE] - 2023-10-30
 - Added support for JWT Authentication Delegation.

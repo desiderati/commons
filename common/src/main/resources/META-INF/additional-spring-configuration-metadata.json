@@ -38,8 +38,8 @@
     {
       "name": "spring.async.task-timeout",
       "type": "java.lang.Integer",
-      "description": "Specify the amount of time, in milliseconds, before asynchronous request handling times out. Default is 300000.",
-      "defaultValue": 300000
+      "description": "Specify the amount of time, in milliseconds, before asynchronous request handling times out. Default is 30000.",
+      "defaultValue": 30000
     }
   ]
 }

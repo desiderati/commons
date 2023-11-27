@@ -19,23 +19,23 @@
 package io.herd.common.web.notification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.herd.common.exception.ApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.atmosphere.config.managed.Decoder;
 
 @Slf4j
-public class NotificationJacksonDecoder implements Decoder<String, Notification> {
+public class NotificationJacksonDecoder implements Decoder<String, Notification<?>> {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Override
-    public Notification decode(String string) {
+    public Notification<?> decode(String string) {
         try {
             return mapper.readValue(string, Notification.class);
         } catch (Exception ex) {
-            String errorMsg = "Unable to deserialize JSON object: + " + string;
-            log.error(errorMsg);
-            log.debug(ex.getMessage(), ex);
+            String errorMsg = "Unable to deserialize JSON object: " + string;
+            log.error(ex.getMessage(), ex);
             throw new ApplicationException(errorMsg);
         }
     }

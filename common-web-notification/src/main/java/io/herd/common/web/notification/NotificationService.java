@@ -18,18 +18,23 @@
  */
 package io.herd.common.web.notification;
 
+import io.herd.common.web.UrlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceFactory;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@SuppressWarnings("unused")
 public class NotificationService {
+
+    @Value("${spring.web.atmosphere.url.mapping:/atmosphere}")
+    private String atmosphereUrlMapping;
 
     private final BroadcasterFactory atmosphereBroadcasterFactory;
 
@@ -37,30 +42,31 @@ public class NotificationService {
 
     @Autowired
     public NotificationService(
-        BroadcasterFactory atmosphereBroadcasterFactory,
-        AtmosphereResourceFactory atmosphereResourceFactory
+        @Lazy BroadcasterFactory atmosphereBroadcasterFactory,
+        @Lazy AtmosphereResourceFactory atmosphereResourceFactory
     ) {
         this.atmosphereBroadcasterFactory = atmosphereBroadcasterFactory;
         this.atmosphereResourceFactory = atmosphereResourceFactory;
     }
 
-    public void broadcast(String message) {
+    public <M> void broadcast(M message) {
         for (Broadcaster broadcaster : atmosphereBroadcasterFactory.lookupAll()) {
-            broadcaster.broadcast(new Notification(message));
+            broadcaster.broadcast(new Notification<>(message));
         }
     }
 
-    public void broadcastToSpecificBroadcaster(String broadcasterId, String message) {
-        Broadcaster broadcaster = atmosphereBroadcasterFactory.lookup(broadcasterId);
+    public <M> void broadcastToSpecificBroadcaster(String broadcasterId, M message) {
+        String prefix = UrlUtils.appendSlash(atmosphereUrlMapping);
+        Broadcaster broadcaster = atmosphereBroadcasterFactory.lookup(prefix + broadcasterId);
         if (broadcaster == null) {
-            log.warn("Atmosphere Broadcaster '{}' not found!", broadcasterId);
+            log.warn("Atmosphere Broadcaster '{}' not found!", prefix + broadcasterId);
             return;
         }
 
-        broadcaster.broadcast(new Notification(message));
+        broadcaster.broadcast(new Notification<>(message));
     }
 
-    public void broadcastToSpecificResource(String resourceId, String message) {
+    public <M> void broadcastToSpecificResource(String resourceId, M message) {
         AtmosphereResource atmosphereResource = atmosphereResourceFactory.find(resourceId);
         if (atmosphereResource == null) {
             log.warn("Atmosphere Resource '{}' not found!", resourceId);
@@ -68,7 +74,7 @@ public class NotificationService {
         }
 
         for (Broadcaster broadcaster : atmosphereResource.broadcasters()) {
-            broadcaster.broadcast(new Notification(resourceId, message), atmosphereResource);
+            broadcaster.broadcast(new Notification<>(resourceId, message), atmosphereResource);
         }
     }
 }

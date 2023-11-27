@@ -44,13 +44,23 @@ public class UrlUtils {
         return path;
     }
 
-    public String appendDoubleAsterisk(final String pathUrl) {
+    public String appendDoubleAsterisk(String pathUrl) {
+        pathUrl = sanitize(pathUrl);
         if (StringUtils.isBlank(pathUrl) || pathUrl.equals(URL_PATH_SEPARATOR)) {
             return URL_PATH_SEPARATOR + "**";
         } else {
             return pathUrl.endsWith(URL_PATH_SEPARATOR) ?
                 pathUrl + "**" :
                 pathUrl + URL_PATH_SEPARATOR + "**";
+        }
+    }
+
+    public String appendSlash(String pathUrl) {
+        pathUrl = sanitize(pathUrl);
+        if (StringUtils.isBlank(pathUrl) || pathUrl.equals(URL_PATH_SEPARATOR)) {
+            return pathUrl;
+        } else {
+            return pathUrl.endsWith(URL_PATH_SEPARATOR) ? pathUrl : pathUrl + URL_PATH_SEPARATOR;
         }
     }
 }

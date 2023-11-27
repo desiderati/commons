@@ -42,6 +42,6 @@ public class AsyncProperties {
     private Integer queueCapacity = 25;
 
     @NotNull
-    private Integer taskTimeout = 300000;
+    private Integer taskTimeout = 30000;
 
 }

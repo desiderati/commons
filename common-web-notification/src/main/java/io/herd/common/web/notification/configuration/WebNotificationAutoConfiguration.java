@@ -18,66 +18,37 @@
  */
 package io.herd.common.web.notification.configuration;
 
+import io.herd.common.web.configuration.WebAutoConfiguration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRegistration;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.atmosphere.cpr.*;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.*;
 import org.springframework.web.WebApplicationInitializer;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
-import java.util.Properties;
 
-import static org.atmosphere.cpr.ApplicationConfig.ANNOTATION_PACKAGE;
-import static org.atmosphere.cpr.ApplicationConfig.BROADCASTER_SHARABLE_THREAD_POOLS;
+import static org.atmosphere.cpr.ApplicationConfig.*;
 
-@Slf4j
-@Configuration
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ComponentScan(basePackages = "io.herd.common.web.notification",
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
-public class AtmosphereWebApplicationInitializer extends ContainerInitializer
+@Import(WebAutoConfiguration.class) // To be used with @WebMvcTest
+public class WebNotificationAutoConfiguration extends ContainerInitializer
     implements WebApplicationInitializer, ServletContextInitializer {
 
-    private static final String DEFAULT_URL_MAPPING = "/notification/*";
-
-    private static final String URL_MAPPING_PROPERTY_NAME = "atmosphere.url.mapping";
-
+    @Value("${spring.web.atmosphere.url.mapping:/atmosphere}")
     private String atmosphereUrlMapping;
 
     private AtmosphereFramework atmosphereFramework;
-
-    public AtmosphereWebApplicationInitializer() {
-        String filename = "atmosphere.properties";
-        try (InputStream input =
-                 AtmosphereWebApplicationInitializer.class.getClassLoader().getResourceAsStream(filename)) {
-            if (input == null) {
-                throw new IOException("Unable to read file '" + filename + "'");
-            }
-
-            Properties prop = new Properties();
-            prop.load(input);
-            String atmosphereUrlMappingTmp = prop.getProperty(URL_MAPPING_PROPERTY_NAME);
-            this.atmosphereUrlMapping = StringUtils.defaultIfBlank(atmosphereUrlMappingTmp, DEFAULT_URL_MAPPING);
-
-        } catch (IOException ex) {
-            log.debug(ex.getMessage(), ex);
-            log.warn("Unable to read property [" + URL_MAPPING_PROPERTY_NAME + "] from file '" + filename + "'! " +
-                "Using default URL mapping instead: " + DEFAULT_URL_MAPPING);
-            this.atmosphereUrlMapping = DEFAULT_URL_MAPPING;
-        }
-    }
 
     @Override
     public void onStartup(@NotNull ServletContext servletContext) throws ServletException {
@@ -91,6 +62,9 @@ public class AtmosphereWebApplicationInitializer extends ContainerInitializer
             onStartup(Collections.emptySet(), servletContext);
             atmosphereFramework = (AtmosphereFramework) servletContext.getAttribute("atmosphere");
             atmosphereFramework.addInitParameter(BROADCASTER_SHARABLE_THREAD_POOLS, "true");
+
+            // It will ensure that CORS will be configured for Atmosphere.
+            atmosphereFramework.addInitParameter(DROP_ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "false");
             atmosphereFramework.addInitParameter(ANNOTATION_PACKAGE, "io.herd.common.web.notification");
         }
     }

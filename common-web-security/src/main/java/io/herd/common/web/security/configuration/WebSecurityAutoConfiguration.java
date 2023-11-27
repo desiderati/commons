@@ -26,13 +26,15 @@ import io.herd.common.web.security.jwt.authentication.*;
 import io.herd.common.web.security.jwt.authorization.DefaultJwtTokenExtractor;
 import io.herd.common.web.security.jwt.authorization.JwtAuthorizationFilter;
 import io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationFilter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.*;
@@ -51,13 +53,14 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
-@Slf4j
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableWebSecurity
@@ -93,6 +96,24 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Value("${spring.web.security.sign-request.authorization.enabled:false}")
     private boolean signRequestAuthorizationEnabled;
+
+    @Value("${graphql.servlet.security.enabled:true}")
+    private boolean graphqlServletSecurityEnabled;
+
+    @Value("${graphql.servlet.mapping}")
+    private String graphqlServletMapping;
+
+    @Value("${graphql.playground.enabled:false}")
+    private boolean graphqlPlaygroundEnabled;
+
+    @Value("${graphql.voyager.enabled:false}")
+    private boolean graphqlVoyagerEnabled;
+
+    @Value("${spring.web.atmosphere.security.enabled:true}")
+    private boolean atmosphereSecurityEnabled;
+
+    @Value("${spring.web.atmosphere.url.mapping:/atmosphere}")
+    private String atmosphereUrlMapping;
 
     @Value("${springdoc.api-docs.path:/api-docs}")
     private String springDocOpenApiPath;
@@ -216,7 +237,10 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
      * </pre>
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain filterChain(
+        HttpSecurity httpSecurity,
+        @SuppressWarnings("VulnerableCodeUsages") HandlerMappingIntrospector introspector
+    ) throws Exception {
         // We don't need to enable CSRF support because our Token is invulnerable.
         // And also because with it enabled, we will not be able to call our back-end
         // from the front-end.
@@ -277,9 +301,41 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
             // It enables all calls to the public API.
             authorizeRequests.requestMatchers(defaultApiBasePath + "/public/**").permitAll();
 
+            // Notification (Atmosphere) Support.
+            if (!atmosphereSecurityEnabled) {
+                // It should be used only on development environments.
+                authorizeRequests.requestMatchers(UrlUtils.sanitize(atmosphereUrlMapping)).permitAll();
+                authorizeRequests.requestMatchers(UrlUtils.appendDoubleAsterisk(atmosphereUrlMapping)).permitAll();
+            }
+
             // GraphQL Support.
-            authorizeRequests.requestMatchers("/graphiql").permitAll();
-            authorizeRequests.requestMatchers("/graphiql/**").permitAll();
+            if (!graphqlServletSecurityEnabled) {
+                // It should be used only on development environments.
+                // As the GraphQL Url is registered by another Servlet, we must configure the security like this!
+                authorizeRequests.requestMatchers(
+                    new MvcRequestMatcher.Builder(introspector)
+                        .servletPath(UrlUtils.sanitize(graphqlServletMapping))
+                        .pattern("/**")
+                ).permitAll();
+            }
+
+            if (graphqlPlaygroundEnabled) {
+                // It should be used only on development environments.
+                // The URL mapping is not customized!
+                authorizeRequests.requestMatchers("/playground").permitAll();
+                authorizeRequests.requestMatchers("/playground/**").permitAll();
+                authorizeRequests.requestMatchers("/vendor/playground").permitAll();
+                authorizeRequests.requestMatchers("/vendor/playground/**").permitAll();
+            }
+
+            if (graphqlVoyagerEnabled) {
+                // It should be used only on development environments.
+                // The URL mapping is not customized!
+                authorizeRequests.requestMatchers("/voyager").permitAll();
+                authorizeRequests.requestMatchers("/voyager/**").permitAll();
+                authorizeRequests.requestMatchers("/vendor/voyager").permitAll();
+                authorizeRequests.requestMatchers("/vendor/voyager/**").permitAll();
+            }
 
             if (jwtAuthenticationEnabled) {
                 // Login URL.
@@ -297,7 +353,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
             if (defaultAuthenticationEnabled) {
                 authorizeRequests.anyRequest().authenticated()
-                    // Será habilitado o filtro: UsernamePasswordAuthenticationFilter
+                    // It will be enabled the filter: UsernamePasswordAuthenticationFilter
                     .and().formLogin()
                     .and().httpBasic();
             } else {

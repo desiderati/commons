@@ -19,6 +19,7 @@
 package io.herd.common.web.configuration;
 
 import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebAutoConfiguration;
+import graphql.schema.*;
 import io.herd.common.data.jpa.configuration.JpaAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.exception.ResponseExceptionDTOHttpMessageConverter;
@@ -27,6 +28,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springdoc.webmvc.api.MultipleOpenApiActuatorResource;
 import org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource;
 import org.springdoc.webmvc.api.OpenApiActuatorResource;
@@ -254,5 +256,29 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
     @ConditionalOnMissingBean(GraphQLExceptionHandler.class)
     public GraphQLExceptionHandler graphQLExceptionHandler(MessageSource messageSource) {
         return new GraphQLExceptionHandler(messageSource);
+    }
+
+    @Bean
+    public GraphQLScalarType voidGraphQLScalarType() {
+        return GraphQLScalarType.newScalar()
+            .name("Void")
+            .description("Void Scalar")
+            .coercing(new Coercing<Void, String>() {
+
+                @Override
+                public String serialize(@NotNull Object dataFetcherResult) throws CoercingSerializeException {
+                    return "";
+                }
+
+                @Override
+                public @NotNull Void parseValue(@NotNull Object input) throws CoercingParseValueException {
+                    return null;
+                }
+
+                @Override
+                public @NotNull Void parseLiteral(@NotNull Object input) throws CoercingParseLiteralException {
+                    return null;
+                }
+            }).build();
     }
 }

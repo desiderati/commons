@@ -27,7 +27,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class Notification implements Serializable {
+public class Notification<M> implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -38,6 +38,6 @@ public class Notification implements Serializable {
     private String uuid;
 
     @NonNull
-    private String message;
+    private M message;
 
 }

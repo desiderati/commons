@@ -11,6 +11,12 @@
   ],
   "properties": [
     {
+      "name": "graphql.servlet.security.enabled",
+      "description": "It defines if the GraphQL Servlet default path will be secured or not. Useful for development environments, which we can use Voyager to show the GraphQL Schema without authentication.",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
+    },
+    {
       "name": "spring.web.security.default.authentication.enabled",
       "description": "It defines if the default Authentication will be enabled or not.",
       "type": "java.lang.Boolean",
@@ -30,7 +36,7 @@
     },
     {
       "name": "spring.web.security.jwt.authentication.expiration-period",
-      "description": "The period of time in which the JWT token expires or terminates (In Hours).",
+      "description": "The period of time in which the JWT token expires or terminates in hours (-1 means no expiration).",
       "type": "java.lang.Integer",
       "defaultValue": 1
     },
