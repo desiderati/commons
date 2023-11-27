@@ -18,8 +18,12 @@
  */
 package io.herd.common.web.graphql.exception
 
+import graphql.ErrorType
 import graphql.GraphQLError
 import graphql.GraphqlErrorBuilder
+import graphql.execution.DataFetcherExceptionHandler
+import graphql.execution.DataFetcherExceptionHandlerParameters
+import graphql.execution.DataFetcherExceptionHandlerResult
 import graphql.kickstart.spring.error.ErrorContext
 import io.herd.common.exception.ApplicationException
 import org.springframework.context.MessageSource
@@ -27,10 +31,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import java.io.Serializable
 import java.lang.reflect.UndeclaredThrowableException
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 open class GraphQLExceptionHandler(
     private val messageSource: MessageSource
-) {
+) : DataFetcherExceptionHandler {
+
     companion object {
         private const val DEFAULT_ERROR_CODE = "internal_server_error"
         private const val DEFAULT_ERROR_MESSAGE =
@@ -40,8 +46,30 @@ open class GraphQLExceptionHandler(
         private val DEFAULT_LOCALE = Locale("pt", "BR")
     }
 
+    override fun handleException(
+        handlerParameters: DataFetcherExceptionHandlerParameters
+    ): CompletableFuture<DataFetcherExceptionHandlerResult> {
+        return CompletableFuture.completedFuture(
+            DataFetcherExceptionHandlerResult.newResult().error(
+                generateGraphQLError(
+                    handlerParameters.exception,
+                    ErrorContext(
+                        listOf(handlerParameters.sourceLocation),
+                        handlerParameters.path.toList(),
+                        if (handlerParameters.argumentValues.isEmpty()) mapOf() else {
+                            mapOf(
+                                "argumentValues" to handlerParameters.argumentValues,
+                            )
+                        },
+                        ErrorType.DataFetchingException
+                    )
+                )
+            ).build()
+        )
+    }
+
     @ExceptionHandler(UndeclaredThrowableException::class)
-    open fun handle(
+    open fun handleException(
         undeclaredThrowableException: UndeclaredThrowableException,
         errorContext: ErrorContext
     ): GraphQLError {
@@ -49,12 +77,12 @@ open class GraphQLExceptionHandler(
     }
 
     @ExceptionHandler(Throwable::class)
-    open fun handle(throwable: Throwable, errorContext: ErrorContext): GraphQLError {
+    open fun handleException(throwable: Throwable, errorContext: ErrorContext): GraphQLError {
         return generateGraphQLError(throwable, errorContext)
     }
 
     @ExceptionHandler(ApplicationException::class)
-    open fun handle(applicationException: ApplicationException, errorContext: ErrorContext): GraphQLError {
+    open fun handleException(applicationException: ApplicationException, errorContext: ErrorContext): GraphQLError {
         return generateGraphQLError(
             applicationException.message,
             errorContext,
@@ -80,11 +108,12 @@ open class GraphQLExceptionHandler(
             .message(
                 getMessage(
                     DEFAULT_LOCALE,
-                    message ?: internalServerError,
+                    message ?: DEFAULT_ERROR_CODE,
                     internalServerError
                 )
             )
-            .locations(errorContext.locations.orEmpty())
+            // If needed in the future, we can add the error location.
+            .locations(null)
             .path(errorContext.path.orEmpty())
             .extensions(errorContext.extensions.orEmpty().plus(extensions))
             .build()
