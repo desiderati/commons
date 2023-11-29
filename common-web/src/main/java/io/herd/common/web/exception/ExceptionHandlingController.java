@@ -586,7 +586,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
                 if (isSameClass) {
                     List<String> msgsList = entry.getValue();
-                    if (msgsList.size() == 0) {
+                    if (msgsList.isEmpty()) {
                         return true;
                     } else {
                         for (String msg : msgsList) {

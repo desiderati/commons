@@ -127,11 +127,13 @@ public class JwtService {
     public String generateToken(JwtTokenConfigurer configurer) {
         Claims tokenPayload = Jwts.claims();
         configurer.configure(tokenPayload);
-        if (expirationPeriod > 0) {
-            tokenPayload.setExpiration(
-                Date.from(LocalDateTime.now().plusHours(expirationPeriod).toInstant(ZoneOffset.UTC))
-            );
-        }
+        tokenPayload.setExpiration(
+            Date.from(
+                LocalDateTime.now().plusHours(
+                    expirationPeriod > 0 ? expirationPeriod : Integer.MAX_VALUE
+                ).toInstant(ZoneOffset.UTC)
+            )
+        );
 
         JwtBuilder builder = Jwts.builder().setClaims(tokenPayload);
         if (jwtEncryptionMethod == JwtEncryptionMethod.ASYMMETRIC) {

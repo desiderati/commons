@@ -21,43 +21,18 @@ package io.herd.common.configuration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Slf4j
 @Configuration
 @EnableAsync
 @EnableScheduling
-@EnableConfigurationProperties(AsyncProperties.class)
 @ConditionalOnProperty(name = "spring.async.enabled", havingValue = "true")
 public class AsyncConfiguration implements AsyncConfigurer {
-
-    private final AsyncProperties asyncProperties;
-
-    @Autowired
-    public AsyncConfiguration(AsyncProperties asyncProperties) {
-        this.asyncProperties = asyncProperties;
-    }
-
-    @Bean(name = "defaultAsyncTaskExecutor")
-    public AsyncTaskExecutor defaultAsyncTaskExecutor() {
-        log.info("Creating default asynchronous task executor...");
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("Async-");
-        executor.setCorePoolSize(asyncProperties.getInitialPoolSize());
-        executor.setMaxPoolSize(asyncProperties.getMaxPoolSize());
-        executor.setQueueCapacity(asyncProperties.getQueueCapacity());
-        executor.initialize();
-        return executor;
-    }
 
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {

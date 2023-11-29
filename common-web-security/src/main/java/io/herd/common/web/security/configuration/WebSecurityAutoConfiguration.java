@@ -18,6 +18,7 @@
  */
 package io.herd.common.web.security.configuration;
 
+import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebSecurityAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.CorsProperties;
 import io.herd.common.web.configuration.WebAutoConfiguration;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -48,6 +50,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -61,16 +64,22 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
+import static org.springframework.security.core.context.SecurityContextHolder.MODE_INHERITABLETHREADLOCAL;
+
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 @PropertySource("classpath:application-common-web-security.properties")
+@AutoConfigureBefore(GraphQLWebSecurityAutoConfiguration.class)
 @ComponentScan(basePackages = "io.herd.common.web.security",
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
-@Import(WebAutoConfiguration.class) // To be used with @WebMvcTest
+@Import({
+    WebAutoConfiguration.class,
+    GraphQLWebSecurityConfiguration.class
+}) // To be used with @WebMvcTest
 public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Value("${spring.web.security.default.authentication.enabled:false}")
@@ -117,6 +126,18 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Value("${springdoc.api-docs.path:/api-docs}")
     private String springDocOpenApiPath;
+
+    public WebSecurityAutoConfiguration(
+        @Value("${graphql.servlet.async.enabled:false}")
+        boolean graphqlServletAsyncEnabled,
+
+        @Value("${graphql.servlet.async.delegate-security-context:true}")
+        boolean graphqlServletAsyncDelegateSecurityContext
+    ) {
+        if (graphqlServletAsyncEnabled && graphqlServletAsyncDelegateSecurityContext) {
+            SecurityContextHolder.setStrategyName(MODE_INHERITABLETHREADLOCAL);
+        }
+    }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     private JwtAuthorizationFilter jwtAuthorizationFilter;

@@ -85,7 +85,7 @@ import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
     // Need to be auto-loaded too.
     AsyncWebConfiguration.class,
     JpaAutoConfiguration.class,
-    JpaWebAutoConfiguration.class,
+    JpaWebConfiguration.class,
     OpenApiConfiguration.class
 })
 public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigurer, RepositoryRestConfigurer {

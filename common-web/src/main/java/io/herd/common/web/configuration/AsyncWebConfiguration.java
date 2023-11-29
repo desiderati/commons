@@ -18,20 +18,20 @@
  */
 package io.herd.common.web.configuration;
 
-import io.herd.common.configuration.AsyncProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
+import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
+import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -39,30 +39,19 @@ import java.util.concurrent.Callable;
 
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(AsyncProperties.class)
 @ConditionalOnProperty(name = "spring.async.enabled", havingValue = "true")
 public class AsyncWebConfiguration {
 
-    private final AsyncProperties asyncProperties;
-
-    @Autowired
-    public AsyncWebConfiguration(AsyncProperties asyncProperties) {
-        this.asyncProperties = asyncProperties;
-    }
-
-    /** Configure async support for Spring MVC. */
+    /**
+     * Configure async support for Spring MVC.
+     */
     @Bean
-    public WebMvcConfigurer webMvcConfigurerConfigurer(
-        @Qualifier("defaultAsyncTaskExecutor") AsyncTaskExecutor taskExecutor,
-        CallableProcessingInterceptor callableProcessingInterceptor
-    ) {
+    public WebMvcConfigurer webMvcConfigurerConfigurer(CallableProcessingInterceptor callableProcessingInterceptor) {
         return new WebMvcConfigurer() {
             @Override
             public void configureAsyncSupport(@NotNull AsyncSupportConfigurer configurer) {
-                log.info("Configuring Spring MVC with asynchronous task executor...");
-                configurer.setDefaultTimeout(asyncProperties.getTaskTimeout()).setTaskExecutor(taskExecutor);
+                log.info("Configuring Spring MVC with custom CallableProcessingInterceptor...");
                 configurer.registerCallableInterceptors(callableProcessingInterceptor);
-                WebMvcConfigurer.super.configureAsyncSupport(configurer);
             }
         };
     }
@@ -79,5 +68,22 @@ public class AsyncWebConfiguration {
                 return super.handleTimeout(request, task);
             }
         };
+    }
+
+    @Bean(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
+    @ConditionalOnProperty(prefix = "spring.mvc.async", name = "thread-context-inheritable", havingValue = "true")
+    public AsyncTaskExecutor simpleAsyncTaskExecutor() {
+        log.info("Creating simple asynchronous task executor...");
+        SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
+        executor.setThreadNamePrefix("simple-task-");
+        return executor;
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "spring.mvc.async", name = "thread-context-inheritable", havingValue = "true")
+    public RequestContextFilter requestContextFilter() {
+        RequestContextFilter requestContextFilter = new OrderedRequestContextFilter();
+        requestContextFilter.setThreadContextInheritable(true);
+        return requestContextFilter;
     }
 }

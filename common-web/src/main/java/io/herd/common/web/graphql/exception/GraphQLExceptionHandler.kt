@@ -27,6 +27,7 @@ import graphql.execution.DataFetcherExceptionHandlerResult
 import graphql.kickstart.spring.error.ErrorContext
 import io.herd.common.exception.ApplicationException
 import org.springframework.context.MessageSource
+import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.web.bind.annotation.ExceptionHandler
 import java.io.Serializable
 import java.lang.reflect.UndeclaredThrowableException
@@ -41,9 +42,6 @@ open class GraphQLExceptionHandler(
         private const val DEFAULT_ERROR_CODE = "internal_server_error"
         private const val DEFAULT_ERROR_MESSAGE =
             "The server encountered an unexpected condition that prevented it from fulfilling the request!"
-
-        // TODO Felipe Desiderati: Extrair a localização a partir da requisição.
-        private val DEFAULT_LOCALE = Locale("pt", "BR")
     }
 
     override fun handleException(
@@ -103,11 +101,11 @@ open class GraphQLExceptionHandler(
         errorContext: ErrorContext,
         extensions: Map<String, Any?> = mapOf()
     ): GraphQLError {
-        val internalServerError = getMessage(DEFAULT_LOCALE, DEFAULT_ERROR_CODE, DEFAULT_ERROR_MESSAGE)
+        val internalServerError = getMessage(LocaleContextHolder.getLocale(), DEFAULT_ERROR_CODE, DEFAULT_ERROR_MESSAGE)
         return GraphqlErrorBuilder.newError()
             .message(
                 getMessage(
-                    DEFAULT_LOCALE,
+                    LocaleContextHolder.getLocale(),
                     message ?: DEFAULT_ERROR_CODE,
                     internalServerError
                 )
