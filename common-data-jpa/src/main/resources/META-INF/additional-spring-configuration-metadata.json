@@ -12,31 +12,31 @@
   "properties": [
     {
       "name": "app.database.config.table-prefix",
-      "type": "java.lang.String",
-      "description": "The prefix to be used by all system tables."
+      "description": "The prefix to be used by all system tables.",
+      "type": "java.lang.String"
     },
     {
       "name": "app.database.config.ddl-create-schema",
-      "type": "java.lang.String",
       "description": "The DDL for schema creation.",
+      "type": "java.lang.String",
       "defaultValue": "CREATE SCHEMA IF NOT EXISTS ${schemaName}"
     },
     {
       "name": "app.database.config.ddl-change-schema",
-      "type": "java.lang.String",
       "description": "The DDL for schema change.",
+      "type": "java.lang.String",
       "defaultValue": "SET SCHEMA ''${schemaName}''"
     },
     {
       "name": "app.database.multitenant.default-tenant",
-      "type": "java.lang.String",
       "description": "Default Tenant.",
+      "type": "java.lang.String",
       "defaultValue": "public"
     },
     {
       "name": "app.database.multitenant.strategy",
-      "type": "io.herd.common.data.multitenant.configuration.MultiTenantProperties$Strategy",
       "description": "Multi Tenant Strategy.",
+      "type": "io.herd.common.data.multitenant.configuration.MultiTenantProperties$Strategy",
       "defaultValue": "NONE"
     }
   ]

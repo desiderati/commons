@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Setter // Never forget to put the setXXX (..) for configuration files!
 @Component
 @PropertySource(value = "classpath:jwt.properties", ignoreResourceNotFound = true)
-@ConfigurationProperties(prefix = "jwt")
+@ConfigurationProperties("jwt")
 public class JwtProperties {
 
     /**

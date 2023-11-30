@@ -37,11 +37,11 @@ import org.springframework.context.annotation.FilterType;
 
 import java.util.Collections;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(LiquibaseAutoConfiguration.class)
 @EnableConfigurationProperties(LiquibaseProperties.class)
 @ConditionalOnBean(MultiTenantConnectionProvider.class)
-@ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(name = "spring.liquibase.enabled", havingValue = "true")
 @ComponentScan(basePackages = "io.herd.common.data.multitenant",
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)

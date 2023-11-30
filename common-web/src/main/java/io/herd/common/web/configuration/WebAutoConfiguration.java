@@ -45,7 +45,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.*;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -75,18 +74,19 @@ import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @AutoConfigureAfter({HibernateJpaAutoConfiguration.class, GraphQLWebAutoConfiguration.class})
 @EnableWebMvc
-@EnableConfigurationProperties(OpenApiClientProperties.class)
 @PropertySource("classpath:application-common-web.properties")
 @ComponentScan({
     "io.herd.common.web.exception",
-    "io.herd.common.web.graphql"
+    "io.herd.common.web.graphql",
+    "io.herd.common.web.rest"
 })
 @Import({
     // Need to be auto-loaded too.
     AsyncWebConfiguration.class,
     JpaAutoConfiguration.class,
     JpaWebConfiguration.class,
-    OpenApiConfiguration.class
+    OpenApiConfiguration.class,
+    RestApiClientConfiguration.class
 })
 public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigurer, RepositoryRestConfigurer {
 
@@ -102,7 +102,7 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
         ObjectProvider<EntityManager> entityManager
     ) {
         this.apiBasePath = UrlUtils.sanitize(apiBasePath);
-        log.info("Configuring REST API base path as: " + this.apiBasePath);
+        log.info("Configuring RESTful API base path as: " + this.apiBasePath);
 
         this.validator = validator;
         this.entityManager = entityManager.getIfAvailable();
@@ -115,19 +115,16 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
         this.webCorsProperties = webCorsProperties;
     }
 
-    @Bean("webCorsProperties")
     @Validated
-    @ConfigurationProperties(prefix = "spring.web.cors")
+    @Bean("webCorsProperties")
+    @ConfigurationProperties("spring.web.cors")
     public CorsProperties webCorsProperties() {
         return new CorsProperties();
     }
 
-    @Bean("graphqlCorsProperties")
     @Validated
-    @ConditionalOnProperty(
-        value = "graphql.servlet.enabled",
-        havingValue = "true",
-        matchIfMissing = true)
+    @Bean("graphqlCorsProperties")
+    @ConditionalOnProperty(value = "graphql.servlet.enabled", havingValue = "true", matchIfMissing = true)
     @ConfigurationProperties("graphql.servlet.cors")
     public CorsProperties graphqlCorsProperties() {
         return new CorsProperties();

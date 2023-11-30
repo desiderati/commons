@@ -29,7 +29,7 @@ import org.springframework.validation.annotation.Validated;
 @Setter
 @Validated
 @Component
-@ConfigurationProperties(prefix = "app.database.config")
+@ConfigurationProperties("app.database.config")
 public class DatabaseProperties {
 
     @NotBlank

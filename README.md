@@ -2,12 +2,12 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-3.1.3.RELEASE-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-3.2.0.RELEASE-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
-[![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE) 
+[![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE)
 
 For more information, see the projects:
- 
+
 * [common](common/README.md)
 * [common-google](common-google/README.md)
 * [common-jms](common-jms/README.md)
@@ -24,7 +24,13 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [3.1.3.RELEASE] - 2023-11-27
+#### [3.2.0.RELEASE] - 2023-11-29
+- Some improvements on Google Captcha Service.
+- Added support to RESTful API client configuration.
+- Defined a default **ObjectMapper**.
+- Code-review.
+
+#### [3.1.3.RELEASE] - 2023-11-29
 - Some improvements on GraphQL asynchronous configuration.
 
 #### [3.1.2.RELEASE] - 2023-11-27
@@ -100,11 +106,11 @@ All project changes will be documented in this file.
 - SpringFox v3.0.0.
 
 #### [2.3.19] - 2020-07-01
-- Replaced the annotation @EnableSwagger2WebMvc by @EnableOpenApi. 
+- Replaced the annotation @EnableSwagger2WebMvc by @EnableOpenApi.
 
 #### [2.3.18] - 2020-06-30
 - Created the class **AutoConfigureCommonWeb**, which would be used mostly during tests.
-- Moved from Swagger Specification (v2) to OpenAPI Specification (v3). 
+- Moved from Swagger Specification (v2) to OpenAPI Specification (v3).
 
 #### [2.3.17] - 2020-06-26
 - Fixed a bug with the Springfox Swagger (The webjars path has changed).
@@ -145,7 +151,7 @@ All project changes will be documented in this file.
 - Fixed a bug related to the banner.txt file creation. There's a bug with the Maven Flatten Plugin, which replaces the placeholders when defined inside the <profile> tag.
 
 #### [2.3.5] - 2020-05-08
-- Configured the Maven Flatten Plugin. The ${revision} placeholder will only work if you use this plugin. See: https://blog.soebes.de/blog/2017/04/02/maven-pom-files-without-a-version-in-it/ 
+- Configured the Maven Flatten Plugin. The ${revision} placeholder will only work if you use this plugin. See: https://blog.soebes.de/blog/2017/04/02/maven-pom-files-without-a-version-in-it/
 
 #### [2.3.4] - 2020-05-08 (Do not use this version, it will not work!)
 - Configured the ${revision} placeholder.
@@ -155,7 +161,7 @@ All project changes will be documented in this file.
 - Created the functionality of cleaning up the database state between tests.
 
 #### [2.3.2] - 2020-04-22
-- Better Undertown configuration.
+- Better Undertow configuration.
 
 #### [2.3.1] - 2020-04-15
 - Better Spring Security configuration.
@@ -163,7 +169,7 @@ All project changes will be documented in this file.
 #### [2.3.0] - 2020-04-15
 - Spring 5.3.5 and Spring Boot 2.2.6. Other dependencies update.
 - Node 12.16.2 and NPM 6.14.4.
-- Fixed a bug related to Swagger configuration. It was not taking into account the fact that the context path 
+- Fixed a bug related to Swagger configuration. It was not taking into account the fact that the context path
   could be different from /.
 - Fixed a bug related to Commons Herd.io Notification's auto-configuration.
 - Fixed a bug when table prefix was configured blank. See: **DefaultPhysicalNamingStrategy**.
@@ -177,11 +183,11 @@ All project changes will be documented in this file.
 
 #### [2.2.9] - 2020-04-08
 - Fixed a bug with the Hikari and Liquibase.
-- Some Undertown tweaks.
+- Some Undertow tweaks.
 - Better Api Base Path sanitization.
 
 #### [2.2.8] - 2020-04-02
-- Undertown access log configuration.
+- Undertow access log configuration.
 
 #### [2.2.7] - 2020-04-02
 - Fully translated to English.
@@ -193,16 +199,16 @@ All project changes will be documented in this file.
 - Fixed a bug related to **ComponentScan** annotation.
 
 #### [2.2.4] - 2020-04-01
-- Fixed a problem while generating the file **spring-configuration-metadata.json**. 
+- Fixed a problem while generating the file **spring-configuration-metadata.json**.
   Custom properties weren't being recognized.
 
 #### [2.2.3] - 2020-03-31
-- **WebSecurityConfigurerAdapterAutoConfiguration** will only be configured if there's no other bean 
+- **WebSecurityConfigurerAdapterAutoConfiguration** will only be configured if there's no other bean
   of the same type inside the application context.
 
 #### [2.2.2] - 2020-03-31
 - **ResponseExceptionDTOHttpMessageConverter** must always return an "application/json".
-  It will ensure when the controller throws an exception, even if the response content-type is different 
+  It will ensure when the controller throws an exception, even if the response content-type is different
   from "application/json", the response entity will be configured to return an "application/json" content type.
 
 #### [2.2.1] - 2020-03-30
@@ -226,13 +232,13 @@ All project changes will be documented in this file.
 - Now it is possible to use a different profile when starting the application to access the Swagger API.
 
 #### [2.1.16] - 2020-03-20
-- Fixed a bug related when an exception was thrown before the **ExceptionHandlingFilter**, generating 
-  this way a response message not readable by the **ExceptionHandlingController**. Now if the response body 
+- Fixed a bug related when an exception was thrown before the **ExceptionHandlingFilter**, generating
+  this way a response message not readable by the **ExceptionHandlingController**. Now if the response body
   could not be deserialized into a **ResponseExceptionDTO**, it will be deserialized using a **Map<String, Object>**.
 - Now it is possible to disable the default authentication.
 
 #### [2.1.15] - 2020-03-19
-- ~~Fixed a bug related to the authentication. We must set authentication as **true** after calling 
+- ~~Fixed a bug related to the authentication. We must set authentication as **true** after calling
   the authentication services (JWT and Sign Request).~~
 
 #### [2.1.14] - 2020-03-11
@@ -255,7 +261,7 @@ All project changes will be documented in this file.
 - Changed the **ExceptionHandlingController** class to add support to **HttpStatusCodeException**.
 - Better logger information while printing exceptions handled by the Swagger Client.
 - Fixed a Bug while reading the **swagger-client.properties** file. Prefix was not specified.
-- Now the class **SignRequestAuthorizationService** is enabled by default, as it can be used to sign requests 
+- Now the class **SignRequestAuthorizationService** is enabled by default, as it can be used to sign requests
   when used by a Swagger client.
 - Now it is possible to add additional properties to the **SignRequestAuthorizedClient**.
 
@@ -265,7 +271,7 @@ All project changes will be documented in this file.
 - Now it is possible to configure the expiration period while generating the JWT Token.
 
 #### [2.1.8] - 2020-01-31
-- Added the **AwsExtendedThrowableProxyConverter** class, which is responsible for grouping the stack trace 
+- Added the **AwsExtendedThrowableProxyConverter** class, which is responsible for grouping the stack trace
   in just one message while using the AWS Cloud Watch.
 
 #### [2.1.7] - 2020-01-30
@@ -292,9 +298,9 @@ All project changes will be documented in this file.
 - Added support to refreshable properties.
 - Added dependency with Spring Cloud Starter.
 - Minor changes.
-- Improved the Swagger client properties configuration. Now there is no need of extending 
+- Improved the Swagger client properties configuration. Now there is no need of extending
   the **SwaggerClientProperties** class.
-- Changed the **DefaultPhysicalNamingStrategy** class. Now there is no need of extending it, 
+- Changed the **DefaultPhysicalNamingStrategy** class. Now there is no need of extending it,
   just to configure the property 'app.database.table-prefix'.
 - Better messages while handling authorization and authentication.
 
@@ -316,7 +322,7 @@ All project changes will be documented in this file.
 - Now it is possible to configure the **EntityScan** and **JpaRepositoryScan**.
 
 #### [2.0.0] - 2020-01-10
-- Better files generation available for Swagger Clients. Now it is possible to download the JSON file 
+- Better files generation available for Swagger Clients. Now it is possible to download the JSON file
   directly from Thin Server.
 - CRC16 calculation feature.
 - Improvements in the class **ExceptionHandlingController**: handling of new exceptions.
@@ -336,7 +342,7 @@ All project changes will be documented in this file.
 - Migration to Spring 5 and SpringBoot 2. Including dependencies.
 - Application configuration improvements (Auto Configuration).
 - Improvements in POM.xml.
-- Improvements in the notification component. It will now be possible to handle more than one broadcast 
+- Improvements in the notification component. It will now be possible to handle more than one broadcast
   per resource. And vice versa!
 
 #### [1.1.0] - 2018-07-05

@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @PropertySource("classpath:application-common-data-mongodb.properties")
 @ComponentScan(basePackages = "io.herd.common.data.mongodb",
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.

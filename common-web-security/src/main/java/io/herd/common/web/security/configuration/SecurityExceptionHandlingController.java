@@ -18,6 +18,7 @@
  */
 package io.herd.common.web.security.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.herd.common.web.exception.ExceptionHandlingController;
 import io.herd.common.web.exception.ResponseExceptionDTO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,9 +47,10 @@ public class SecurityExceptionHandlingController extends ExceptionHandlingContro
     @Autowired
     public SecurityExceptionHandlingController(
         @Value("${spring.web.exception-handler.should-log-as-warning}") @NotEmpty List<@NotBlank String> shouldLogAsWarning,
+        ObjectMapper objectMapper,
         ModelMapper modelMapper
     ) {
-        super(shouldLogAsWarning, modelMapper);
+        super(shouldLogAsWarning, objectMapper, modelMapper);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

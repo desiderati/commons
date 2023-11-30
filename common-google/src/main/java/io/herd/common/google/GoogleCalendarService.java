@@ -35,9 +35,6 @@ import io.herd.common.google.configuration.GoogleCalendarProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,8 +44,6 @@ import java.util.Collections;
 import java.util.List;
 
 @Slf4j
-@Service
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GoogleCalendarService {
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();

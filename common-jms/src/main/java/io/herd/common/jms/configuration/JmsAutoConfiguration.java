@@ -57,7 +57,7 @@ public class JmsAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "jms.dlq", name = "enabled", havingValue = "true")
+    @ConditionalOnProperty(name = "jms.dlq.enabled", havingValue = "true")
     public Queue dlqQueue(
         @Value("${jms.dlq.queue-prefix}") String queueDlqPrefix,
         @Value("${jms.default-queue.name}") String queueName
@@ -71,7 +71,7 @@ public class JmsAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "jms.dlq", name = "enabled", havingValue = "true")
+    @ConditionalOnProperty(name = "jms.dlq.enabled", havingValue = "true")
     public Queue responseDlqQueue(
         @Value("${jms.dlq.queue-prefix}") String queueDlqPrefix,
         @Value("${jms.default-response-queue.name}") String responseQueueName

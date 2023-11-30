@@ -102,6 +102,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
 
     public static final HttpStatusCode DEFAULT_HTTP_STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
 
+    private final ObjectMapper objectMapper;
     private final ModelMapper modelMapper;
 
     @Setter
@@ -112,6 +113,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     @Autowired
     public ExceptionHandlingController(
         @Value("${spring.web.exception-handler.should-log-as-warning}") @NotEmpty List<@NotBlank String> shouldLogAsWarning,
+        ObjectMapper objectMapper,
         ModelMapper modelMapper
     ) {
         this.shouldLogAsWarning = new HashMap<>();
@@ -130,6 +132,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             }
         });
 
+        this.objectMapper = objectMapper;
         this.modelMapper = modelMapper;
     }
 
@@ -275,8 +278,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             TypeReference<ValidationResponseExceptionDTO> typeRef = new TypeReference<>() {
             };
 
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(responseBody, typeRef);
+            return objectMapper.readValue(responseBody, typeRef);
         } catch (IOException ex) {
             log.info("It is was not possible deserialize API exception body to response exception! " +
                 "Message: {}", ex.getMessage());
@@ -294,8 +296,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
             TypeReference<Map<String, Object>> typeRef = new TypeReference<>() {
             };
 
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(responseBody, typeRef);
+            return objectMapper.readValue(responseBody, typeRef);
         } catch (IOException ex) {
             log.info("It is was not possible deserialize API exception body to response error attributes! " +
                 "Message: {}", ex.getMessage());
@@ -310,9 +311,8 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
         }
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
             String prettyPrintedResponseBody =
-                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject);
+                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject);
             remoteExceptionStr.append(prettyPrintedResponseBody);
             return true;
         } catch (IOException ex) {

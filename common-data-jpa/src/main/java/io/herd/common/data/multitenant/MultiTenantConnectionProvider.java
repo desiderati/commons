@@ -40,7 +40,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "app.database.multitenant", name = "strategy", havingValue = "schema")
+@ConditionalOnProperty(name = "app.database.multitenant.strategy", havingValue = "schema")
 public class MultiTenantConnectionProvider extends AbstractMultiTenantConnectionProvider {
 
     private final transient DatabaseProperties databaseProperties;

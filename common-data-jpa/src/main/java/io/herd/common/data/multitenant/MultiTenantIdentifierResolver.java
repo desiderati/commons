@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @DependsOn("multiTenantContext")
-@ConditionalOnProperty(prefix = "app.database.multitenant", name = "strategy", havingValue = "schema")
+@ConditionalOnProperty(name = "app.database.multitenant.strategy", havingValue = "schema")
 public class MultiTenantIdentifierResolver implements CurrentTenantIdentifierResolver {
 
     @Override

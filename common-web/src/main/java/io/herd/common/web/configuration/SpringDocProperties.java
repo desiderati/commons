@@ -31,7 +31,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Component // I don't know why, but without it, the properties file is not loaded.
 @PropertySource("classpath:springdoc.properties")
-@ConfigurationProperties(prefix = "springdoc.api-info")
+@ConfigurationProperties("springdoc.api-info")
 public class SpringDocProperties {
 
     @NotBlank

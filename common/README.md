@@ -65,7 +65,7 @@ as shown below:
 ```
 @Component
 @PropertySource("classpath:custom.properties")
-@ConfigurationProperties(prefix = "app")
+@ConfigurationProperties("app")
 public class LoginProperties {
 
     private String prop1;

@@ -18,15 +18,16 @@
  */
 package io.herd.common.google.configuration;
 
+import io.herd.common.google.GoogleCalendarService;
 import io.herd.common.google.GoogleCaptchaService;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.*;
+import org.springframework.validation.annotation.Validated;
 
 @Configuration
-@EnableConfigurationProperties({GoogleCalendarProperties.class, GoogleCaptchaProperties.class})
+@PropertySource("classpath:application-common-google.properties")
 @ComponentScan(basePackages = "io.herd.common.google",
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
@@ -34,9 +35,30 @@ import org.springframework.context.annotation.*;
 public class GoogleAutoConfiguration {
 
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    @ConditionalOnProperty(prefix = "google.captcha", name = "secret-key")
+    @Validated
+    @ConditionalOnProperty(name = "google.calendar.enabled", havingValue = "true")
+    @ConfigurationProperties("google.calendar")
+    public GoogleCalendarProperties googleCalendarProperties() {
+        return new GoogleCalendarProperties();
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "google.calendar.enabled", havingValue = "true")
+    public GoogleCalendarService googleCalendarService(GoogleCalendarProperties calendarProperties) {
+        return new GoogleCalendarService(calendarProperties);
+    }
+
+    @Bean
+    @Validated
+    @ConditionalOnProperty("google.captcha.secret-key")
+    @ConfigurationProperties("google.captcha")
+    public GoogleCaptchaProperties googleCaptchaProperties() {
+        return new GoogleCaptchaProperties();
+    }
+
+    @Bean
+    @ConditionalOnProperty("google.captcha.secret-key")
     public GoogleCaptchaService googleCaptchaService(GoogleCaptchaProperties captchaProperties) {
-        return new GoogleCaptchaService(captchaProperties) ;
+        return new GoogleCaptchaService(captchaProperties);
     }
 }

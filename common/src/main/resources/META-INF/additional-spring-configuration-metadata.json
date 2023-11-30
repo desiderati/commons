@@ -2,13 +2,13 @@
   "properties": [
     {
       "name": "app.system-id",
-      "type": "java.util.UUID",
-      "description": "System Id."
+      "description": "System Id.",
+      "type": "java.util.UUID"
     },
     {
       "name": "spring.async.enabled",
-      "type": "java.lang.Boolean",
       "description": "It defines if custom async support will be enabled or not.",
+      "type": "java.lang.Boolean",
       "defaultValue": true
     }
   ]

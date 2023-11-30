@@ -39,7 +39,7 @@ import java.util.Arrays;
  * Configuration used to load all application internationalization files in the same {@link java.util.ResourceBundle}.
  */
 @Slf4j
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @PropertySource("classpath:i18n.properties")
 @Import({
     // Spring Cloud uses RefreshAutoConfiguration to add the refresh scope to your application.

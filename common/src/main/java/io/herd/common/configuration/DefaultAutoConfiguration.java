@@ -18,6 +18,8 @@
  */
 package io.herd.common.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -28,7 +30,7 @@ import org.springframework.context.annotation.*;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableAspectJAutoProxy // Enables support for handling components marked with AspectJ's @Aspect annotation.
 @AutoConfigureBefore({ValidationAutoConfiguration.class})
 @PropertySource("classpath:application-common.properties")
@@ -39,6 +41,12 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
     ThymeleafConfiguration.class
 })
 public class DefaultAutoConfiguration {
+
+    @Bean
+    @Scope("prototype") // So you can reset the settings without affecting the others.
+    public ObjectMapper defaultObjectMapper() {
+        return new ObjectMapper().registerModule(new KotlinModule.Builder().build());
+    }
 
     @Bean
     @Scope("prototype") // So you can reset the settings without affecting the others.

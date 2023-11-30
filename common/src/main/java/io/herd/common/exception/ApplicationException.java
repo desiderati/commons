@@ -20,12 +20,15 @@ package io.herd.common.exception;
 
 import lombok.Getter;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
+
 public class ApplicationException extends RuntimeException {
 
-    private static final long serialVersionUID = 5046859219775779815L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("squid:S1165")
     private Serializable[] args = null;

@@ -8,62 +8,73 @@
   "properties": [
     {
       "name": "app.api-base-path",
-      "type": "java.lang.String",
       "description": "Default prefix used by all RESTs.",
+      "type": "java.lang.String",
       "defaultValue": "/api"
     },
     {
       "name": "springdoc.enabled",
-      "type": "java.lang.Boolean",
       "description": "It defines if Open API (ormelly Swagger API) will be enabled or not.",
+      "type": "java.lang.Boolean",
       "defaultValue": true
     },
     {
       "name": "springdoc.package-to-scan",
-      "type": "java.lang.String",
       "description": "Package that will be scanned to retrieve all endpoints to be exposed.",
+      "type": "java.lang.String",
       "defaultValue": ""
     },
     {
       "name": "springdoc.paths-to-expose",
-      "type": "java.lang.String",
       "description": "Only the paths defined here will be exposed on Swagger UI.",
+      "type": "java.lang.String",
       "defaultValue": "/v.*,/public/v.*"
     },
     {
       "name": "spring.mvc.async.thread-context-inheritable",
-      "type": "java.lang.Boolean",
       "description": "Set whether to expose the LocaleContext and RequestAttributes as inheritable for child threads (using an InheritableThreadLocal). If true, a SimpleAsyncTaskExecutor will be used (instead of a ThreadPoolTaskExecutor) since it will never re-use threads. WARNING: Do not use inheritance for child threads if you are accessing a thread pool which is configured to potentially add new threads on demand, since this will expose the inherited context to such a pooled thread.",
+      "type": "java.lang.Boolean",
       "defaultValue": false
     },
     {
       "name": "spring.web.cors.allowed-methods",
-      "type": "java.lang.String",
       "description": "Set the HTTP methods to allow, e.g. GET, POST, etc. The special value '*' allows all methods.",
+      "type": "java.lang.String",
       "defaultValue": ["GET", "POST", "PUT", "PATCH", "DELETE"]
     },
     {
       "name": "spring.web.cors.allowed-headers",
-      "type": "java.lang.String",
       "description": "Set the list of headers that a preflight request can list as allowed for use during an actual request. The special value '*', may be used to allow all headers. By default all headers are allowed.",
+      "type": "java.lang.String",
       "defaultValue": ["*"]
     },
     {
       "name": "spring.web.cors.allowed-origins",
-      "type": "java.lang.String",
       "description": "The list of allowed origins that be specific origins, e.g. 'https://domain1.com', or '*' for all origins. By default, all origins are allowed.",
+      "type": "java.lang.String",
       "defaultValue": ["*"]
     },
     {
       "name": "spring.web.cors.exposed-headers",
-      "type": "java.lang.String",
       "description": "Set the list of response headers other than 'simple', headers, i.e. Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, or Pragma, that an actual response might have and can be exposed. Note that '*' is not supported on this property.",
+      "type": "java.lang.String",
       "defaultValue": ["Authorization"]
     },
     {
       "name": "spring.web.exception-handler.should-log-as-warning",
-      "type": "java.lang.String",
-      "description": "Exceptions list which should be recorded in the log as a warning."
+      "description": "Exceptions list which should be recorded in the log as a warning.",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "spring.web.client.rest-template.enabled",
+      "description": "It defines if a default client will be created to access another service via RESTful API.",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    },
+    {
+      "name": "spring.web.client.rest-template.base-path",
+      "description": "Specify the RESTful API base path, that will be accessed.",
+      "type": "java.lang.String"
     }
   ]
 }

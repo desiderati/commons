@@ -41,7 +41,7 @@ import java.util.UUID;
 @Getter
 @Setter // Never forget to put the setXXX (..) for configuration files!
 @Component
-@ConfigurationProperties(prefix = "spring.web.security.sign-request.authorization")
+@ConfigurationProperties("spring.web.security.sign-request.authorization")
 @org.springframework.context.annotation.PropertySource(
     value = "classpath:sign-request-authorized-clients.json",
     factory = SignRequestAuthorizedClientProperties.JsonPropertySourceFactory.class)
@@ -52,10 +52,14 @@ public class SignRequestAuthorizedClientProperties implements SignRequestAuthori
 
         @NotNull
         @Override
-        public PropertySource<?> createPropertySource(String name,
-                                                      EncodedResource resource) throws IOException {
+        public PropertySource<?> createPropertySource(
+            String name,
+            EncodedResource resource
+        ) throws IOException {
+
             List<SignRequestAuthorizedClient> authorizedClients =
-                new ObjectMapper().readValue(resource.getInputStream(), new TypeReference<>(){});
+                new ObjectMapper().readValue(resource.getInputStream(), new TypeReference<>() {
+                });
             Map<String, Object> authorizedClientsProperties = new HashedMap<>();
             authorizedClientsProperties.put("spring.web.security.sign-request.authorization.authorized-clients", authorizedClients);
             return new MapPropertySource("sign-request-authorized-clients", authorizedClientsProperties);

@@ -20,6 +20,7 @@ package io.herd.common.web.exception;
 
 import io.herd.common.exception.ApplicationException;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -28,6 +29,7 @@ import java.io.Serializable;
 @SuppressWarnings("unused")
 public class SecurityApplicationException extends ApplicationException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public SecurityApplicationException(String message) {

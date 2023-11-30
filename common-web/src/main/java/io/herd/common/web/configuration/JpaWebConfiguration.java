@@ -43,7 +43,7 @@ import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 //  apenas após a criação do 'AbstractEntityManagerFactoryBean'.
 @ConditionalOnJpa
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ConditionalOnProperty(prefix = "spring.jpa", name = "open-in-view", havingValue = "true")
+@ConditionalOnProperty(name = "spring.jpa.open-in-view", havingValue = "true")
 public class JpaWebConfiguration {
 
     @Bean

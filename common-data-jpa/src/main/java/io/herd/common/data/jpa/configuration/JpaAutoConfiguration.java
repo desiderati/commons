@@ -26,7 +26,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @PropertySource("classpath:application-common-data-jpa.properties")
 
 // Do not use this annotation in a auto-configuration file.
@@ -48,7 +48,7 @@ public class JpaAutoConfiguration {
      * This should be a default behavior for the auto-configuration.
      */
     @Bean
-    @ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", havingValue = "false", matchIfMissing = true)
+    @ConditionalOnProperty(name = "spring.liquibase.enabled", havingValue = "false", matchIfMissing = true)
     public SpringLiquibase liquibase() {
         SpringLiquibase springLiquibase = new SpringLiquibase();
         springLiquibase.setShouldRun(false);

@@ -17,6 +17,12 @@
       "defaultValue": true
     },
     {
+      "name": "spring.web.client.rest-template.decorate-with-auth-header",
+      "description": "If a default RESTful API client was created, we can decorate the requests made by it with the authentication header.",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    },
+    {
       "name": "spring.web.security.default.authentication.enabled",
       "description": "It defines if the default Authentication will be enabled or not.",
       "type": "java.lang.Boolean",
@@ -48,8 +54,8 @@
     },
     {
       "name": "spring.web.security.jwt.authentication.cors.allowed-methods",
-      "type": "java.lang.String",
       "description": "Set the HTTP methods to allow, e.g. GET, POST, etc. The special value '*' allows all methods.",
+      "type": "java.lang.String",
       "defaultValue": ["POST"]
     },
     {
@@ -60,14 +66,14 @@
     },
     {
       "name": "spring.web.security.jwt.authentication.cors.allowed-origins",
-      "type": "java.lang.String",
       "description": "The list of allowed origins that be specific origins, e.g. 'https://domain1.com', or '*' for all origins. By default, all origins are allowed.",
+      "type": "java.lang.String",
       "defaultValue": ["*"]
     },
     {
       "name": "spring.web.security.jwt.authentication.cors.exposed-headers",
-      "type": "java.lang.String",
       "description": "Set the list of response headers other than 'simple', headers, i.e. Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, or Pragma, that an actual response might have and can be exposed. Note that '*' is not supported on this property.",
+      "type": "java.lang.String",
       "defaultValue": ["Authorization"]
     },
     {

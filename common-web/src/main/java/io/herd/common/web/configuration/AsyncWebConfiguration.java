@@ -38,7 +38,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.concurrent.Callable;
 
 @Slf4j
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.async.enabled", havingValue = "true")
 public class AsyncWebConfiguration {
 
@@ -71,7 +71,7 @@ public class AsyncWebConfiguration {
     }
 
     @Bean(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
-    @ConditionalOnProperty(prefix = "spring.mvc.async", name = "thread-context-inheritable", havingValue = "true")
+    @ConditionalOnProperty(name = "spring.mvc.async.thread-context-inheritable", havingValue = "true")
     public AsyncTaskExecutor simpleAsyncTaskExecutor() {
         log.info("Creating simple asynchronous task executor...");
         SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
@@ -80,7 +80,7 @@ public class AsyncWebConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "spring.mvc.async", name = "thread-context-inheritable", havingValue = "true")
+    @ConditionalOnProperty(name = "spring.mvc.async.thread-context-inheritable", havingValue = "true")
     public RequestContextFilter requestContextFilter() {
         RequestContextFilter requestContextFilter = new OrderedRequestContextFilter();
         requestContextFilter.setThreadContextInheritable(true);

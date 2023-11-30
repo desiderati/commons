@@ -22,6 +22,7 @@ import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebSecurityAutoConfigu
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.CorsProperties;
 import io.herd.common.web.configuration.WebAutoConfiguration;
+import io.herd.common.web.security.jwt.JwtServiceRestTemplateInterceptor;
 import io.herd.common.web.security.jwt.JwtTokenExtractor;
 import io.herd.common.web.security.jwt.authentication.*;
 import io.herd.common.web.security.jwt.authorization.DefaultJwtTokenExtractor;
@@ -59,6 +60,7 @@ import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -182,7 +184,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Bean("webSecurityCorsProperties")
     @Validated
-    @ConfigurationProperties(prefix = "spring.web.security.jwt.authentication.cors")
+    @ConfigurationProperties("spring.web.security.jwt.authentication.cors")
     public CorsProperties webSecurityCorsProperties() {
         return new CorsProperties();
     }
@@ -219,6 +221,15 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
             jwtDelegateAuthenticationRestTemplate,
             jwtDelegateAuthenticationLoginUrl
         );
+    }
+
+    @Bean
+    @RequestScope
+    @ConditionalOnProperty(value = "spring.web.client.rest-template.decorate-with-auth-header", havingValue = "true")
+    public JwtServiceRestTemplateInterceptor defaultRestTemplateClientJwtServiceInterceptor(
+        @Qualifier("defaultRestTemplateClient") RestTemplate defaultRestTemplateClient
+    ) {
+        return new JwtServiceRestTemplateInterceptor(defaultRestTemplateClient);
     }
 
     @Bean

@@ -36,7 +36,7 @@ import org.thymeleaf.templateresolver.StringTemplateResolver;
 import java.util.Collections;
 
 @Slf4j
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Import(ThymeleafAutoConfiguration.class)
 public class ThymeleafConfiguration {
 

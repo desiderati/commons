@@ -22,20 +22,14 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.Base64;
 
 @Getter
 @Setter
-@Validated
-@Component // I don't know why, but without it, the properties file is not loaded.
-@PropertySource("classpath:openapi-client.properties")
-@ConfigurationProperties(prefix = "openapi.client")
+@NoArgsConstructor
 public class OpenApiClientProperties {
 
     @NotBlank
@@ -51,6 +45,7 @@ public class OpenApiClientProperties {
     @Min(value = 0)
     private Integer timeout = 0; // Timeout in seconds. (0 = No Timeout)
 
+    @SuppressWarnings("unused")
     public String getBasicAuthorizationHeader() {
         if (authUser != null && authPass != null) {
             return "Basic " + new String(Base64.getEncoder().encode(

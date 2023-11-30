@@ -2,8 +2,8 @@
   "properties": [
     {
       "name": "spring.web.atmosphere.url.mapping",
-      "type": "java.lang.String",
       "description": "Sets the URL to send and receive Atmosphere notifications.",
+      "type": "java.lang.String",
       "defaultValue": "/atmosphere"
     },
     {

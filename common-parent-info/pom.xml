@@ -40,7 +40,7 @@
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -57,7 +57,7 @@
     <scm>
         <connection>scm:git:git://github.com/desiderati/commons.git</connection>
         <developerConnection>scm:git:ssh://github.com:desiderati/commons.git</developerConnection>
-        <url>http://github.com/desiderati/commons/tree/master</url>
+        <url>https://github.com/desiderati/commons/tree/master</url>
     </scm>
 
     <issueManagement>
@@ -82,7 +82,7 @@
     </repositories>
 
     <properties>
-        <revision>3.1.3.RELEASE</revision>
+        <revision>3.2.0.RELEASE</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>

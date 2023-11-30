@@ -41,6 +41,7 @@ public class NotificationController {
     private BroadcasterFactory broadcasterFactory;
 
     @PathParam("user")
+    @SuppressWarnings("unused")
     private String user;
 
     /**
@@ -74,7 +75,7 @@ public class NotificationController {
      * 2) to perform some type of treatment and 3) to resend it to all listeners.
      */
     @Message(encoders = NotificationJacksonEncoder.class, decoders = NotificationJacksonDecoder.class)
-    public Notification onMessage(AtmosphereResource resource, Notification notification) {
+    public Notification<?> onMessage(AtmosphereResource resource, Notification<?> notification) {
         if (notification.getUuid() == null) {
             log.trace("Notification message '{}' sent to all clients of broadcast '{}'",
                 notification.getMessage(), resource.getBroadcaster().getID()

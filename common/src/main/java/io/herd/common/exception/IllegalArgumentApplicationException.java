@@ -18,6 +18,7 @@
  */
 package io.herd.common.exception;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -26,6 +27,7 @@ import java.io.Serializable;
 @SuppressWarnings("unused")
 public class IllegalArgumentApplicationException extends ApplicationException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public IllegalArgumentApplicationException(String message) {

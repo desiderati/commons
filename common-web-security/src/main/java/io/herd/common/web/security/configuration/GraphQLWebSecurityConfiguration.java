@@ -23,7 +23,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 import java.util.concurrent.Executor;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @Conditional(OnSchemaOrSchemaProviderBean.class)
@@ -36,7 +36,7 @@ public class GraphQLWebSecurityConfiguration {
     private final AsyncServletProperties asyncServletProperties;
 
     @Bean("graphqlAsyncTaskExecutor")
-    @ConditionalOnProperty(prefix = "spring.mvc.async", name = "thread-context-inheritable", havingValue = "true")
+    @ConditionalOnProperty(name = "spring.mvc.async.thread-context-inheritable", havingValue = "true")
     public Executor simpleGraphQLAsyncTaskExecutor(
         @Qualifier(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME) AsyncTaskExecutor taskExecutor
     ) {

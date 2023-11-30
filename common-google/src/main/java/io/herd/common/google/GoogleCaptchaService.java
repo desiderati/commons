@@ -21,6 +21,7 @@ package io.herd.common.google;
 import io.herd.common.google.configuration.GoogleCaptchaProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 
@@ -71,24 +72,11 @@ public class GoogleCaptchaService {
     }
 
     private boolean innerVerify(String recaptchaResponse) throws IOException, JSONException {
-        BufferedReader streamReader = null;
-        OutputStream outStream = null;
-        try {
-            URL verifyUrl = new URL(captchaProperties.getSiteVerifyUrl());
-            HttpsURLConnection conn = (HttpsURLConnection) verifyUrl.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("User-Agent", captchaProperties.getUserAgent());
-            conn.setRequestProperty("Accept-Language", captchaProperties.getAcceptLanguage());
-            conn.setConnectTimeout(60000); // 60 seconds
-            conn.setDoOutput(true);
-
-            log.info("Calling Google Recaptcha...");
-            String postParams = "secret=" + captchaProperties.getSecretKey() + "&response=" + recaptchaResponse;
-            outStream = conn.getOutputStream();
-            outStream.write(postParams.getBytes());
-            outStream.flush();
-
-            streamReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        HttpsURLConnection conn = callWebService(recaptchaResponse, getUrlConnection());
+        try (
+            BufferedReader streamReader = new BufferedReader(new InputStreamReader(conn.getInputStream()))
+        ) {
+            log.info("Retrieving response...");
             StringBuilder responseStrBuilder = new StringBuilder();
             String inputStr;
             while ((inputStr = streamReader.readLine()) != null) {
@@ -98,23 +86,31 @@ public class GoogleCaptchaService {
 
             log.info("Google Recaptcha called with success!");
             return (Boolean) jsonObject.get("success");
-
-        } finally {
-            if (outStream != null) {
-                try {
-                    outStream.close();
-                } catch (IOException e) {
-                    log.warn("Error while closing connection with Google Recaptcha!", e);
-                }
-            }
-
-            if (streamReader != null) {
-                try {
-                    streamReader.close();
-                } catch (IOException e) {
-                    log.warn("Error while closing connection with Google Recaptcha!", e);
-                }
-            }
         }
+    }
+
+    @NotNull
+    private HttpsURLConnection getUrlConnection() throws IOException {
+        URL verifyUrl = new URL(captchaProperties.getSiteVerifyUrl());
+        HttpsURLConnection conn = (HttpsURLConnection) verifyUrl.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("User-Agent", captchaProperties.getUserAgent());
+        conn.setRequestProperty("Accept-Language", captchaProperties.getAcceptLanguage());
+        conn.setConnectTimeout(captchaProperties.getTimeout());
+        conn.setDoOutput(true);
+        return conn;
+    }
+
+    private HttpsURLConnection callWebService(
+        String recaptchaResponse,
+        HttpsURLConnection urlConnection
+    ) throws IOException {
+        try (OutputStream outStream = urlConnection.getOutputStream()) {
+            log.info("Calling Google Recaptcha...");
+            String postParams = "secret=" + captchaProperties.getSecretKey() + "&response=" + recaptchaResponse;
+            outStream.write(postParams.getBytes());
+            outStream.flush();
+        }
+        return urlConnection;
     }
 }

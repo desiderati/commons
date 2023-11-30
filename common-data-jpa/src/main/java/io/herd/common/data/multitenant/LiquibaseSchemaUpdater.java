@@ -33,7 +33,7 @@ import java.util.Set;
 @Slf4j
 @Service
 @ConditionalOnBean(MultiTenantConnectionProvider.class)
-@ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(name = "spring.liquibase.enabled", havingValue = "true")
 public class LiquibaseSchemaUpdater {
 
     private final SpringLiquibase liquibase;

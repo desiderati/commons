@@ -45,7 +45,7 @@ import java.util.List;
  * Use this configuration whenever you need to expose application controllers ({@link RestController})
  * via Open API (formally Swagger API).
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(name = "springdoc.enabled", havingValue = "true")
 @EnableConfigurationProperties(SpringDocProperties.class)

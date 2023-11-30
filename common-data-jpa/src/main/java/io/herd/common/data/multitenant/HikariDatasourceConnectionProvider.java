@@ -38,7 +38,7 @@ import java.sql.SQLException;
  */
 @Component
 @ConditionalOnClass(HikariDataSource.class)
-@ConditionalOnProperty(prefix = "app.database.multitenant", name = "strategy", havingValue = "schema")
+@ConditionalOnProperty(name = "app.database.multitenant.strategy", havingValue = "schema")
 public class HikariDatasourceConnectionProvider implements ConnectionProvider, Stoppable {
 
     private final transient HikariDataSource dataSource;

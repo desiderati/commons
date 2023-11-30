@@ -29,7 +29,7 @@ import org.springframework.validation.annotation.Validated;
 @Setter
 @Validated
 @Component
-@ConfigurationProperties(prefix = "app.database.multitenant")
+@ConfigurationProperties("app.database.multitenant")
 public class MultiTenantProperties {
 
     public enum Strategy {

@@ -32,7 +32,7 @@ import java.util.UUID;
 @Setter // Never forget to put the setXXX (..) for configuration files!
 @Component
 @Validated
-@ConfigurationProperties(prefix = "spring.web.security.sign-request.authorization.client")
+@ConfigurationProperties("spring.web.security.sign-request.authorization.client")
 public class SignRequestAuthorizationClientProperties {
 
     public interface SignValidation {

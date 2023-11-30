@@ -1,8 +1,9 @@
 # suppress inspection "UnusedProperty" for whole file
+
 openapi.client.host=http://localhost:9090
 openapi.client.base-path=${openapi.client.host}
-#openapi.client.auth-user=
-#openapi.client.auth-pass=
+openapi.client.auth-user=
+openapi.client.auth-pass=
 
 # Timeout in seconds. (0 = No Timeout)
 openapi.client.timeout=0

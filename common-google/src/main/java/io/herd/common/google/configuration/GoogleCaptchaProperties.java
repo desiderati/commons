@@ -21,16 +21,12 @@ package io.herd.common.google.configuration;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.validation.annotation.Validated;
 
 @Getter
 @Setter
-@Validated
-@PropertySource("classpath:google-captcha.properties")
-@ConfigurationProperties(prefix = "google.captcha")
+@NoArgsConstructor
 public class GoogleCaptchaProperties {
 
     @NotNull
@@ -47,5 +43,8 @@ public class GoogleCaptchaProperties {
 
     @NotBlank
     private String secretKey;
+
+    @NotNull
+    private Integer timeout = 60000;
 
 }

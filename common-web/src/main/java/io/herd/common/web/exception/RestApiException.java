@@ -21,12 +21,14 @@ package io.herd.common.web.exception;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
 @NoArgsConstructor
 public class RestApiException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("squid:S1165")

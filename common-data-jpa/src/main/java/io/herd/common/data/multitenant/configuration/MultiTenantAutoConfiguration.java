@@ -34,14 +34,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore({
     DataSourceAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class,
     LiquibaseAutoConfiguration.class
 })
 @EnableConfigurationProperties(MultiTenantProperties.class)
-@ConditionalOnProperty(prefix = "app.database.multitenant", name = "strategy", havingValue = "schema")
+@ConditionalOnProperty(name = "app.database.multitenant.strategy", havingValue = "schema")
 @ComponentScan(basePackages = "io.herd.common.data.multitenant",
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)

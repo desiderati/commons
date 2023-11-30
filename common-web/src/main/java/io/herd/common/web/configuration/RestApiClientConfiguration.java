@@ -16,26 +16,37 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.configuration;
+package io.herd.common.web.configuration;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.AsyncConfigurer;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.annotation.RequestScope;
 
-@Slf4j
+/**
+ * It defines if a default client will be created to access another service via RESTful API.
+ */
 @Configuration(proxyBeanMethods = false)
-@EnableAsync
-@EnableScheduling
-@ConditionalOnProperty(name = "spring.async.enabled", havingValue = "true")
-public class AsyncConfiguration implements AsyncConfigurer {
+@ConditionalOnClass(RestTemplate.class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnProperty(name = "spring.web.client.rest-template.enabled", havingValue = "true")
+public class RestApiClientConfiguration {
 
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new SimpleAsyncUncaughtExceptionHandler();
+    @Value("${spring.web.client.rest-template.base-path}")
+    private String restApiBasePath;
+
+    @Bean
+    @RequestScope
+    public RestTemplate defaultRestTemplateClient() {
+        return new RestTemplateBuilder()
+            .defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
+            .rootUri(restApiBasePath)
+            .build();
     }
 }
