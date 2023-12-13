@@ -16,7 +16,7 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.configuration;
+package io.herd.common.web.configuration.async;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +75,7 @@ public class AsyncWebConfiguration {
     public AsyncTaskExecutor simpleAsyncTaskExecutor() {
         log.info("Creating simple asynchronous task executor...");
         SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
+        executor.setTaskDecorator(new RequestAttributesAwareTaskDecorator());
         executor.setThreadNamePrefix("simple-task-");
         return executor;
     }

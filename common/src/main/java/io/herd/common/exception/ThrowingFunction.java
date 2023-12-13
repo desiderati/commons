@@ -16,26 +16,26 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.exception;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * @see ThrowingConsumer
  */
 @FunctionalInterface
 @SuppressWarnings("unused")
-public interface ThrowingSupplier<R> {
+public interface ThrowingFunction<T, R> {
 
     @SuppressWarnings("squid:S00112")
-    R get() throws Exception;
+    R apply(T t) throws Exception;
 
-    static <R> Supplier<R> silently(ThrowingSupplier<R> f) {
-        return () -> {
+    static <T, R> Function<T, R> silently(ThrowingFunction<T, R> f) {
+        return t -> {
             try {
-                return f.get();
+                return f.apply(t);
             } catch (Exception ex) {
-                return ThrowingSupplier.sneakyThrow(ex);
+                return ThrowingFunction.sneakyThrow(ex);
             }
         };
     }

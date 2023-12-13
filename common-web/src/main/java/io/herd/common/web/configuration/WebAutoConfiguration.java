@@ -22,7 +22,8 @@ import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebAutoConfiguration;
 import graphql.schema.*;
 import io.herd.common.data.jpa.configuration.JpaAutoConfiguration;
 import io.herd.common.web.UrlUtils;
-import io.herd.common.web.exception.ResponseExceptionDTOHttpMessageConverter;
+import io.herd.common.web.configuration.async.AsyncWebConfiguration;
+import io.herd.common.web.rest.exception.ResponseExceptionDTOHttpMessageConverter;
 import io.herd.common.web.graphql.exception.GraphQLExceptionHandler;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.Type;
@@ -76,7 +77,6 @@ import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
 @EnableWebMvc
 @PropertySource("classpath:application-common-web.properties")
 @ComponentScan({
-    "io.herd.common.web.exception",
     "io.herd.common.web.graphql",
     "io.herd.common.web.rest"
 })

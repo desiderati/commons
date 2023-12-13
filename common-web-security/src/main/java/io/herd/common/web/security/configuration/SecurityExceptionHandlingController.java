@@ -19,8 +19,8 @@
 package io.herd.common.web.security.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.herd.common.web.exception.ExceptionHandlingController;
-import io.herd.common.web.exception.ResponseExceptionDTO;
+import io.herd.common.web.rest.exception.ExceptionHandlingController;
+import io.herd.common.web.rest.exception.ResponseExceptionDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

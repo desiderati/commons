@@ -16,35 +16,34 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.exception;
 
-import io.herd.common.exception.ApplicationException;
-
-import java.io.Serial;
-import java.io.Serializable;
+import java.util.function.Consumer;
 
 /**
- *  This exception will be treated as {@link org.springframework.http.HttpStatus#NOT_FOUND}.
+ * Using the ThrowingConsumer Functional Interface allow us to handle lambda functions
+ * which throws checked exceptions, and with this, we didn't have to declare a specific
+ * Consumer which handles such checked exception.
  */
+@FunctionalInterface
 @SuppressWarnings("unused")
-public class ResourceNotFoundApplicationException extends ApplicationException {
+public interface ThrowingConsumer<T> {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    @SuppressWarnings("squid:S00112")
+    void accept(T t) throws Exception;
 
-    public ResourceNotFoundApplicationException(String message) {
-        super(message);
+    static <T> Consumer<T> silently(ThrowingConsumer<T> f) {
+        return t -> {
+            try {
+                f.accept(t);
+            } catch (Exception ex) {
+                ThrowingConsumer.sneakyThrow(ex);
+            }
+        };
     }
 
-    public ResourceNotFoundApplicationException(String message, Serializable... args) {
-        super(message, args);
-    }
-
-    public ResourceNotFoundApplicationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ResourceNotFoundApplicationException(String message, Throwable cause, Serializable... args) {
-        super(message, cause, args);
+    @SuppressWarnings("unchecked")
+    static <E extends Exception> void sneakyThrow(Exception e) throws E {
+        throw (E) e;
     }
 }

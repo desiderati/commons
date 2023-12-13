@@ -16,7 +16,7 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.web.rest.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,28 +25,28 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @SuppressWarnings("unused")
-@ResponseStatus(HttpStatus.FORBIDDEN)
-public class ForbiddenRestApiException extends RestApiException {
+@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+public class NotAcceptableRestApiException extends RestApiException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public ForbiddenRestApiException() {
+    public NotAcceptableRestApiException() {
     }
 
-    public ForbiddenRestApiException(String message) {
+    public NotAcceptableRestApiException(String message) {
         super(message);
     }
 
-    public ForbiddenRestApiException(String message, Serializable... args) {
+    public NotAcceptableRestApiException(String message, Serializable... args) {
         super(message, args);
     }
 
-    public ForbiddenRestApiException(String message, Throwable cause) {
+    public NotAcceptableRestApiException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ForbiddenRestApiException(String message, Throwable cause, Serializable... args) {
+    public NotAcceptableRestApiException(String message, Throwable cause, Serializable... args) {
         super(message, cause, args);
     }
 }

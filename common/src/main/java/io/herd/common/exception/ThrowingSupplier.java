@@ -16,38 +16,32 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.exception;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.util.function.Supplier;
 
-import java.io.Serializable;
-import java.util.UUID;
+/**
+ * @see ThrowingConsumer
+ */
+@FunctionalInterface
+@SuppressWarnings("unused")
+public interface ThrowingSupplier<R> {
 
-@Getter
-@NoArgsConstructor
-public class ResponseExceptionDTO implements Serializable {
+    @SuppressWarnings("squid:S00112")
+    R get() throws Exception;
 
-    /**
-     * Just to have the guarantee that is exactly this class that we are deserializing.
-     */
-    private final String type = ResponseExceptionDTO.class.getName();
+    static <R> Supplier<R> silently(ThrowingSupplier<R> f) {
+        return () -> {
+            try {
+                return f.get();
+            } catch (Exception ex) {
+                return ThrowingSupplier.sneakyThrow(ex);
+            }
+        };
+    }
 
-    private UUID errorId;
-
-    private String errorCode;
-
-    private String message;
-
-    private int status;
-
-    private Serializable[] args = null;
-
-    ResponseExceptionDTO(UUID errorId, String errorCode, String message, int status, Serializable... args) {
-        this.errorId = errorId;
-        this.errorCode = errorCode;
-        this.message = message;
-        this.status = status;
-        this.args = args;
+    @SuppressWarnings("unchecked")
+    static <E extends Exception, R> R sneakyThrow(Exception e) throws E {
+        throw (E) e;
     }
 }

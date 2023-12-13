@@ -19,7 +19,7 @@
 package io.herd.common.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.herd.common.web.exception.ValidationResponseExceptionDTO;
+import io.herd.common.web.rest.exception.ValidationResponseExceptionDTO;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.springframework.test.web.servlet.MvcResult;

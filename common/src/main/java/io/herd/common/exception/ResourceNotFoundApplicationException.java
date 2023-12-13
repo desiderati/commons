@@ -16,34 +16,30 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.exception;
 
-import java.util.function.Consumer;
+import java.io.Serial;
+import java.io.Serializable;
 
-/**
- * Using the ThrowingConsumer Functional Interface allow us to handle lambda functions
- * which throws checked exceptions, and with this, we didn't have to declare a specific
- * Consumer which handles such checked exception.
- */
-@FunctionalInterface
 @SuppressWarnings("unused")
-public interface ThrowingConsumer<T> {
+public class ResourceNotFoundApplicationException extends ApplicationException {
 
-    @SuppressWarnings("squid:S00112")
-    void accept(T t) throws Exception;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    static <T> Consumer<T> silently(ThrowingConsumer<T> f) {
-        return t -> {
-            try {
-                f.accept(t);
-            } catch (Exception ex) {
-                ThrowingConsumer.sneakyThrow(ex);
-            }
-        };
+    public ResourceNotFoundApplicationException(String message) {
+        super(message);
     }
 
-    @SuppressWarnings("unchecked")
-    static <E extends Exception> void sneakyThrow(Exception e) throws E {
-        throw (E) e;
+    public ResourceNotFoundApplicationException(String message, Serializable... args) {
+        super(message, args);
+    }
+
+    public ResourceNotFoundApplicationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ResourceNotFoundApplicationException(String message, Throwable cause, Serializable... args) {
+        super(message, cause, args);
     }
 }

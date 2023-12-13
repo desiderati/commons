@@ -16,32 +16,37 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.web.rest.exception;
 
-import java.util.function.Function;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-/**
- * @see ThrowingConsumer
- */
-@FunctionalInterface
+import java.io.Serial;
+import java.io.Serializable;
+
 @SuppressWarnings("unused")
-public interface ThrowingFunction<T, R> {
+@ResponseStatus(HttpStatus.UNAUTHORIZED)
+public class UnauthorizedRestApiException extends RestApiException {
 
-    @SuppressWarnings("squid:S00112")
-    R apply(T t) throws Exception;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    static <T, R> Function<T, R> silently(ThrowingFunction<T, R> f) {
-        return t -> {
-            try {
-                return f.apply(t);
-            } catch (Exception ex) {
-                return ThrowingFunction.sneakyThrow(ex);
-            }
-        };
+    public UnauthorizedRestApiException() {
     }
 
-    @SuppressWarnings("unchecked")
-    static <E extends Exception, R> R sneakyThrow(Exception e) throws E {
-        throw (E) e;
+    public UnauthorizedRestApiException(String message) {
+        super(message);
+    }
+
+    public UnauthorizedRestApiException(String message, Serializable... args) {
+        super(message, args);
+    }
+
+    public UnauthorizedRestApiException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnauthorizedRestApiException(String message, Throwable cause, Serializable... args) {
+        super(message, cause, args);
     }
 }

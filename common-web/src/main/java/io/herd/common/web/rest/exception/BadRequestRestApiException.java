@@ -16,35 +16,37 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.web.rest.exception;
 
-import io.herd.common.exception.ApplicationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.Serial;
 import java.io.Serializable;
 
-/**
- * This exception will be treated as {@link org.springframework.http.HttpStatus#UNAUTHORIZED}.
- */
 @SuppressWarnings("unused")
-public class SecurityApplicationException extends ApplicationException {
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class BadRequestRestApiException extends RestApiException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public SecurityApplicationException(String message) {
+    public BadRequestRestApiException() {
+    }
+
+    public BadRequestRestApiException(String message) {
         super(message);
     }
 
-    public SecurityApplicationException(String message, Serializable... args) {
+    public BadRequestRestApiException(String message, Serializable... args) {
         super(message, args);
     }
 
-    public SecurityApplicationException(String message, Throwable cause) {
+    public BadRequestRestApiException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public SecurityApplicationException(String message, Throwable cause, Serializable... args) {
+    public BadRequestRestApiException(String message, Throwable cause, Serializable... args) {
         super(message, cause, args);
     }
 }

@@ -32,7 +32,7 @@
     },
     {
       "name": "spring.mvc.async.thread-context-inheritable",
-      "description": "Set whether to expose the LocaleContext and RequestAttributes as inheritable for child threads (using an InheritableThreadLocal). If true, a SimpleAsyncTaskExecutor will be used (instead of a ThreadPoolTaskExecutor) since it will never re-use threads. WARNING: Do not use inheritance for child threads if you are accessing a thread pool which is configured to potentially add new threads on demand, since this will expose the inherited context to such a pooled thread.",
+      "description": "Set whether to expose the LocaleContext and RequestAttributes as inheritable for child threads (using an InheritableThreadLocal). If true, a SimpleAsyncTaskExecutor will be used (instead of a ThreadPoolTaskExecutor) since it will never re-use threads. WARNING: Do not use inheritance for child threads if you are accessing a thread pool configured to add new threads on demand, since this will expose the inherited context to such a pooled thread.",
       "type": "java.lang.Boolean",
       "defaultValue": false
     },

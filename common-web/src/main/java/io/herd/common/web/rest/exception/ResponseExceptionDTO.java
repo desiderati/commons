@@ -16,37 +16,38 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.web.rest.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.io.Serial;
 import java.io.Serializable;
+import java.util.UUID;
 
-@SuppressWarnings("unused")
-@ResponseStatus(HttpStatus.UNAUTHORIZED)
-public class UnauthorizedRestApiException extends RestApiException {
+@Getter
+@NoArgsConstructor
+public class ResponseExceptionDTO implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    /**
+     * Just to have the guarantee that is exactly this class that we are deserializing.
+     */
+    private final String type = ResponseExceptionDTO.class.getName();
 
-    public UnauthorizedRestApiException() {
-    }
+    private UUID errorId;
 
-    public UnauthorizedRestApiException(String message) {
-        super(message);
-    }
+    private String errorCode;
 
-    public UnauthorizedRestApiException(String message, Serializable... args) {
-        super(message, args);
-    }
+    private String message;
 
-    public UnauthorizedRestApiException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    private int status;
 
-    public UnauthorizedRestApiException(String message, Throwable cause, Serializable... args) {
-        super(message, cause, args);
+    private Serializable[] args = null;
+
+    ResponseExceptionDTO(UUID errorId, String errorCode, String message, int status, Serializable... args) {
+        this.errorId = errorId;
+        this.errorCode = errorCode;
+        this.message = message;
+        this.status = status;
+        this.args = args;
     }
 }

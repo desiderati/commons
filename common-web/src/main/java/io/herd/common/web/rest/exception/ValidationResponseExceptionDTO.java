@@ -16,39 +16,31 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.web.rest.exception;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.io.Serial;
 import java.io.Serializable;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
-public class RestApiException extends RuntimeException {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ValidationResponseExceptionDTO extends ResponseExceptionDTO {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    private String[] validationMessages;
 
-    @SuppressWarnings("squid:S1165")
-    private Serializable[] args;
-
-    public RestApiException(String message) {
-        super(message);
-    }
-
-    public RestApiException(String message, Serializable...args) {
-        super(message);
-        this.args = args;
-    }
-
-    public RestApiException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public RestApiException(String message, Throwable cause, Serializable...args) {
-        super(message, cause);
-        this.args = args;
+    ValidationResponseExceptionDTO(
+        UUID errorId,
+        String errorCode,
+        String message,
+        int status,
+        String[] validationMessages,
+        Serializable... args
+    ) {
+        super(errorId, errorCode, message, status, args);
+        this.validationMessages = validationMessages;
     }
 }

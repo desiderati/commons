@@ -16,37 +16,30 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+package io.herd.common.exception;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 @SuppressWarnings("unused")
-@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-public class NotAcceptableRestApiException extends RestApiException {
+public class SecurityApplicationException extends ApplicationException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public NotAcceptableRestApiException() {
-    }
-
-    public NotAcceptableRestApiException(String message) {
+    public SecurityApplicationException(String message) {
         super(message);
     }
 
-    public NotAcceptableRestApiException(String message, Serializable... args) {
+    public SecurityApplicationException(String message, Serializable... args) {
         super(message, args);
     }
 
-    public NotAcceptableRestApiException(String message, Throwable cause) {
+    public SecurityApplicationException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public NotAcceptableRestApiException(String message, Throwable cause, Serializable... args) {
+    public SecurityApplicationException(String message, Throwable cause, Serializable... args) {
         super(message, cause, args);
     }
 }

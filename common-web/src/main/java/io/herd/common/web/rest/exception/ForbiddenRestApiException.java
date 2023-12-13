@@ -16,7 +16,7 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.exception;
+package io.herd.common.web.rest.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,28 +25,28 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @SuppressWarnings("unused")
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class BadRequestRestApiException extends RestApiException {
+@ResponseStatus(HttpStatus.FORBIDDEN)
+public class ForbiddenRestApiException extends RestApiException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public BadRequestRestApiException() {
+    public ForbiddenRestApiException() {
     }
 
-    public BadRequestRestApiException(String message) {
+    public ForbiddenRestApiException(String message) {
         super(message);
     }
 
-    public BadRequestRestApiException(String message, Serializable... args) {
+    public ForbiddenRestApiException(String message, Serializable... args) {
         super(message, args);
     }
 
-    public BadRequestRestApiException(String message, Throwable cause) {
+    public ForbiddenRestApiException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public BadRequestRestApiException(String message, Throwable cause, Serializable... args) {
+    public ForbiddenRestApiException(String message, Throwable cause, Serializable... args) {
         super(message, cause, args);
     }
 }

@@ -33,7 +33,7 @@ import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
 
-// Tentei de todas as formas possíves usar a anotação comentada abaixo, mas por algum motivo
+// Tentei de todas as formas possíveis usar a anotação comentada abaixo, mas por algum motivo
 // que não sei dizer qual, e, mesmo colocando a anotação @Order, a verificação desta anotação
 // sempre ocorria antes do registro do 'AbstractEntityManagerFactoryBean'. Desta forma, como
 // tal Bean ainda não havia sido registrado no contexto, o filtro abaixo não era criado.
