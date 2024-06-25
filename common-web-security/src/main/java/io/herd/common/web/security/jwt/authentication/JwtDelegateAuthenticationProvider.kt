@@ -1,7 +1,9 @@
 package io.herd.common.web.security.jwt.authentication
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.herd.common.web.security.jwt.authorization.JwtAuthorizationService
 import lombok.extern.slf4j.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.AuthenticationServiceException
 import org.springframework.security.authentication.BadCredentialsException
@@ -21,6 +23,13 @@ class JwtDelegateAuthenticationProvider(
     private val jwtDelegateAuthenticationRestTemplate: RestTemplate,
     private val jwtDelegateAuthenticationLoginUrl: String
 ) : AbstractUserDetailsAuthenticationProvider() {
+
+    private var jwtAuthorizationService: JwtAuthorizationService? = null
+
+    @Autowired
+    fun setJwtAuthorizationService(jwtAuthorizationService: JwtAuthorizationService?) {
+        this.jwtAuthorizationService = jwtAuthorizationService
+    }
 
     override fun additionalAuthenticationChecks(
         userDetails: UserDetails?,
@@ -56,12 +65,17 @@ class JwtDelegateAuthenticationProvider(
 
             if (responseEntity.statusCode == HttpStatus.OK) {
                 authentication.authorizationHeader =
-                    responseEntity.headers[JwtAuthenticationFilter.HEADER_AUTHORIZATION]?.get(0)
+                    responseEntity.headers[JwtAuthorizationService.HEADER_AUTHORIZATION]?.get(0)
+
+                val delegateAuthentication =
+                    jwtAuthorizationService?.getAuthenticationFromAuthorizationHeader(
+                        authentication.authorizationHeader
+                    )
 
                 return User(
                     requestBody.getFirst(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY),
                     requestBody.getFirst(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY),
-                    emptyList()
+                    delegateAuthentication?.authorities ?: emptyList()
                 )
             }
         } catch (ex: Exception) {

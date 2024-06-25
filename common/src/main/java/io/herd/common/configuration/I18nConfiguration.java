@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 - Felipe Desiderati
+ * Copyright (c) 2024 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,11 +39,12 @@ import java.util.Arrays;
  * Configuration used to load all application internationalization files in the same {@link java.util.ResourceBundle}.
  */
 @Slf4j
+@Setter
 @Configuration(proxyBeanMethods = false)
 @PropertySource("classpath:i18n.properties")
 @Import({
     // Spring Cloud uses RefreshAutoConfiguration to add the refresh scope to your application.
-    // By default, this auto-configuration isn't included in the auto-configuration that's
+    // By default, this auto-configuration isn't included in the auto-configuration
     // enabled by @WebMvcTest. You can enable extra auto-configuration by adding
     // @ImportAutoConfiguration(RefreshAutoConfiguration.class) to your tests.
     RefreshAutoConfiguration.class
@@ -54,7 +55,6 @@ public class I18nConfiguration implements EnvironmentAware {
         new String[]{"classpath*:i18n/exceptions", "classpath*:i18n/http-exceptions", "classpath*:i18n/templates",
             "classpath*:i18n/default-validation-messages", "classpath*:i18n/validation-messages"};
 
-    @Setter
     private Environment environment;
 
     @Bean
@@ -67,7 +67,7 @@ public class I18nConfiguration implements EnvironmentAware {
         }
         String[] i18nAllFiles = ArrayUtils.addAll(i18nDefaultFiles, i18nFiles);
 
-        log.info("Loading i18n files: " + Arrays.toString(i18nAllFiles));
+        log.info("Loading i18n files: {}", Arrays.toString(i18nAllFiles));
         PathMatchingReloadableResourceBundleMessageSource source =
             new PathMatchingReloadableResourceBundleMessageSource();
         //source.setCacheSeconds(300); // Reload messages every 5 minutes

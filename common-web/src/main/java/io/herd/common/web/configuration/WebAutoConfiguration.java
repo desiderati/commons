@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 - Felipe Desiderati
+ * Copyright (c) 2024 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,10 +19,12 @@
 package io.herd.common.web.configuration;
 
 import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebAutoConfiguration;
+import graphql.kickstart.tools.TypeDefinitionFactory;
 import graphql.schema.*;
 import io.herd.common.data.jpa.configuration.JpaAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.async.AsyncWebConfiguration;
+import io.herd.common.web.graphql.PageableTypeDefinitionConnectionFactory;
 import io.herd.common.web.rest.exception.ResponseExceptionDTOHttpMessageConverter;
 import io.herd.common.web.graphql.exception.GraphQLExceptionHandler;
 import jakarta.persistence.EntityManager;
@@ -277,5 +279,10 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
                     return null;
                 }
             }).build();
+    }
+
+    @Bean
+    public TypeDefinitionFactory pageableTypeDefinitionConnectionFactory() {
+        return new PageableTypeDefinitionConnectionFactory();
     }
 }

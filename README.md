@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-3.2.1.RELEASE-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-3.3.0.RC1-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE)
 
@@ -23,6 +23,16 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [3.3.0.RC1] - 2024-01-12
+- Added support to retrieve the authorities passed by the delegated authentication provider.
+- Added support for pre/post authorizations on GraphQL calls.
+- Added Hamkrest and Spek as test dependencies.
+- Added initial support for ArrowKt.
+- Added the pageable functionality for GraphQL.
+- Removed dependency with org.reflections.
+- Updated some dependency versions.
+- Update the copyrigth.
 
 #### [3.2.1.RELEASE] - 2023-12-13
 - Added support to create request scoped beans within async threads.

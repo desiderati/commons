@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 - Felipe Desiderati
+ * Copyright (c) 2024 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -59,20 +59,21 @@ public class JwtAuthorizationService {
      */
     public Authentication verifyAuthentication(HttpServletRequest request) {
         try {
-            return getAuthenticationFromTokenPayload(request);
+            String authHeader = request.getHeader(HEADER_AUTHORIZATION);
+            return getAuthenticationFromAuthorizationHeader(authHeader);
         } catch (Exception e) {
             throw new AuthenticationServiceException("Unable to authorize the request due to: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Extract the authenticated user (contained inside the TOKEN).
+     * Extract the authenticated user (contained inside the JWT Token).
      */
-    private Authentication getAuthenticationFromTokenPayload(HttpServletRequest request) {
-        String auth = request.getHeader(HEADER_AUTHORIZATION);
-        if (auth != null && auth.startsWith(TOKEN_BEARER)) {
+    public Authentication getAuthenticationFromAuthorizationHeader(String authHeader) {
+        if (authHeader != null && authHeader.startsWith(TOKEN_BEARER)) {
             return jwtService.extractTokenPayload(
-                auth.replace(TOKEN_BEARER, ""), jwtTokenExtractor);
+                authHeader.replace(TOKEN_BEARER, ""), jwtTokenExtractor
+            );
         }
         return null;
     }

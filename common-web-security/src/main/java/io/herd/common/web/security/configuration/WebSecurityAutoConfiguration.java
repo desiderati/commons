@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 - Felipe Desiderati
+ * Copyright (c) 2024 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -44,6 +44,8 @@ import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authorization.method.AuthorizationManagerAfterMethodInterceptor;
+import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -57,14 +59,20 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
+import org.springframework.security.web.method.annotation.CurrentSecurityContextArgumentResolver;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+
+import java.util.Collection;
+import java.util.List;
 
 import static org.springframework.security.core.context.SecurityContextHolder.MODE_INHERITABLETHREADLOCAL;
 
@@ -134,10 +142,22 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
         boolean graphqlServletAsyncEnabled,
 
         @Value("${graphql.servlet.async.delegate-security-context:true}")
-        boolean graphqlServletAsyncDelegateSecurityContext
+        boolean graphqlServletAsyncDelegateSecurityContext,
+
+        Collection<AuthorizationManagerBeforeMethodInterceptor> preAuthorizeInterceptors,
+        Collection<AuthorizationManagerAfterMethodInterceptor> postAuthorizeInterceptors
     ) {
         if (graphqlServletAsyncEnabled && graphqlServletAsyncDelegateSecurityContext) {
             SecurityContextHolder.setStrategyName(MODE_INHERITABLETHREADLOCAL);
+
+            // As we have defined a new SecurityContextHolderStrategy, we must reconfigure
+            // the method security interceptors and the argument resolvers.
+            preAuthorizeInterceptors.forEach(
+                it -> it.setSecurityContextHolderStrategy(SecurityContextHolder.getContextHolderStrategy())
+            );
+            postAuthorizeInterceptors.forEach(
+                it -> it.setSecurityContextHolderStrategy(SecurityContextHolder.getContextHolderStrategy())
+            );
         }
     }
 
@@ -180,6 +200,33 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @Autowired(required = false)
     public void setGraphQLCorsFilter(@Qualifier("corsConfigurer") CorsFilter graphQLCorsFilter) {
         this.graphQLCorsFilter = graphQLCorsFilter;
+    }
+
+    @Autowired
+    public void configureArgumentResolvers(
+        @Value("${graphql.servlet.async.enabled:false}")
+        boolean graphqlServletAsyncEnabled,
+
+        @Value("${graphql.servlet.async.delegate-security-context:true}")
+        boolean graphqlServletAsyncDelegateSecurityContext,
+
+        List<HandlerMethodArgumentResolver> argumentResolvers
+    ) {
+        if (graphqlServletAsyncEnabled && graphqlServletAsyncDelegateSecurityContext) {
+            argumentResolvers.forEach(
+                it -> {
+                    if (it instanceof AuthenticationPrincipalArgumentResolver) {
+                        ((AuthenticationPrincipalArgumentResolver) it).setSecurityContextHolderStrategy(
+                            SecurityContextHolder.getContextHolderStrategy()
+                        );
+                    } else if (it instanceof CurrentSecurityContextArgumentResolver) {
+                        ((CurrentSecurityContextArgumentResolver) it).setSecurityContextHolderStrategy(
+                            SecurityContextHolder.getContextHolderStrategy()
+                        );
+                    }
+                }
+            );
+        }
     }
 
     @Bean("webSecurityCorsProperties")
