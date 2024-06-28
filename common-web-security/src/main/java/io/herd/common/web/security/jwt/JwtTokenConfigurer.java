@@ -18,11 +18,11 @@
  */
 package io.herd.common.web.security.jwt;
 
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsBuilder;
 
 @FunctionalInterface
 public interface JwtTokenConfigurer {
 
-    void configure(Claims tokenPayload);
+    void configure(ClaimsBuilder tokenPayload);
 
 }

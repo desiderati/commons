@@ -76,10 +76,13 @@
         </dependency>
 
         <!-- Needed if you are going to use the Hibernate Validator out of a web context. -->
+        <!-- It will be duplicated with Tomcat Embed Expression Language.
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.el</artifactId>
+            <groupId>jakarta.el</groupId>
+            <artifactId>jakarta.el-api</artifactId>
+            <version>${jakarta.el-api.version}</version>
         </dependency>
+        -->
 
         <!-- Apache Commons and others libs like Guava. -->
         <dependency>
@@ -107,13 +110,16 @@
             <artifactId>commons-text</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
+
+        <!-- Until now 27/06/2024, there are a few vulnerabilities -->
+        <!--
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
@@ -123,13 +129,10 @@
             <artifactId>commons-fileupload</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
         </dependency>
+        -->
 
         <!-- Mapping Frameworks -->
         <dependency>

@@ -74,7 +74,7 @@ public class DefaultImplicitNamingStrategy extends SpringImplicitNamingStrategy 
         }
 
         // If it is still larger than the size supported by PostgreSQL, the database
-        // will truncate on your own! See explanation below!
+        // will truncate on your own! See the explanation below!
 
         // Postgres warns us of identifiers longer than 63 characters, informing us
         // of what they will be truncated to. It then proceeds to create the identifier.
@@ -84,7 +84,7 @@ public class DefaultImplicitNamingStrategy extends SpringImplicitNamingStrategy 
         // will truncate the identifier somewhere in the middle so as to maintain the
         // convention of terminating with, for example, _fkey.
         //
-        // The 63 byte limit is not arbitrary. It comes from NAMEDATALEN - 1. By default
+        // The 63 byte limit is not arbitrary. It comes from NAMEDATALEN - 1. By default,
         // NAMEDATALEN is 64. If need be, this value can be modified in the Postgres source.
         // Yay, open-source database implementations.
         Identifier userProvidedIdentifier = source.getUserProvidedIdentifier();
@@ -92,9 +92,11 @@ public class DefaultImplicitNamingStrategy extends SpringImplicitNamingStrategy 
             identifierName, source.getBuildingContext());
     }
 
-    private String getIdentifierName(ImplicitConstraintNameSource source, String prefix,
-                                     ColumnNameTransformer columnNameTransformer) {
-
+    private String getIdentifierName(
+        ImplicitConstraintNameSource source,
+        String prefix,
+        ColumnNameTransformer columnNameTransformer
+    ) {
         StringBuilder identifierName = new StringBuilder(prefix);
         List<Identifier> columnNames = source.getColumnNames();
         for (Identifier columnName : columnNames) {

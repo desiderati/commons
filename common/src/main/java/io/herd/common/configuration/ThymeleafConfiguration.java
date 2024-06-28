@@ -89,7 +89,7 @@ public class ThymeleafConfiguration {
     private ITemplateResolver stringTemplateResolver() {
         final StringTemplateResolver templateResolver = new StringTemplateResolver();
         templateResolver.setOrder(Ordered.LOWEST_PRECEDENCE);
-        // No resolvable pattern, will simply process as a String template everything not previously matched!
+        // No resolvable pattern, it will simply process as a String template everything not previously matched!
         templateResolver.setCacheable(false);
         return templateResolver;
     }

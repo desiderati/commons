@@ -31,7 +31,7 @@ public class CpfValidator extends AbstractCpfCpnpjValidator<Cpf> {
 
     @Override
     public void initialize(Cpf constraintAnnotation) {
-        // Validates CPF strings with separator, eg.: 134.241.313-00.
+        // Validates CPF strings with separator, e.g.: 134.241.313-00.
         withSeparatorMod11Validator1.initialize(
             0, 10, 12, true, Integer.MAX_VALUE, '0',
             '0', Mod11Check.ProcessingDirection.RIGHT_TO_LEFT
@@ -41,7 +41,7 @@ public class CpfValidator extends AbstractCpfCpnpjValidator<Cpf> {
             '0', Mod11Check.ProcessingDirection.RIGHT_TO_LEFT
         );
 
-        // Validates CPF strings without separator, eg.: 13424131300.
+        // Validates CPF strings without a separator, e.g.: 13424131300.
         withoutSeparatorMod11Validator1.initialize(
             0, 8, 9, true, Integer.MAX_VALUE, '0',
             '0', Mod11Check.ProcessingDirection.RIGHT_TO_LEFT
@@ -52,4 +52,3 @@ public class CpfValidator extends AbstractCpfCpnpjValidator<Cpf> {
         );
     }
 }
-

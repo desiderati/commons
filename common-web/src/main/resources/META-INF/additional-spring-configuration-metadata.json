@@ -14,7 +14,7 @@
     },
     {
       "name": "springdoc.enabled",
-      "description": "It defines if Open API (ormelly Swagger API) will be enabled or not.",
+      "description": "It defines if Open API (formally Swagger API) will be enabled or not.",
       "type": "java.lang.Boolean",
       "defaultValue": true
     },

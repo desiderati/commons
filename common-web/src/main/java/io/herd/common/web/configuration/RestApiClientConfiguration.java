@@ -30,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.annotation.RequestScope;
 
 /**
- * It defines if a default client will be created to access another service via RESTful API.
+ * It defines if a default client is created to access another service via RESTful API.
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RestTemplate.class)

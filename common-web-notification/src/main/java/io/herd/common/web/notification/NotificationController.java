@@ -26,7 +26,7 @@ import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.BroadcasterFactory;
 
-// Can not be singleton!
+// Cannot be singleton!
 @Slf4j
 @Getter
 @ManagedService(path = "/{notification}/{user}")
@@ -48,7 +48,7 @@ public class NotificationController {
      * Executed when the connection was fully established, in other words, ready to receive messages.
      * <p>
      * If necessary, it will be possible to return a message to the listener of this resource using an encoder.
-     * Eg.: @Ready(encoders = {NotificationJacksonEncoder.class})
+     * E.g.: @Ready(encoders = {NotificationJacksonEncoder.class})
      * <p>
      *
      * <a href="https://github.com/Atmosphere/atmosphere/wiki/Getting-Started-with-the-ManagedService-Annotation">

@@ -30,6 +30,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -59,10 +61,12 @@ public class GoogleCaptchaService {
         for (int retry = 0; retry < captchaProperties.getMaxRetries(); retry++) {
             try {
                 return innerVerify(recaptchaResponse);
-            } catch (Exception e) {
+            } catch (Exception ex) {
                 log.warn(
-                    "Error while calling Google Recaptcha! Retrying ("
-                        + (retry + 1) + "/" + captchaProperties.getMaxRetries() + ")...", e
+                    "Error while calling Google Recaptcha! Retrying ({}/{})...",
+                    retry + 1,
+                    captchaProperties.getMaxRetries(),
+                    ex
                 );
             }
         }
@@ -71,7 +75,7 @@ public class GoogleCaptchaService {
         return false;
     }
 
-    private boolean innerVerify(String recaptchaResponse) throws IOException, JSONException {
+    private boolean innerVerify(String recaptchaResponse) throws IOException, JSONException, URISyntaxException {
         HttpsURLConnection conn = callWebService(recaptchaResponse, getUrlConnection());
         try (
             BufferedReader streamReader = new BufferedReader(new InputStreamReader(conn.getInputStream()))
@@ -90,8 +94,8 @@ public class GoogleCaptchaService {
     }
 
     @NotNull
-    private HttpsURLConnection getUrlConnection() throws IOException {
-        URL verifyUrl = new URL(captchaProperties.getSiteVerifyUrl());
+    private HttpsURLConnection getUrlConnection() throws IOException, URISyntaxException {
+        URL verifyUrl = new URI(captchaProperties.getSiteVerifyUrl()).toURL();
         HttpsURLConnection conn = (HttpsURLConnection) verifyUrl.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("User-Agent", captchaProperties.getUserAgent());

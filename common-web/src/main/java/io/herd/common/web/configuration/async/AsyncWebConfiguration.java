@@ -60,7 +60,10 @@ public class AsyncWebConfiguration {
     public CallableProcessingInterceptor callableProcessingInterceptor() {
         return new TimeoutCallableProcessingInterceptor() {
             @Override
-            public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
+            public <T> @NotNull Object handleTimeout(
+                @NotNull NativeWebRequest request,
+                @NotNull Callable<T> task
+            ) throws Exception {
                 log.error(
                     "Timeout while executing asynchronous request: {}",
                     ((HttpServletRequest) request.getNativeRequest()).getRequestURI()

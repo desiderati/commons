@@ -29,7 +29,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.UUID;
 
 @Getter
-@Setter // Never forget to put the setXXX (..) for configuration files!
+@Setter // Never forget to put the setXXX (...) for configuration files!
 @Component
 @Validated
 @ConfigurationProperties("spring.web.security.sign-request.authorization.client")
@@ -43,7 +43,7 @@ public class SignRequestAuthorizationClientProperties {
     private String secretKey;
 
     /**
-     * We had to put the validation annotations in the methods instead of the fields, because when declaring
+     * We had to put the validation annotations in the methods instead of the fields, because, when declaring
      * validation rules for a properties file, we need to annotate the referring class with {@link Validated}.
      * <p>
      * If not annotated, a warning message would be printed in the application log: "The @ConfigurationProperties
@@ -52,7 +52,7 @@ public class SignRequestAuthorizationClientProperties {
      * <p>
      *
      * This way, when we annotate a class with {@link Validated}, Spring Boot will create a Proxy for this class
-     * and thus the validation will not work correctly, if the validation annotations are not in the methods.
+     * and thus the validation will not work correctly if the validation annotations are not in the methods.
      */
     @NotNull(groups = SignValidation.class)
     public UUID getId() {

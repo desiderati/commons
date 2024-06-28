@@ -26,12 +26,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.lang.annotation.*;
 
 /**
- * It enables Commons Herd.io (Security) auto configuration when using test slicing
+ * It enables Commons Herd.io (Security) auto-configuration when using test slicing
  * like {@link WebMvcTest} or {@link DataJpaTest}.
  * <p>
  * If you are going to test using the annotation {@link SpringBootTest},
  * there's no need to use this annotation.
  */
+@SuppressWarnings("unused")
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

@@ -34,13 +34,13 @@ public class DefaultJwtAuthenticationTokenConfigurer implements JwtAuthenticatio
     @SuppressWarnings("squid:S1905") // Unnecessary cast
     public JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication authentication) {
         return tokenPayload -> {
-            tokenPayload.setSubject(((User) authentication.getPrincipal()).getUsername());
-            tokenPayload.put(JwtService.AUTHORITIES_ATTRIBUTE,
+            tokenPayload.subject(((User) authentication.getPrincipal()).getUsername());
+            tokenPayload.add(JwtService.AUTHORITIES_ATTRIBUTE,
                 authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
 
             if (authentication.getPrincipal() instanceof MultiTenantSupport multiTenantSupport) {
-                tokenPayload.put(JwtService.TENANT_ATTRIBUTE, multiTenantSupport.getTenant());
+                tokenPayload.add(JwtService.TENANT_ATTRIBUTE, multiTenantSupport.getTenant());
             }
         };
     }

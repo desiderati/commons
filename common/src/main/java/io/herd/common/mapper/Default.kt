@@ -20,7 +20,7 @@
 package io.herd.common.mapper
 
 /**
- * Identifica qual construtor deve ser usado pelo MapStruct para a geração da trasnformação automática.
+ * Identifica qual construtor deve ser usado pelo MapStruct para a geração da transformação automática.
  * <br>
  * O nome precisa ser exatamente igual a <b>Default</b>.
  */

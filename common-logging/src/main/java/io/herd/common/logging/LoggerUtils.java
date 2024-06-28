@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.Optional;
 
 public final class LoggerUtils {
@@ -55,7 +55,7 @@ public final class LoggerUtils {
 
     private static boolean connectTo(String cloud, String url) {
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            HttpURLConnection connection = (HttpURLConnection) new URI(url).toURL().openConnection();
             connection.setConnectTimeout(1000 * 2);
             connection.setRequestMethod("GET");
             connection.setDoOutput(true);

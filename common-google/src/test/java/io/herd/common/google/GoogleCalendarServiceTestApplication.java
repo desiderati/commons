@@ -21,21 +21,23 @@ package io.herd.common.google;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
-import io.herd.common.configuration.annotation.CustomSpringBootApplication;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
 
 @Slf4j
-@CustomSpringBootApplication
+@SpringBootApplication
 public class GoogleCalendarServiceTestApplication {
 
     public static void main(String[] args) throws IOException {
         ConfigurableApplicationContext context =
-            new SpringApplicationBuilder(GoogleCalendarServiceTestApplication.class).web(WebApplicationType.NONE).run(args);
+            new SpringApplicationBuilder(
+                GoogleCalendarServiceTestApplication.class
+            ).web(WebApplicationType.NONE).run(args);
         GoogleCalendarService googleCalendarService = context.getBean(GoogleCalendarService.class);
 
         // List all calendars associated with the account.
@@ -48,7 +50,7 @@ public class GoogleCalendarServiceTestApplication {
                 .execute();
 
             for (CalendarListEntry listEntry : calendarList.getItems()) {
-                log.info(listEntry.getId());
+                log.info(listEntry.getSummary());
             }
             pageToken = calendarList.getNextPageToken();
 

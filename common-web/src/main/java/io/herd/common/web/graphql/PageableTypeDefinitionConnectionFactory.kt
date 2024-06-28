@@ -52,7 +52,7 @@ class PageableTypeDefinitionConnectionFactory : TypeDefinitionFactory {
     override fun create(existing: MutableList<Definition<*>>): List<Definition<*>> {
         val declaredPageableDirectives = findDeclaredPageableDirectives(existing)
         if (declaredPageableDirectives.isEmpty()) {
-            // do not add Relay definitions unless needed
+            // Do not add relay definitions unless needed.
             return emptyList()
         }
 

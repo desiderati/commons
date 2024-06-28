@@ -19,6 +19,7 @@
 package io.herd.common.web.security.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -117,17 +117,16 @@ public class JwtService {
             if (StringUtils.isBlank(jwtProperties.getSecretKey())) {
                 throw new IllegalStateException("Empty secret key.");
             }
-            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-            return new SecretKeySpec(jwtProperties.getSecretKey().getBytes(), signatureAlgorithm.getJcaName());
+            return Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes());
         } catch (Exception e) {
             throw new JwtException("Unable to load public key.", e);
         }
     }
 
     public String generateToken(JwtTokenConfigurer configurer) {
-        Claims tokenPayload = Jwts.claims();
+        ClaimsBuilder tokenPayload = Jwts.claims();
         configurer.configure(tokenPayload);
-        tokenPayload.setExpiration(
+        tokenPayload.expiration(
             Date.from(
                 LocalDateTime.now().plusHours(
                     expirationPeriod > 0 ? expirationPeriod : Integer.MAX_VALUE
@@ -135,11 +134,11 @@ public class JwtService {
             )
         );
 
-        JwtBuilder builder = Jwts.builder().setClaims(tokenPayload);
+        JwtBuilder builder = Jwts.builder().claims(tokenPayload.build());
         if (jwtEncryptionMethod == JwtEncryptionMethod.ASYMMETRIC) {
-            builder.signWith(getPrivateKey(), SignatureAlgorithm.RS512);
+            builder.signWith(getPrivateKey(), Jwts.SIG.RS512);
         } else if (jwtEncryptionMethod == JwtEncryptionMethod.SYMMETRIC) {
-            builder.signWith(getSecretKey(), SignatureAlgorithm.HS512);
+            builder.signWith(getSecretKey(), Jwts.SIG.HS512);
         } else {
             throw new IllegalStateException("Invalid encryption method! This exception should not happen at all.");
         }
@@ -147,18 +146,18 @@ public class JwtService {
     }
 
     public <T> T extractTokenPayload(String token, JwtTokenExtractor<T> extractor) {
-        JwtParserBuilder parserBuilder = Jwts.parserBuilder();
-        parserBuilder.setClock(() -> Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
+        JwtParserBuilder parserBuilder = Jwts.parser();
+        parserBuilder.clock(() -> Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
         if (jwtEncryptionMethod == JwtEncryptionMethod.ASYMMETRIC) {
-            parserBuilder.setSigningKey(getPublicKey());
+            parserBuilder.verifyWith(getPublicKey());
         } else if (jwtEncryptionMethod == JwtEncryptionMethod.SYMMETRIC) {
-            parserBuilder.setSigningKey(getSecretKey());
+            parserBuilder.verifyWith(getSecretKey());
         } else {
             throw new IllegalStateException("Invalid encryption method! This exception should not happen at all.");
         }
 
         onBeforeExtractPayload(token);
-        Claims tokenPayload = parserBuilder.build().parseClaimsJws(token).getBody();
+        Claims tokenPayload = parserBuilder.build().parseSignedClaims(token).getPayload();
         return extractor.extract(tokenPayload);
     }
 

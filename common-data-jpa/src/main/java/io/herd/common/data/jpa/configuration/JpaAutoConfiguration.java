@@ -29,7 +29,7 @@ import org.springframework.context.annotation.*;
 @Configuration(proxyBeanMethods = false)
 @PropertySource("classpath:application-common-data-jpa.properties")
 
-// Do not use this annotation in a auto-configuration file.
+// Do not use this annotation in an auto-configuration file.
 //@EnableJpaRepositories
 
 @ComponentScan(basePackages = "io.herd.common.data.jpa",

@@ -22,6 +22,8 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -37,25 +39,29 @@ public class MultipartRequest {
     private final OutputStream outputStream;
     private final PrintWriter writer;
 
-    public static MultipartRequest as(String requestURL, String auth) throws IOException {
+    public static MultipartRequest as(String requestURL, String auth) throws IOException, URISyntaxException {
         return new MultipartRequest(requestURL, auth, StandardCharsets.UTF_8);
     }
 
-    public static MultipartRequest as(String requestURL, String auth, Charset charset) throws IOException {
+    public static MultipartRequest as(
+        String requestURL,
+        String auth,
+        Charset charset
+    ) throws IOException, URISyntaxException {
         return new MultipartRequest(requestURL, auth, charset);
     }
 
     /**
-     * This private constructor initializes a new HTTP POST request with content type
-     * is set to multipart/form-data.
+     * This private constructor initializes a new HTTP POST request with the content type
+     * set to multipart/form-data.
      */
-    private MultipartRequest(String requestURL, String auth, Charset charset) throws IOException {
+    private MultipartRequest(String requestURL, String auth, Charset charset) throws IOException, URISyntaxException {
         this.charset = charset;
 
         // Creates a unique boundary based on time stamp!
         boundary = "===" + System.currentTimeMillis() + "===";
 
-        URL url = new URL(requestURL);
+        URL url = new URI(requestURL).toURL();
         httpConn = (HttpURLConnection) url.openConnection();
         httpConn.setUseCaches(false);
         httpConn.setDoOutput(true); // Indicates POST method!
@@ -83,13 +89,17 @@ public class MultipartRequest {
     }
 
     /**
-     * Adds a upload file section to the request.
+     * Adds an upload file section to the request.
      *
      * @param fieldName   Name attribute in <input type="file" name="..." />
      * @param inputStream File to be uploaded.
      */
-    public MultipartRequest addFilePart(String fieldName, String fileName, String contentType,
-                                        InputStream inputStream) throws IOException {
+    public MultipartRequest addFilePart(
+        String fieldName,
+        String fileName,
+        String contentType,
+        InputStream inputStream
+    ) throws IOException {
 
         writer.append("--").append(boundary).append(LINE_FEED);
         writer.append("Content-Disposition: form-data; name=\"").append(fieldName).append("\"; ")

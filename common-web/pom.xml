@@ -70,12 +70,6 @@
         <dependency>
             <groupId>com.graphql-java-kickstart</groupId>
             <artifactId>graphql-spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.reflections</groupId>
-                    <artifactId>reflections</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.graphql-java</groupId>
@@ -98,13 +92,6 @@
             <artifactId>spek-runner-junit5</artifactId>
             <version>${spek.version}</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <!-- Too old to be used. -->
-                    <groupId>io.github.classgraph</groupId>
-                    <artifactId>classgraph</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 

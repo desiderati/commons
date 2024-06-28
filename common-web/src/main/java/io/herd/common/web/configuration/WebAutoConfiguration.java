@@ -104,7 +104,7 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
         ObjectProvider<EntityManager> entityManager
     ) {
         this.apiBasePath = UrlUtils.sanitize(apiBasePath);
-        log.info("Configuring RESTful API base path as: " + this.apiBasePath);
+        log.info("Configuring RESTful API base path as: {}", this.apiBasePath);
 
         this.validator = validator;
         this.entityManager = entityManager.getIfAvailable();

@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 /**
  * Using the ThrowingConsumer Functional Interface allow us to handle lambda functions
- * which throws checked exceptions, and with this, we didn't have to declare a specific
+ * that throw checked exceptions, and with this, we didn't have to declare a specific
  * Consumer which handles such checked exception.
  */
 @FunctionalInterface

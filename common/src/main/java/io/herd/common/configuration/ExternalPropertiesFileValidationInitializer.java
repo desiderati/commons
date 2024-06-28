@@ -39,7 +39,7 @@ public class ExternalPropertiesFileValidationInitializer implements ApplicationC
             externalProperties = externalProperties.replace("file:", "");
             File externalPropertiesFile = Paths.get(externalProperties).toFile();
             if (externalPropertiesFile.exists() && externalPropertiesFile.isFile()) {
-                log.info("\n \nLoading external properties file:" + externalPropertiesFile + "\n");
+                log.info("\n \nLoading external properties file:{}\n", externalPropertiesFile);
             }
         }
     }

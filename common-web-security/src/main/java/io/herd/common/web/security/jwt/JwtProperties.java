@@ -25,7 +25,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Getter
-@Setter // Never forget to put the setXXX (..) for configuration files!
+@Setter // Never forget to put the setXXX (...) for configuration files!
 @Component
 @PropertySource(value = "classpath:jwt.properties", ignoreResourceNotFound = true)
 @ConfigurationProperties("jwt")

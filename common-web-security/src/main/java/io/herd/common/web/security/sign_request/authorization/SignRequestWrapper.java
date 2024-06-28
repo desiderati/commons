@@ -31,7 +31,7 @@ import java.io.*;
  * <p>
  * <b>org.springframework.http.converter.HttpMessageNotReadableException: Required request body is missing!</b>
  * <p>
- * We can not use the ContentCachingRequestWrapper, since it only supports the following:
+ * We cannot use the ContentCachingRequestWrapper, since it only supports the following:
  * Content-Type:application/x-www-form-urlencoded
  */
 public class SignRequestWrapper extends HttpServletRequestWrapper {

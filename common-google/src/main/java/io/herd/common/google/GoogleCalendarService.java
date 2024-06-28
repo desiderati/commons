@@ -76,7 +76,7 @@ public class GoogleCalendarService {
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         File credentialsFolder = new File(googleCalendarProperties.getCredentialsFolder());
-        log.info("Reading Google Credentials from: " + credentialsFolder.getCanonicalPath());
+        log.info("Reading Google Credentials from: {}", credentialsFolder.getCanonicalPath());
 
         GoogleAuthorizationCodeFlow flow =
             new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, SCOPES)

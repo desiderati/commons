@@ -90,12 +90,13 @@ public class SignRequestAuthorizationFilter extends OncePerRequestFilter {
                     }
                 }
             } catch (AuthenticationServiceException failed) {
-                log.error("Authorization Failed: " + failed.getMessage(), failed);
+                log.error("Authorization Failed: {}", failed.getMessage(), failed);
             }
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } else {
-            log.debug("SecurityContextHolder already contains: '"
-                + SecurityContextHolder.getContext().getAuthentication() + "'");
+            log.debug("SecurityContextHolder already contains: '{}'",
+                SecurityContextHolder.getContext().getAuthentication()
+            );
         }
 
         try {

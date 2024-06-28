@@ -45,11 +45,12 @@ public class DatabaseService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @SuppressWarnings("unused")
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void createSchema(String name) {
         Map<String, String> values = new HashMap<>();
         values.put("schemaName", name);
-        log.info("Creating schema: " + name);
+        log.info("Creating schema: {}", name);
 
         StringSubstitutor strSubstitutor = new StringSubstitutor(values);
         String createQuery = strSubstitutor.replace(databaseProperties.getDdlCreateSchema());

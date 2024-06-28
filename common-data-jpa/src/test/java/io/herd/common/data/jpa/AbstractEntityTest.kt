@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.cglib.proxy.Enhancer
 import org.springframework.cglib.proxy.MethodInterceptor
 
+@Suppress("LoggingSimilarMessage")
 class AbstractEntityTest {
 
     companion object {

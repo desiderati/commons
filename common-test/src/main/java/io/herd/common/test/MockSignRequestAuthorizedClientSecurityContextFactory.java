@@ -33,7 +33,7 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
  * Adds support for authorization when running tests.
  */
 public class MockSignRequestAuthorizedClientSecurityContextFactory
-        implements WithSecurityContextFactory<WithMockSignRequestAuthorizedClient>, ApplicationContextAware {
+    implements WithSecurityContextFactory<WithMockSignRequestAuthorizedClient>, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
@@ -44,8 +44,8 @@ public class MockSignRequestAuthorizedClientSecurityContextFactory
 
     @Override
     public SecurityContext createSecurityContext(
-            WithMockSignRequestAuthorizedClient signRequestAuthorizedClientAnnotation) {
-
+        WithMockSignRequestAuthorizedClient signRequestAuthorizedClientAnnotation
+    ) {
         // We didn't cast to SignRequestAuthorizedClient, because in this case, this module would need
         // a dependency with the security module.
         Object signRequestAuthorizedClient =

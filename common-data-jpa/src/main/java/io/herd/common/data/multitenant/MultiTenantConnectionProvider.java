@@ -41,17 +41,18 @@ import java.util.Map;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "app.database.multitenant.strategy", havingValue = "schema")
-public class MultiTenantConnectionProvider extends AbstractMultiTenantConnectionProvider {
+public class MultiTenantConnectionProvider extends AbstractMultiTenantConnectionProvider<String> {
 
     private final transient DatabaseProperties databaseProperties;
     private final transient HikariDatasourceConnectionProvider connectionProvider;
     private final transient LiquibaseSchemaUpdater liquibaseSchemaUpdater;
 
     @Autowired
-    public MultiTenantConnectionProvider(DatabaseProperties databaseProperties,
-                                         HikariDatasourceConnectionProvider connectionProvider,
-                                         ObjectProvider<LiquibaseSchemaUpdater> liquibaseSchemaUpdater) {
-
+    public MultiTenantConnectionProvider(
+        DatabaseProperties databaseProperties,
+        HikariDatasourceConnectionProvider connectionProvider,
+        ObjectProvider<LiquibaseSchemaUpdater> liquibaseSchemaUpdater
+    ) {
         this.databaseProperties = databaseProperties;
         this.connectionProvider = connectionProvider;
         this.liquibaseSchemaUpdater = liquibaseSchemaUpdater.getIfAvailable();

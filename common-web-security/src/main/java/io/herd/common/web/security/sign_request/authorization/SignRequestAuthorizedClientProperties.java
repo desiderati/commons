@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Getter
-@Setter // Never forget to put the setXXX (..) for configuration files!
+@Setter // Never forget to put the setXXX (...) for configuration files!
 @Component
 @ConfigurationProperties("spring.web.security.sign-request.authorization")
 @org.springframework.context.annotation.PropertySource(

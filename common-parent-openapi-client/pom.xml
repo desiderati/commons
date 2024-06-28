@@ -61,7 +61,7 @@
         <openapi.generation.language>java</openapi.generation.language>
         <openapi.generation.keep-superfluous-files>false</openapi.generation.keep-superfluous-files>
 
-        <!-- Supported values: okhttp4-gson, resttemplate, ... -->
+        <!-- Supported values: native, resttemplate, ... -->
         <openapi.generation.library>okhttp-gson</openapi.generation.library>
         <openapi.generation.date-library>java8</openapi.generation.date-library>
 
@@ -105,7 +105,6 @@
             <build>
                 <plugins>
                     <plugin>
-                        <!--suppress MavenModelInspection-->
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
@@ -126,11 +125,8 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <!--suppress MavenModelInspection-->
                         <groupId>com.soebes.maven.plugins</groupId>
-                        <!--suppress MavenModelInspection-->
                         <artifactId>iterator-maven-plugin</artifactId>
-                        <!--suppress MavenModelInspection-->
                         <version>0.5.1</version>
                         <executions>
                             <execution>
@@ -173,8 +169,7 @@
                                                         Adds @JsonIgnoreProperties(ignoreUnknown = true) annotation
                                                         to model classes.
                                                     -->
-                                                    <ignoreUnknownJacksonAnnotation>true
-                                                    </ignoreUnknownJacksonAnnotation>
+                                                    <ignoreUnknownJacksonAnnotation>true</ignoreUnknownJacksonAnnotation>
                                                 </configOptions>
                                                 <apiPackage>${openapi.generation.package.api}</apiPackage>
                                                 <modelPackage>${openapi.generation.package.model}</modelPackage>
@@ -212,7 +207,7 @@
                                 <!--
                                     Specifying a different profile is useful because you can run
                                     a thin version of your application and extract the Open API,
-                                    without need to load all resources.
+                                    without the need to load all resources.
                                 -->
                                 <profile>openapi</profile>
                             </profiles>
@@ -224,7 +219,6 @@
                         </configuration>
                     </plugin>
                     <plugin>
-                        <!--suppress MavenModelInspection-->
                         <artifactId>maven-clean-plugin</artifactId>
                         <executions>
                             <execution>
@@ -284,7 +278,7 @@
             <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
 
-        <!-- To run Swagger Client Api. Only if choose 'okhttp-gson' library. -->
+        <!-- To run OpenAPI Client Api. Only if choose 'okhttp-gson' library. -->
         <dependency>
             <!-- @Nullable annotation -->
             <groupId>com.google.code.findbugs</groupId>
@@ -311,11 +305,6 @@
             <artifactId>logging-interceptor</artifactId>
         </dependency>
         <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
         </dependency>
@@ -326,6 +315,11 @@
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

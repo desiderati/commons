@@ -50,7 +50,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -74,6 +74,7 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import java.util.Collection;
 import java.util.List;
 
+import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.core.context.SecurityContextHolder.MODE_INHERITABLETHREADLOCAL;
 
 @Configuration(proxyBeanMethods = false)
@@ -305,7 +306,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     /**
      * This method allows configuration of web-based security at a resource level, based on a selection match.
-     * E.g. The example below restricts the URLs that start with /admin/ to users that have ADMIN role, and
+     * E.g., The example below restricts the URLs that start with /admin/ to users that have ADMIN role, and
      * declares that any other URLs need to be successfully authenticated.
      * <pre>
      * public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -318,12 +319,12 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain filterChain(
         HttpSecurity httpSecurity,
-        @SuppressWarnings("VulnerableCodeUsages") HandlerMappingIntrospector introspector
+        HandlerMappingIntrospector introspector
     ) throws Exception {
         // We don't need to enable CSRF support because our Token is invulnerable.
         // And also because with it enabled, we will not be able to call our back-end
         // from the front-end.
-        httpSecurity.csrf().disable();
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
         // If the GraphQL CORS filter is enabled, it must be registered before the authentication filters!
         if (graphQLCorsFilter != null) {
@@ -331,7 +332,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
         }
 
         // We have to enable Cross-Origin Resource Sharing.
-        httpSecurity.cors();
+        httpSecurity.cors(withDefaults());
 
         // TODO Felipe Desiderati: Permitir que possa ser personalizado esta sessão.
         // We can perform custom exception handling if authentication fails.
@@ -339,105 +340,112 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
         //httpSecurity.exceptionHandling().authenticationEntryPoint(new Http403ForbiddenEntryPoint());
 
         // We do not wish to enable session. Only if default authentication is enabled.
-        httpSecurity.sessionManagement().sessionCreationPolicy(
-            defaultAuthenticationEnabled ?
-                SessionCreationPolicy.IF_REQUIRED :
-                SessionCreationPolicy.STATELESS);
+        httpSecurity.sessionManagement(sessionManagement ->
+            sessionManagement.sessionCreationPolicy(
+                defaultAuthenticationEnabled ?
+                    SessionCreationPolicy.IF_REQUIRED :
+                    SessionCreationPolicy.STATELESS
+            )
+        );
 
         // Disables page caching.
-        httpSecurity.headers().cacheControl();
+        httpSecurity.headers(headers -> headers.cacheControl(withDefaults()));
 
-        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorizeRequests =
-            httpSecurity.authorizeHttpRequests();
-        if (!defaultAuthenticationEnabled
-            && !jwtAuthenticationEnabled
-            && !jwtAuthorizationEnabled
-            && !signRequestAuthorizationEnabled
-        ) {
-            // If none configured, it uses the default behavior.
-            authorizeRequests.anyRequest().permitAll();
+        httpSecurity.authorizeHttpRequests(authorizeHttpRequests -> {
+            if (!defaultAuthenticationEnabled
+                && !jwtAuthenticationEnabled
+                && !jwtAuthorizationEnabled
+                && !signRequestAuthorizationEnabled
+            ) {
+                // If none configured, it uses the default behavior.
+                authorizeHttpRequests.anyRequest().permitAll();
 
-        } else {
-            // Default public endpoints. Security should not be enabled for these!
-
-            // Default error page.
-            authorizeRequests
-                .requestMatchers(HttpMethod.GET, "/error")
-                .permitAll();
-
-            // We enable all Actuator RESTs.
-            authorizeRequests
-                .requestMatchers(HttpMethod.GET, "/actuator/**")
-                .permitAll();
-
-            // We enable all Open API (formally Swagger API) RESTs.
-            authorizeRequests.requestMatchers(HttpMethod.GET, "/swagger-resources/**").permitAll();
-            authorizeRequests.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
-            authorizeRequests.requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll();
-            authorizeRequests.requestMatchers(HttpMethod.GET, "/webjars/**").permitAll();
-            authorizeRequests.requestMatchers(HttpMethod.GET, springDocOpenApiPath).permitAll();
-
-            // It enables all calls to the public API.
-            authorizeRequests.requestMatchers(defaultApiBasePath + "/public/**").permitAll();
-
-            // Notification (Atmosphere) Support.
-            if (!atmosphereSecurityEnabled) {
-                // It should be used only on development environments.
-                authorizeRequests.requestMatchers(UrlUtils.sanitize(atmosphereUrlMapping)).permitAll();
-                authorizeRequests.requestMatchers(UrlUtils.appendDoubleAsterisk(atmosphereUrlMapping)).permitAll();
-            }
-
-            // GraphQL Support.
-            if (!graphqlServletSecurityEnabled) {
-                // It should be used only on development environments.
-                // As the GraphQL Url is registered by another Servlet, we must configure the security like this!
-                authorizeRequests.requestMatchers(
-                    new MvcRequestMatcher.Builder(introspector)
-                        .servletPath(UrlUtils.sanitize(graphqlServletMapping))
-                        .pattern("/**")
-                ).permitAll();
-            }
-
-            if (graphqlPlaygroundEnabled) {
-                // It should be used only on development environments.
-                // The URL mapping is not customized!
-                authorizeRequests.requestMatchers("/playground").permitAll();
-                authorizeRequests.requestMatchers("/playground/**").permitAll();
-                authorizeRequests.requestMatchers("/vendor/playground").permitAll();
-                authorizeRequests.requestMatchers("/vendor/playground/**").permitAll();
-            }
-
-            if (graphqlVoyagerEnabled) {
-                // It should be used only on development environments.
-                // The URL mapping is not customized!
-                authorizeRequests.requestMatchers("/voyager").permitAll();
-                authorizeRequests.requestMatchers("/voyager/**").permitAll();
-                authorizeRequests.requestMatchers("/vendor/voyager").permitAll();
-                authorizeRequests.requestMatchers("/vendor/voyager/**").permitAll();
-            }
-
-            if (jwtAuthenticationEnabled) {
-                // Login URL.
-                authorizeRequests = authorizeRequests.requestMatchers(HttpMethod.POST, jwtAuthenticationLoginUrl).permitAll();
-                httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-            }
-
-            if (jwtAuthorizationEnabled) {
-                httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
-            }
-
-            if (signRequestAuthorizationEnabled) {
-                httpSecurity.addFilterBefore(signRequestAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
-            }
-
-            if (defaultAuthenticationEnabled) {
-                authorizeRequests.anyRequest().authenticated()
-                    // It will be enabled the filter: UsernamePasswordAuthenticationFilter
-                    .and().formLogin()
-                    .and().httpBasic();
             } else {
-                authorizeRequests.anyRequest().authenticated();
+                // Default public endpoints. Security should not be enabled for these!
+
+                // Default error page.
+                authorizeHttpRequests
+                    .requestMatchers(HttpMethod.GET, "/error")
+                    .permitAll();
+
+                // We enable all Actuator RESTs.
+                authorizeHttpRequests
+                    .requestMatchers(HttpMethod.GET, "/actuator/**")
+                    .permitAll();
+
+                // We enable all Open API (formally Swagger API) RESTs.
+                authorizeHttpRequests.requestMatchers(HttpMethod.GET, "/swagger-resources/**").permitAll();
+                authorizeHttpRequests.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
+                authorizeHttpRequests.requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll();
+                authorizeHttpRequests.requestMatchers(HttpMethod.GET, "/webjars/**").permitAll();
+                authorizeHttpRequests.requestMatchers(HttpMethod.GET, springDocOpenApiPath).permitAll();
+
+                // It enables all calls to the public API.
+                authorizeHttpRequests.requestMatchers(defaultApiBasePath + "/public/**").permitAll();
+
+                // Notification (Atmosphere) Support.
+                if (!atmosphereSecurityEnabled) {
+                    // It should be used only on development environments.
+                    authorizeHttpRequests.requestMatchers(UrlUtils.sanitize(atmosphereUrlMapping)).permitAll();
+                    authorizeHttpRequests.requestMatchers(
+                        UrlUtils.appendDoubleAsterisk(atmosphereUrlMapping)
+                    ).permitAll();
+                }
+
+                // GraphQL Support.
+                if (!graphqlServletSecurityEnabled) {
+                    // It should be used only on development environments.
+                    // As the GraphQL Url is registered by another Servlet, we must configure the security like this!
+                    authorizeHttpRequests.requestMatchers(
+                        new MvcRequestMatcher.Builder(introspector)
+                            .servletPath(UrlUtils.sanitize(graphqlServletMapping))
+                            .pattern("/**")
+                    ).permitAll();
+                }
+
+                if (graphqlPlaygroundEnabled) {
+                    // It should be used only on development environments.
+                    // The URL mapping is not customized!
+                    authorizeHttpRequests.requestMatchers("/playground").permitAll();
+                    authorizeHttpRequests.requestMatchers("/playground/**").permitAll();
+                    authorizeHttpRequests.requestMatchers("/vendor/playground").permitAll();
+                    authorizeHttpRequests.requestMatchers("/vendor/playground/**").permitAll();
+                }
+
+                if (graphqlVoyagerEnabled) {
+                    // It should be used only on development environments.
+                    // The URL mapping is not customized!
+                    authorizeHttpRequests.requestMatchers("/voyager").permitAll();
+                    authorizeHttpRequests.requestMatchers("/voyager/**").permitAll();
+                    authorizeHttpRequests.requestMatchers("/vendor/voyager").permitAll();
+                    authorizeHttpRequests.requestMatchers("/vendor/voyager/**").permitAll();
+                }
+
+                if (jwtAuthenticationEnabled) {
+                    // Login URL.
+                    authorizeHttpRequests =
+                        authorizeHttpRequests.requestMatchers(HttpMethod.POST, jwtAuthenticationLoginUrl).permitAll();
+                    httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                }
+
+                if (jwtAuthorizationEnabled) {
+                    httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                }
+
+                if (signRequestAuthorizationEnabled) {
+                    httpSecurity.addFilterBefore(
+                        signRequestAuthorizationFilter, UsernamePasswordAuthenticationFilter.class
+                    );
+                }
+
+                authorizeHttpRequests.anyRequest().authenticated();
             }
+        });
+
+        if (defaultAuthenticationEnabled) {
+            // It will be enabled the filter: UsernamePasswordAuthenticationFilter
+            httpSecurity.formLogin(withDefaults());
+            httpSecurity.httpBasic(withDefaults());
         }
 
         return httpSecurity.build();

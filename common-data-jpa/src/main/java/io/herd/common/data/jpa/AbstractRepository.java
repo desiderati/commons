@@ -21,14 +21,11 @@ package io.herd.common.data.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.data.domain.Persistable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.beans.Introspector;
 import java.lang.reflect.ParameterizedType;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -97,9 +94,10 @@ public abstract class AbstractRepository<E extends Persistable<?>> {
         }
     }
 
+    /** Commented because BeanUtils
     public void update(E entity, String... fields) {
         if (fields == null || fields.length == 0) {
-            throw new IllegalStateException("Fields can not be null or empty!");
+            throw new IllegalStateException("Fields cannot be null or empty!");
         }
 
         StringBuilder hql = new StringBuilder();
@@ -133,6 +131,7 @@ public abstract class AbstractRepository<E extends Persistable<?>> {
         Query query = createQuery(hql, params);
         query.executeUpdate();
     }
+    */
 
     public void deleteById(Long... ids) {
         StringBuilder hql = new StringBuilder();

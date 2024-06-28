@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.lang.annotation.*;
 
 /**
- * It enables Commons Herd.io (Web) auto configuration when using test slicing
+ * It enables Commons Herd.io (Web) auto-configuration when using test slicing
  * like {@link WebMvcTest} or {@link DataJpaTest}.
  * <p>
  * If you are going to test using the annotation {@link SpringBootTest},

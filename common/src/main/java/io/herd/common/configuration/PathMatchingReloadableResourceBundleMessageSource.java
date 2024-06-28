@@ -57,7 +57,7 @@ public class PathMatchingReloadableResourceBundleMessageSource extends Reloadabl
             for (Resource resource : resources) {
                 String sourcePath = resource.getURI().toString().replace(PROPERTIES_SUFFIX, "");
 
-                log.info("Loading resource: " + sourcePath);
+                log.info("Loading resource: {}", sourcePath);
                 PropertiesHolder holder = super.refreshProperties(sourcePath, propHolder);
                 if (holder.getProperties() != null) {
                     properties.putAll(holder.getProperties());
@@ -67,8 +67,8 @@ public class PathMatchingReloadableResourceBundleMessageSource extends Reloadabl
                 }
             }
         } catch (IOException ex) {
-            // Just ignore any exception!
-            log.warn("Error while getting resources: " + filename + PROPERTIES_SUFFIX, ex);
+            // Ignore any exception!
+            log.warn("Error while getting resources: {}" + PROPERTIES_SUFFIX, filename, ex);
         }
         return new PropertiesHolder(properties, lastModified);
     }

@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Remove it when Test Containers project releases its own implementation.
+ * Remove it when the Test Containers project releases its own implementation.
  */
 @SuppressWarnings("unused")
 public class MongoContainer extends GenericContainer<MongoContainer> {

@@ -23,6 +23,7 @@ import com.zaxxer.hikari.hibernate.HikariConnectionProvider;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.service.UnknownUnwrapTypeException;
 import org.hibernate.service.spi.Stoppable;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -33,7 +34,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Despite the fact that Hibernate has its own implementation, such implementation does not have
+ * Although Hibernate has its own implementation, such implementation does not have
  * the option to initialize it with the {@link HikariDataSource} configured by Spring.
  */
 @Component
@@ -69,14 +70,14 @@ public class HikariDatasourceConnectionProvider implements ConnectionProvider, S
     }
 
     @Override
-    public boolean isUnwrappableAs(Class unwrapType) {
+    public boolean isUnwrappableAs(@NotNull Class unwrapType) {
         return ConnectionProvider.class.equals(unwrapType)
             || HikariConnectionProvider.class.isAssignableFrom(unwrapType);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T unwrap(Class<T> unwrapType) {
+    public <T> T unwrap(@NotNull Class<T> unwrapType) {
         if (ConnectionProvider.class.equals(unwrapType) ||
                 HikariConnectionProvider.class.isAssignableFrom(unwrapType)) {
             return (T) this;

@@ -36,7 +36,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -143,11 +142,13 @@ public class SignRequestAuthorizationService {
         ZonedDateTime currentDate = ZonedDateTime.now();
         ZonedDateTime requestDate =
             ZonedDateTime.ofInstant(Instant.ofEpochMilli(request.getDateHeader(HEADER_DATE)), ZoneId.of("UTC"));
-        boolean dateOutOfRange = requestDate.isBefore(currentDate.minus(VALID_TIME_WINDOW, ChronoUnit.MINUTES))
-            || requestDate.isAfter(currentDate.plus(VALID_TIME_WINDOW, ChronoUnit.MINUTES));
+        boolean dateOutOfRange = requestDate.isBefore(currentDate.minusMinutes(VALID_TIME_WINDOW))
+            || requestDate.isAfter(currentDate.plusMinutes(VALID_TIME_WINDOW));
         if (dateOutOfRange) {
-            log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Request out of date! " +
-                "Current time: " + currentDate + ", Request Date: " + requestDate);
+            log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Request out of date! Current time: {}, Request Date: {}",
+                currentDate,
+                requestDate
+            );
         }
         return !dateOutOfRange;
     }

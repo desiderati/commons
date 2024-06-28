@@ -35,16 +35,6 @@ public class ImprovedHSQLDialect extends HSQLDialect {
     }
 
     @Override
-    public boolean supportsIfExistsBeforeTableName() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsIfExistsAfterTableName() {
-        return false;
-    }
-
-    @Override
     public String getCascadeConstraintsString() {
         return " CASCADE ";
     }

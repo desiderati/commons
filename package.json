@@ -5,7 +5,7 @@
     "mvn:deploy": "mvn -B -e -fn -Dmaven.wagon.http.pool=false clean deploy"
   },
   "engines": {
-    "node": ">=12.13.10"
+    "node": ">=12.22.12"
   },
   "keywords": [
     "node",

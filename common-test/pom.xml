@@ -79,6 +79,13 @@
             <version>${testcontainers.version}</version>
             <scope>compile</scope>
             <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <!-- Too old to be used. Use the one defined in this file. -->
+                    <groupId>org.jetbrains</groupId>
+                    <artifactId>annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Needed by the tests which run inside this project. -->

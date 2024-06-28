@@ -22,7 +22,7 @@ import java.util.Set;
 
 /**
  * Identifies which schemas (Tenants) will be updated with the Liquibase rules at application startup.
- * It is not mandatory to implement it, however it is highly recommended.
+ * It is not mandatory to implement it; however, it is highly recommended.
  */
 public interface LiquibaseSchemaRetriever {
 

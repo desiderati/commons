@@ -95,15 +95,22 @@ public class MockitoLoader extends SpringBootContextLoader {
                 Mockito.reset(mockedBean);
             });
 
-            log.info("*** MockedLoader stats: [" + mockedBeans.size() + "] mocked beans of which " +
-                "[" + mockedBeansWithInvocations + "] with invocations and [" + mockedBeansWithoutInvocations + "] " +
-                "without invocations");
+            log.info("*** MockedLoader stats: [{}] mocked beans of which [{}] " +
+                    "with invocations and [{}] without invocations",
+                mockedBeans.size(),
+                mockedBeansWithInvocations,
+                mockedBeansWithoutInvocations
+            );
             mockedBeans.clear();
         }
 
         @Override
-        public Object resolveDependency(@NotNull DependencyDescriptor descriptor, String beanName,
-                                        Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+        public Object resolveDependency(
+            @NotNull DependencyDescriptor descriptor,
+            String beanName,
+            Set<String> autowiredBeanNames,
+            TypeConverter typeConverter
+        ) {
             try {
                 return super.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
 
@@ -121,7 +128,7 @@ public class MockitoLoader extends SpringBootContextLoader {
 
                     // Just to avoid NPE while returning an Iterator.
                     if (Iterable.class.isAssignableFrom(dependencyType)) {
-                       Mockito.when(((Collection<?>) mockedBean).iterator()).thenReturn(Collections.emptyIterator());
+                        Mockito.when(((Collection<?>) mockedBean).iterator()).thenReturn(Collections.emptyIterator());
                     }
 
                     // We could actually also try to instantiate the Impl if we feel the need.

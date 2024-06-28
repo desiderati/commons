@@ -46,7 +46,7 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
  * </a>
  */
 public class MockJwtAuthorizedUserSecurityContextFactory
-        implements WithSecurityContextFactory<WithMockJwtAuthorizedUser>, ApplicationContextAware {
+    implements WithSecurityContextFactory<WithMockJwtAuthorizedUser>, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
