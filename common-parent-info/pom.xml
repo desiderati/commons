@@ -90,7 +90,7 @@
 
         <!-- Basic configuration. -->
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-        <maven.version>3.9.0</maven.version>
+        <maven.version>3.8.8</maven.version>
         <java.version>21</java.version>
 
         <!--
