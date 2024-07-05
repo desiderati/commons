@@ -27,7 +27,7 @@ import org.hibernate.validator.constraints.Mod11Check;
  *
  * @see org.hibernate.validator.internal.constraintvalidators.hv.br.CPFValidator
  */
-public class CpfValidator extends AbstractCpfCpnpjValidator<Cpf> {
+public class CpfValidator extends AbstractCpfCnpjValidator<Cpf> {
 
     @Override
     public void initialize(Cpf constraintAnnotation) {

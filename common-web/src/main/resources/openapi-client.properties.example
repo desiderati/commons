@@ -1,5 +1,4 @@
 # suppress inspection "UnusedProperty" for whole file
-
 openapi.client.host=http://localhost:9090
 openapi.client.base-path=${openapi.client.host}
 openapi.client.auth-user=

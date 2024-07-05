@@ -82,7 +82,7 @@
     </repositories>
 
     <properties>
-        <revision>3.3.0.RC2</revision>
+        <revision>3.3.0.RC3</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>
@@ -113,7 +113,7 @@
             If not specified, the first compiled class found that contains
             a 'main' method will be used.
         -->
-        <start-class />
+        <start-class/>
     </properties>
 
     <build>

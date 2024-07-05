@@ -35,11 +35,14 @@
             <groupId>io.herd.common</groupId>
             <artifactId>common-data-jpa</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.herd.common</groupId>
             <artifactId>common-google</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.herd.common</groupId>
+            <artifactId>common-web-client</artifactId>
         </dependency>
 
         <!-- Jakarta -->

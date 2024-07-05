@@ -21,10 +21,10 @@ package io.herd.common.data.jpa
 import org.springframework.data.util.ProxyUtils
 import java.io.Serializable
 
-abstract class AbstractEntity<I : Serializable> : Identity<I> {
+abstract class AbstractIdentity<I : Serializable> : Identity<I> {
 
     @Override
-    abstract override fun getId() : I?
+    abstract override fun getId(): I?
 
     @Override
     override fun equals(other: Any?): Boolean {
@@ -36,11 +36,11 @@ abstract class AbstractEntity<I : Serializable> : Identity<I> {
             return true
         }
 
-        if (javaClass != ProxyUtils.getUserClass(other) && other !is AbstractEntity<*>) {
+        if (javaClass != ProxyUtils.getUserClass(other) && other !is AbstractIdentity<*>) {
             return false
         }
 
-        val that = other as AbstractEntity<*>
+        val that = other as AbstractIdentity<*>
         return this.id == that.id
     }
 

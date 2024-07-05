@@ -29,7 +29,9 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>${project.properties.npm.dist-dir}/${project.artifactId}/${project.properties.npm.dist-environment-dir}</directory>
+            <directory>
+                ${project.properties.npm.dist-dir}/${project.artifactId}/${project.properties.npm.dist-environment-dir}
+            </directory>
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>**/*</include>

@@ -58,8 +58,8 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
     }
 
     public String getConnectionUri() {
-        return "mongodb://" + username + ":" +password + "@"
-            + getHost() + ":" + getMappedPort(MONGO_PORT) +  "/";
+        return "mongodb://" + username + ":" + password + "@"
+            + getHost() + ":" + getMappedPort(MONGO_PORT) + "/";
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -71,6 +71,7 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
     public String getDatabase() {
         return "local";
     }
+
     public String getUsername() {
         return username;
     }

@@ -1,0 +1,67 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "SpringDoc Sample Application API",
+    "description": "SpringDoc Sample Application",
+    "license": {
+      "name": "The MIT License",
+      "url": "https://opensource.org/license/mit/"
+    },
+    "version": "v0.0.1"
+  },
+  "externalDocs": {
+    "description": "SpringDoc Sample Application WiKi",
+    "url": "https://github.com/springdoc/wiki"
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "paths": {
+    "/api/v1/broadcast": {
+      "post": {
+        "tags": [
+          "broadcast-controller"
+        ],
+        "operationId": "broadcast",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BroadcastMessageObject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BroadcastMessageObject": {
+        "required": [
+          "payload"
+        ],
+        "type": "object",
+        "properties": {
+          "broadcastId": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

@@ -16,41 +16,27 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.configuration;
+package io.herd.common.web.notification.domain;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.herd.common.exception.ApplicationException;
+import lombok.extern.slf4j.Slf4j;
+import org.atmosphere.config.managed.Decoder;
 
-import java.util.Base64;
+@Slf4j
+public class NotificationMessageDecoder implements Decoder<String, NotificationMessage<?>> {
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class OpenApiClientProperties {
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    @NotBlank
-    private String host;
-
-    @NotBlank
-    private String basePath;
-
-    private String authUser;
-    private String authPass;
-
-    @NotNull
-    @Min(value = 0)
-    private Integer timeout = 0; // Timeout in seconds. (0 = No Timeout)
-
-    @SuppressWarnings("unused")
-    public String getBasicAuthorizationHeader() {
-        if (authUser != null && authPass != null) {
-            return "Basic " + new String(Base64.getEncoder().encode(
-                (authUser + ":" + authPass).getBytes()));
+    @Override
+    public NotificationMessage<?> decode(String string) {
+        try {
+            return mapper.readValue(string, NotificationMessage.class);
+        } catch (Exception ex) {
+            String errorMsg = "Unable to deserialize JSON object: " + string;
+            log.error(ex.getMessage(), ex);
+            throw new ApplicationException(errorMsg);
         }
-        return null;
     }
 }

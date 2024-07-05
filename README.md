@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-3.3.0.RC2-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-3.3.0.RC3-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE)
 
@@ -24,7 +24,7 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [3.3.0.RC2] - 2024-01-12
+#### [3.3.0.RC3] - 2024-01-12
 - Added support to retrieve the authorities passed by the delegated authentication provider.
 - Added support for pre/post authorizations on GraphQL calls.
 - Added Hamkrest and Spek as test dependencies.
@@ -32,7 +32,7 @@ All project changes will be documented in this file.
 - Added the pageable functionality for GraphQL.
 - Removed dependency with org.reflections.
 - Updated some dependency versions.
-- Update the copyrigth.
+- Update the copyright.
 
 #### [3.2.1.RELEASE] - 2023-12-13
 - Added support to create request scoped beans within async threads.
@@ -369,8 +369,8 @@ All project changes will be documented in this file.
 - Creation of CPF/CNPJ field validations.
 - Creation of the generic exception handling functionality. (**ExceptionHandlingController**)
 - Creation of JPA repositories to handle null method parameters (_Null-Safe Parameters_), including MongoDB.
-- Creation of **AbstractRepository** class to assist in the creation of personalized data repositories.
-- Creation of **AbstractPersistableIdentity** class to assist in the creation of JPA entities.
+- Creation of **AbstractRepository** class to help in the creation of personalized data repositories.
+- Creation of **AbstractPersistableIdentity** class to help in the creation of JPA entities.
 - Creation of the functionality responsible for defining the name strategy to use with databases. (_Naming Strategy_)
 - Creation of classes to use with automated tests.
 - Added support for internationalization.

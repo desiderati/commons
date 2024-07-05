@@ -16,43 +16,27 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.jms;
+package io.herd.common.web.notification.domain;
 
-import io.herd.common.jms.configuration.JmsAutoConfiguration;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.herd.common.exception.ApplicationException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.stereotype.Component;
+import org.atmosphere.config.managed.Encoder;
 
-import jakarta.jms.Queue;
-
-/**
- * Class responsible for publishing messages to the standard queue.
- * <p>
- * Spring is able to do the dependency injection correctly, because the parameter name
- * is the same as the name of the queue being configured.
- *
- * @see JmsAutoConfiguration#queue(String)
- */
 @Slf4j
-@Component
-public class MessagePublisher {
+public class NotificationMessageEncoder implements Encoder<NotificationMessage<?>, String> {
 
-    private final JmsTemplate jmsTemplate;
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    private final Queue queue;
-
-    @Autowired
-    public MessagePublisher(JmsTemplate jmsTemplate, Queue queue) {
-        this.jmsTemplate = jmsTemplate;
-        this.queue = queue;
-    }
-
-    @SuppressWarnings("unused")
-    public <M extends Message> void publish(M message) {
-        log.info("Publishing message {} ...", message.getId());
-        log.debug("{}", message);
-        jmsTemplate.convertAndSend(queue, message);
-        log.info("Message {} published!", message.getId());
+    @Override
+    public String encode(NotificationMessage object) {
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (Exception ex) {
+            String errorMsg = "Unable to serialize JSON object: " + object;
+            log.error(ex.getMessage(), ex);
+            throw new ApplicationException(errorMsg);
+        }
     }
 }

@@ -16,9 +16,10 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.notification;
+package io.herd.common.web.notification.service;
 
 import io.herd.common.web.UrlUtils;
+import io.herd.common.web.notification.domain.NotificationMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceFactory;
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class NotificationService {
+public class NotificationServiceImpl implements NotificationService {
 
     @Value("${spring.web.atmosphere.url.mapping:/atmosphere}")
     private String atmosphereUrlMapping;
@@ -41,7 +42,7 @@ public class NotificationService {
     private final AtmosphereResourceFactory atmosphereResourceFactory;
 
     @Autowired
-    public NotificationService(
+    public NotificationServiceImpl(
         @Lazy BroadcasterFactory atmosphereBroadcasterFactory,
         @Lazy AtmosphereResourceFactory atmosphereResourceFactory
     ) {
@@ -49,24 +50,26 @@ public class NotificationService {
         this.atmosphereResourceFactory = atmosphereResourceFactory;
     }
 
-    public <M> void broadcast(M message) {
+    @Override
+    public <P> void broadcastToAll(P payload) {
         for (Broadcaster broadcaster : atmosphereBroadcasterFactory.lookupAll()) {
-            broadcaster.broadcast(new Notification<>(message));
+            broadcaster.broadcast(new NotificationMessage<>(payload));
         }
     }
 
-    public <M> void broadcastToSpecificBroadcaster(String broadcasterId, M message) {
+    @Override
+    public <P> void broadcastToSpecificBroadcaster(String broadcasterId, P payload) {
         String prefix = UrlUtils.appendSlash(atmosphereUrlMapping);
         Broadcaster broadcaster = atmosphereBroadcasterFactory.lookup(prefix + broadcasterId);
         if (broadcaster == null) {
             log.warn("Atmosphere Broadcaster '{}' not found!", prefix + broadcasterId);
             return;
         }
-
-        broadcaster.broadcast(new Notification<>(message));
+        broadcaster.broadcast(new NotificationMessage<>(payload));
     }
 
-    public <M> void broadcastToSpecificResource(String resourceId, M message) {
+    @Override
+    public <P> void broadcastToSpecificResource(String resourceId, P payload) {
         AtmosphereResource atmosphereResource = atmosphereResourceFactory.find(resourceId);
         if (atmosphereResource == null) {
             log.warn("Atmosphere Resource '{}' not found!", resourceId);
@@ -74,7 +77,7 @@ public class NotificationService {
         }
 
         for (Broadcaster broadcaster : atmosphereResource.broadcasters()) {
-            broadcaster.broadcast(new Notification<>(resourceId, message), atmosphereResource);
+            broadcaster.broadcast(new NotificationMessage<>(resourceId, payload), atmosphereResource);
         }
     }
 }

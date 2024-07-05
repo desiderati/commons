@@ -67,8 +67,7 @@
     {
       "name": "google.captcha.secret-key",
       "description": "Google Captcha service secret key.",
-      "type": "java.lang.String",
-      "defaultValue": "/google-calendar-api-secret.json"
+      "type": "java.lang.String"
     }
   ]
 }

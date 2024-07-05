@@ -38,7 +38,7 @@ public class RestApiException extends RuntimeException {
         super(message);
     }
 
-    public RestApiException(String message, Serializable...args) {
+    public RestApiException(String message, Serializable... args) {
         super(message);
         this.args = args;
     }
@@ -47,7 +47,7 @@ public class RestApiException extends RuntimeException {
         super(message, cause);
     }
 
-    public RestApiException(String message, Throwable cause, Serializable...args) {
+    public RestApiException(String message, Throwable cause, Serializable... args) {
         super(message, cause);
         this.args = args;
     }

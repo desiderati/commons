@@ -19,9 +19,8 @@
 package io.herd.common.web.security.jwt.authentication;
 
 import io.herd.common.web.security.jwt.JwtTokenConfigurer;
-import org.springframework.security.core.Authentication;
-
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
 
 public interface JwtAuthenticationTokenConfigurer {
 

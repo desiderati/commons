@@ -18,17 +18,49 @@
  */
 package io.herd.common.jms;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
 @Slf4j
-@Component
 public class JmsErrorHandler implements ErrorHandler {
 
+    private final Integer maxDeliveryAttempts;
+
+    public JmsErrorHandler(Integer maxDeliveryAttempts) {
+        this.maxDeliveryAttempts = maxDeliveryAttempts;
+    }
+
     @Override
-    public void handleError(@NotNull Throwable t) {
-        log.error("An error occurred while processing JMS message!", t);
+    public void handleError(@NotNull Throwable throwable) {
+        try {
+            if (throwable.getCause() != null && throwable.getCause() instanceof JmsApplicationException exception) {
+                Message message = exception.getFailedMessage();
+                int deliveryCount = message.getIntProperty("JMSXDeliveryCount");
+                if (deliveryCount >= maxDeliveryAttempts) {
+                    handleLastError(exception.getCause());
+                } else {
+                    log.warn(
+                        "An error occurred while processing JMS message [{}/{}]!",
+                        deliveryCount,
+                        maxDeliveryAttempts,
+                        throwable
+                    );
+                }
+            }
+        } catch (JMSException ex) {
+            log.error("It was not possible to extract the delivery count from the message!", ex);
+        }
+    }
+
+    protected void handleLastError(@NotNull Throwable throwable) {
+        log.error(
+            "All attempts [{}/{}] to process the message have been exhausted!",
+            maxDeliveryAttempts,
+            maxDeliveryAttempts,
+            throwable
+        );
     }
 }

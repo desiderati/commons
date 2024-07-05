@@ -38,7 +38,7 @@ public class ValidationTestUtils {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @SneakyThrows
-    public void assertBeanValidation(MvcResult result, String ... errorMsgs) {
+    public void assertBeanValidation(MvcResult result, String... errorMsgs) {
         ValidationResponseExceptionDTO responseExceptionDTO =
             mapper.readValue(result.getResponse().getContentAsString(), ValidationResponseExceptionDTO.class);
 

@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @ConditionalOnProperty("google.captcha.secret-key")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-class CaptchaRest(
+class CaptchaController(
     private val objectMapper: ObjectMapper,
     private val googleCaptchaService: GoogleCaptchaService,
-) : PublicRest {
+) : PublicController {
 
     @PostMapping
-    @RequestMapping("/captcha")
+    @RequestMapping("/v1/captcha")
     fun validateCaptcha(@RequestBody payload: String): Boolean {
         val payloadNode: JsonNode = objectMapper.readTree(payload)
         val captchaResponse = payloadNode.get("captchaResponse").asText()

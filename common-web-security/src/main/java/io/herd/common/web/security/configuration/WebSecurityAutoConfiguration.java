@@ -230,8 +230,8 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
         }
     }
 
-    @Bean("webSecurityCorsProperties")
     @Validated
+    @Bean("webSecurityCorsProperties")
     @ConfigurationProperties("spring.web.security.jwt.authentication.cors")
     public CorsProperties webSecurityCorsProperties() {
         return new CorsProperties();

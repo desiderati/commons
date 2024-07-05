@@ -16,8 +16,11 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.notification;
+package io.herd.common.web.notification.controller;
 
+import io.herd.common.web.notification.domain.NotificationMessage;
+import io.herd.common.web.notification.domain.NotificationMessageDecoder;
+import io.herd.common.web.notification.domain.NotificationMessageEncoder;
 import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +32,7 @@ import org.atmosphere.cpr.BroadcasterFactory;
 // Cannot be singleton!
 @Slf4j
 @Getter
-@ManagedService(path = "/{notification}/{user}")
+@ManagedService(path = "/{notificationPath}/{broadcaster}")
 public class NotificationController {
 
     /**
@@ -40,9 +43,13 @@ public class NotificationController {
     @Inject
     private BroadcasterFactory broadcasterFactory;
 
-    @PathParam("user")
+    @PathParam("notificationPath")
     @SuppressWarnings("unused")
-    private String user;
+    private String notificationPath;
+
+    @PathParam("broadcaster")
+    @SuppressWarnings("unused")
+    private String broadcaster;
 
     /**
      * Executed when the connection was fully established, in other words, ready to receive messages.
@@ -57,7 +64,7 @@ public class NotificationController {
      */
     @Ready
     public void onReady(AtmosphereResource resource) {
-        log.info("Client {} connected on Broadcast {}", resource.uuid(), resource.getBroadcaster().getID());
+        log.info("Client '{}' connected on Broadcast '{}'", resource.uuid(), resource.getBroadcaster().getID());
     }
 
     /**
@@ -65,7 +72,7 @@ public class NotificationController {
      */
     @Disconnect
     public void onDisconnect(AtmosphereResourceEvent event) {
-        log.info("Client {} disconnected [{}]", event.getResource().uuid(),
+        log.info("Client '{}' disconnected [{}]", event.getResource().uuid(),
             (event.isCancelled() ? "cancelled" : "closed")
         );
     }
@@ -74,15 +81,15 @@ public class NotificationController {
      * Necessary method for: 1) to receive the message sent by a client,
      * 2) to perform some type of treatment and 3) to resend it to all listeners.
      */
-    @Message(encoders = NotificationJacksonEncoder.class, decoders = NotificationJacksonDecoder.class)
-    public Notification<?> onMessage(AtmosphereResource resource, Notification<?> notification) {
+    @Message(encoders = NotificationMessageEncoder.class, decoders = NotificationMessageDecoder.class)
+    public NotificationMessage<?> onMessage(AtmosphereResource resource, NotificationMessage<?> notification) {
         if (notification.getUuid() == null) {
             log.trace("Notification message '{}' sent to all clients of broadcast '{}'",
-                notification.getMessage(), resource.getBroadcaster().getID()
+                notification.getPayload(), resource.getBroadcaster().getID()
             );
         } else {
-            log.trace("Notification message '{}' sent to client {} of broadcast '{}'",
-                notification.getMessage(), notification.getUuid(), resource.getBroadcaster().getID()
+            log.trace("Notification message '{}' sent to client '{}' of broadcast '{}'",
+                notification.getPayload(), notification.getUuid(), resource.getBroadcaster().getID()
             );
         }
         return notification;

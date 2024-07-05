@@ -38,6 +38,7 @@
         -->
         <openapi.thin-server.disabled>true</openapi.thin-server.disabled>
         <openapi.thin-server.start-class/>
+        <openapi.thin-server.jmx-port>9111</openapi.thin-server.jmx-port>
         <openapi.thin-server.max-attempts>20</openapi.thin-server.max-attempts>
         <openapi.thin-server.timeout-between-attempts>15000</openapi.thin-server.timeout-between-attempts>
         <openapi.thin-server.arguments>--spring.main.banner-mode=off,--server.port=12345</openapi.thin-server.arguments>
@@ -216,6 +217,7 @@
                             <arguments>${openapi.thin-server.arguments}</arguments>
                             <maxAttempts>${openapi.thin-server.max-attempts}</maxAttempts>
                             <wait>${openapi.thin-server.timeout-between-attempts}</wait>
+                            <jmxPort>${openapi.thin-server.jmx-port}</jmxPort>
                         </configuration>
                     </plugin>
                     <plugin>

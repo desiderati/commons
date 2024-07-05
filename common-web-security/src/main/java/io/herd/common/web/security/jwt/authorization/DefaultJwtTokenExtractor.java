@@ -51,6 +51,6 @@ public class DefaultJwtTokenExtractor implements JwtTokenExtractor<Authenticatio
             new UserWithMultiTenantSupport(username, "****", authorities, tenant) :
             new User(username, "****", authorities);
 
-        return new UsernamePasswordAuthenticationToken(principal,null, authorities);
+        return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 }

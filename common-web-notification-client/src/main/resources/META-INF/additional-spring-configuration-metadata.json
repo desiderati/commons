@@ -1,0 +1,15 @@
+{
+  "properties": [
+    {
+      "name": "notification.openapi.client.host",
+      "description": "It defines the host of the Notification server.",
+      "type": "java.lang.String",
+      "defaultValue": "http://localhost:9090"
+    },
+    {
+      "name": "notification.openapi.client.base-path",
+      "description": "It defines the base path of the Notification server.",
+      "type": "java.lang.String"
+    }
+  ]
+}

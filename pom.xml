@@ -51,7 +51,9 @@
         <module>./common-parent-openapi-client</module>
         <module>./common-scanner</module>
         <module>./common-web</module>
+        <module>./common-web-client</module>
         <module>./common-web-notification</module>
+        <module>./common-web-notification-client</module>
         <module>./common-web-security</module>
         <module>./common-starter</module>
         <module>./common-starter-openapi-client</module>

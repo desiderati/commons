@@ -26,7 +26,7 @@ import org.hibernate.validator.internal.constraintvalidators.hv.Mod11CheckValida
 import java.lang.annotation.Annotation;
 import java.util.regex.Pattern;
 
-public class AbstractCpfCpnpjValidator<A extends Annotation> implements ConstraintValidator<A, CharSequence> {
+public class AbstractCpfCnpjValidator<A extends Annotation> implements ConstraintValidator<A, CharSequence> {
 
     private static final Pattern DIGITS_ONLY = Pattern.compile("\\d+");
 

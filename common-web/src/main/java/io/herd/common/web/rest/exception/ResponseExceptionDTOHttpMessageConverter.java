@@ -50,8 +50,11 @@ public class ResponseExceptionDTOHttpMessageConverter extends AbstractHttpMessag
     }
 
     @Override
-    protected void addDefaultHeaders(HttpHeaders headers, @NotNull ResponseExceptionDTO responseExceptionDTO,
-            MediaType contentType) throws IOException {
+    protected void addDefaultHeaders(
+        HttpHeaders headers,
+        @NotNull ResponseExceptionDTO responseExceptionDTO,
+        MediaType contentType
+    ) throws IOException {
 
         // It doesn't matter what happened, if there's an error always return as application/json.
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -60,14 +63,20 @@ public class ResponseExceptionDTOHttpMessageConverter extends AbstractHttpMessag
 
     @NotNull
     @Override
-    protected ResponseExceptionDTO readInternal(@NotNull Class<? extends ResponseExceptionDTO> clazz,
-            @NotNull HttpInputMessage inputMessage) throws IOException {
+    protected ResponseExceptionDTO readInternal(
+        @NotNull Class<? extends ResponseExceptionDTO> clazz,
+        @NotNull HttpInputMessage inputMessage
+    ) throws IOException {
+
         return (ResponseExceptionDTO) httpMessageConverter.read(clazz, inputMessage);
     }
 
     @Override
-    protected void writeInternal(@NotNull ResponseExceptionDTO responseExceptionDTO,
-            @NotNull HttpOutputMessage outputMessage) throws IOException {
+    protected void writeInternal(
+        @NotNull ResponseExceptionDTO responseExceptionDTO,
+        @NotNull HttpOutputMessage outputMessage
+    ) throws IOException {
+
         httpMessageConverter.write(responseExceptionDTO, MediaType.APPLICATION_JSON, outputMessage);
     }
 }

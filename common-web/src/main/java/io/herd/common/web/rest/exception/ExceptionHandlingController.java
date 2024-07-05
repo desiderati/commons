@@ -399,7 +399,7 @@ public class ExceptionHandlingController extends ResponseEntityExceptionHandler 
     }
 
     /**
-     * Thrown when used the  @{@link jakarta.validation.Valid} annotation.
+     * Thrown when used the @{@link jakarta.validation.Valid} annotation.
      */
     @NotNull
     @Override

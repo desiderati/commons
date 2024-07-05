@@ -37,7 +37,7 @@ public class ApplicationException extends RuntimeException {
         super(message);
     }
 
-    public ApplicationException(String message, Serializable...args) {
+    public ApplicationException(String message, Serializable... args) {
         super(message);
         this.args = args;
     }
@@ -46,7 +46,7 @@ public class ApplicationException extends RuntimeException {
         super(message, cause);
     }
 
-    public ApplicationException(String message, Throwable cause, Serializable...args) {
+    public ApplicationException(String message, Throwable cause, Serializable... args) {
         super(message, cause);
         this.args = args;
     }

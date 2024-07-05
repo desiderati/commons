@@ -30,8 +30,8 @@ import java.util.UUID;
 
 @Getter
 @Setter // Never forget to put the setXXX (...) for configuration files!
-@Component
 @Validated
+@Component
 @ConfigurationProperties("spring.web.security.sign-request.authorization.client")
 public class SignRequestAuthorizationClientProperties {
 
@@ -50,7 +50,6 @@ public class SignRequestAuthorizationClientProperties {
      * bean class io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationClientProperties
      * contains validation constraints but had not been annotated with @Validated."
      * <p>
-     *
      * This way, when we annotate a class with {@link Validated}, Spring Boot will create a Proxy for this class
      * and thus the validation will not work correctly if the validation annotations are not in the methods.
      */

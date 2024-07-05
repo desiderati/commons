@@ -18,25 +18,17 @@
  */
 package io.herd.common.web.notification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.herd.common.exception.ApplicationException;
-import lombok.extern.slf4j.Slf4j;
-import org.atmosphere.config.managed.Encoder;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
-@Slf4j
-public class NotificationJacksonEncoder implements Encoder<Notification<?>, String> {
+/**
+ * We defined as a temporary application to get the OpenAPI documentation,
+ * while building the common-web-notification-client.
+ */
+@SpringBootApplication
+public class WebTempApplication {
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-
-    @Override
-    public String encode(Notification object) {
-        try {
-            return mapper.writeValueAsString(object);
-        } catch (Exception ex) {
-            String errorMsg = "Unable to serialize JSON object: " + object;
-            log.error(ex.getMessage(), ex);
-            throw new ApplicationException(errorMsg);
-        }
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(WebTempApplication.class).run(args);
     }
 }

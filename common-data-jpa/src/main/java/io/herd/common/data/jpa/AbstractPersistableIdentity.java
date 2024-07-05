@@ -18,10 +18,10 @@
  */
 package io.herd.common.data.jpa;
 
+import jakarta.persistence.*;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
-import jakarta.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -35,7 +35,7 @@ import java.io.Serializable;
  */
 @MappedSuperclass
 @SuppressWarnings("unused")
-public abstract class AbstractPersistableIdentity<I extends Serializable> extends AbstractEntity<I> implements Persistable<I>, Identity<I> {
+public abstract class AbstractPersistableIdentity<I extends Serializable> extends AbstractIdentity<I> implements Persistable<I>, Identity<I> {
 
     public AbstractPersistableIdentity() {
         this(null);
@@ -54,7 +54,7 @@ public abstract class AbstractPersistableIdentity<I extends Serializable> extend
         return id;
     }
 
-    protected final void setId(final I id) {
+    protected void setId(final I id) {
         this.id = id;
     }
 

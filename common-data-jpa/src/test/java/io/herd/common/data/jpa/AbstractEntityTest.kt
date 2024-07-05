@@ -93,7 +93,7 @@ class AbstractEntityTest {
     }
 }
 
-internal open class ClassePai(private var id: Long? = null) : AbstractEntity<Long>() {
+internal open class ClassePai(private var id: Long? = null) : AbstractIdentity<Long>() {
     override fun getId(): Long? {
         return id
     }

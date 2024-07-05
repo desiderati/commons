@@ -19,25 +19,39 @@
 package io.herd.common.jms;
 
 import io.herd.common.jms.configuration.JmsAutoConfiguration;
+import jakarta.jms.Queue;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jms.annotation.JmsListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.stereotype.Component;
 
 /**
- * {@link jakarta.jms.MessageListener} responsible for reading messages sent to the standard queue.
+ * Class responsible for publishing messages to the standard queue.
+ * <p>
+ * Spring is able to do the dependency injection correctly, because the parameter name
+ * is the same as the name of the queue being configured.
  *
  * @see JmsAutoConfiguration#queue(String)
  */
 @Slf4j
-public abstract class AbstractMessageListener<M extends Message> {
+@Component
+public class AsyncMessagePublisher {
 
-    @JmsListener(destination = "${jms.default-queue.name}")
-    public void receive(M message) throws Exception {
-        log.info("Message {} received!", message.getId());
-        log.debug("{}", message);
-        doReceive(message);
-        log.info("Message {} received and processed with success!", message.getId());
+    private final JmsTemplate jmsTemplate;
+
+    private final Queue queue;
+
+    @Autowired
+    public AsyncMessagePublisher(JmsTemplate jmsTemplate, Queue queue) {
+        this.jmsTemplate = jmsTemplate;
+        this.queue = queue;
     }
 
-    @SuppressWarnings({"squid:S00112"}) // Must have thrown a generic exception.
-    protected abstract void doReceive(M message) throws Exception;
+    @SuppressWarnings("unused")
+    public <M extends AsyncMessage> void publish(M message) {
+        log.info("Publishing message '{}' ...", message.getMsgId());
+        log.debug("{}", message);
+        jmsTemplate.convertAndSend(queue, message);
+        log.info("Message '{}' published!", message.getMsgId());
+    }
 }

@@ -18,16 +18,24 @@
  */
 package io.herd.common.jms;
 
-import lombok.Getter;
-
 import java.util.UUID;
 
-@Getter
-public abstract class Message {
+@SuppressWarnings("unused")
+public abstract class AbstractAsyncMessage implements AsyncMessage {
 
-    private final UUID id;
+    private final UUID msgId;
 
-    public Message() {
-        id = UUID.randomUUID();
+    public AbstractAsyncMessage() {
+        this.msgId = UUID.randomUUID();
+    }
+
+    @Override
+    public UUID getMsgId() {
+        return msgId;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractAsyncMessage{mgId=" + msgId + "}";
     }
 }

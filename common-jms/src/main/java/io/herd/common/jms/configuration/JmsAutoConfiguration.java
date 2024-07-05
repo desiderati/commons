@@ -18,24 +18,22 @@
  */
 package io.herd.common.jms.configuration;
 
-import jakarta.jms.ConnectionFactory;
+import io.herd.common.jms.JmsErrorHandler;
 import jakarta.jms.Queue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.context.annotation.*;
 import org.springframework.jms.annotation.EnableJms;
-import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
-import org.springframework.util.ErrorHandler;
 
 @Slf4j
 @EnableJms
@@ -51,55 +49,44 @@ public class JmsAutoConfiguration {
 
     public static final String TYPE_ID_PROPERTY_NAME = "_type";
 
+    public JmsAutoConfiguration(@Value("${jms.dlq.enabled:false}") Boolean jmsDefaultQueueDlqEnabled) {
+        log.info("JMS default queue DLQ enabled? {}", jmsDefaultQueueDlqEnabled);
+    }
+
     @Bean
     public Queue queue(@Value("${jms.default-queue.name}") String queueName) {
         return new ActiveMQQueue(queueName);
     }
 
     @Bean
-    @ConditionalOnProperty(name = "jms.dlq.enabled", havingValue = "true")
+    @ConditionalOnExpression("${jms.dlq.enabled:false}")
     public Queue dlqQueue(
-        @Value("${jms.dlq.queue-prefix}") String queueDlqPrefix,
+        @Value("${jms.dlq.prefix}") String queueDlqPrefix,
         @Value("${jms.default-queue.name}") String queueName
     ) {
         return new ActiveMQQueue(queueDlqPrefix + queueName);
     }
 
     @Bean
+    @ConditionalOnProperty(name = "jms.default-response-queue.name")
     public Queue responseQueue(@Value("${jms.default-response-queue.name}") String responseQueueName) {
         return new ActiveMQQueue(responseQueueName);
     }
 
     @Bean
-    @ConditionalOnProperty(name = "jms.dlq.enabled", havingValue = "true")
+    @ConditionalOnExpression("${jms.dlq.enabled:false} and !'${jms.default-response-queue.name}'.empty()")
     public Queue responseDlqQueue(
-        @Value("${jms.dlq.queue-prefix}") String queueDlqPrefix,
+        @Value("${jms.dlq.prefix}") String queueDlqPrefix,
         @Value("${jms.default-response-queue.name}") String responseQueueName
     ) {
         return new ActiveMQQueue(queueDlqPrefix + responseQueueName);
     }
 
     /**
-     * We need to redefine a {@link DefaultJmsListenerContainerFactory}, because we need to register
-     * a custom {@link ErrorHandler}. We also had to register a redelivery policy.
-     */
-    @Bean
-    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
-        DefaultJmsListenerContainerFactoryConfigurer configurer,
-        @Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory,
-        @Qualifier("jmsErrorHandler") ErrorHandler errorHandler
-    ) {
-
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        configurer.configure(factory, connectionFactory);
-        factory.setErrorHandler(errorHandler);
-        return factory;
-    }
-
-    /**
      * We registered a converter for JSON.
      */
     @Bean
+    @ConditionalOnMissingBean(MessageConverter.class)
     public MessageConverter jacksonJmsMessageConverter() {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
@@ -108,5 +95,13 @@ public class JmsAutoConfiguration {
         // Jackson mapper should know what entity to use when deserializing incoming JSON.
         converter.setTypeIdPropertyName(TYPE_ID_PROPERTY_NAME);
         return converter;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JmsErrorHandler.class)
+    public JmsErrorHandler jmsErrorHandler(
+        @Value("${jms.default-queue.max-delivery-attempts:10}") Integer maxDeliveryAttempts
+    ) {
+        return new JmsErrorHandler(maxDeliveryAttempts);
     }
 }

@@ -17,6 +17,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 @file:Suppress("unused")
+
 package io.herd.common.mapper
 
 /**

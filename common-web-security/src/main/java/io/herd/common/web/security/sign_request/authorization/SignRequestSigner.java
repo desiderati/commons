@@ -84,7 +84,9 @@ public class SignRequestSigner {
             request.getHeader(HEADER_DATE);
     }
 
-    /** Instead of signing the whole request content directly, first we need to generate the hash. */
+    /**
+     * Instead of signing the whole request content directly, first we need to generate the hash.
+     */
     @SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
     private String computeRequestBodyHash(InputStream fis) {
         MessageDigest digest = MessageDigest.getInstance("MD5");

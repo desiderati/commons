@@ -16,28 +16,41 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.notification;
+package io.herd.common.web.client.configuration;
 
-import lombok.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.util.Base64;
 
 @Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@RequiredArgsConstructor
-public class Notification<M> implements Serializable {
+public class OpenApiClientProperties {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    @NotBlank
+    private String host;
 
-    /**
-     * AtmosphereResource UUID.
-     */
-    private String uuid;
+    @NotBlank
+    private String basePath;
 
-    @NonNull
-    private M message;
+    private String authUser;
+    private String authPass;
 
+    @NotNull
+    @Min(value = 0)
+    private Integer timeout = 0; // Timeout in seconds. (0 = No Timeout)
+
+    @SuppressWarnings("unused")
+    public String getBasicAuthorizationHeader() {
+        if (authUser != null && authPass != null) {
+            return "Basic " + new String(Base64.getEncoder().encode(
+                (authUser + ":" + authPass).getBytes()));
+        }
+        return null;
+    }
 }

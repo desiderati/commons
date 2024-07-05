@@ -23,10 +23,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.herd.common</groupId>
-        <artifactId>common-parent</artifactId>
+        <artifactId>common-starter-web</artifactId>
         <version>${revision}</version>
         <!--suppress MavenModelInspection-->
-        <relativePath>../common-parent</relativePath>
+        <relativePath>../common-starter-web</relativePath>
     </parent>
     <artifactId>common-web-notification</artifactId>
 

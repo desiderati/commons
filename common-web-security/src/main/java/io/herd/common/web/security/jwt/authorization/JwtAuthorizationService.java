@@ -20,14 +20,13 @@ package io.herd.common.web.security.jwt.authorization;
 
 import io.herd.common.web.security.jwt.JwtService;
 import io.herd.common.web.security.jwt.JwtTokenExtractor;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Service

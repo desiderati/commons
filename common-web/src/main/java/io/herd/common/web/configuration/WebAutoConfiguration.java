@@ -25,8 +25,8 @@ import io.herd.common.data.jpa.configuration.JpaAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.async.AsyncWebConfiguration;
 import io.herd.common.web.graphql.PageableTypeDefinitionConnectionFactory;
-import io.herd.common.web.rest.exception.ResponseExceptionDTOHttpMessageConverter;
 import io.herd.common.web.graphql.exception.GraphQLExceptionHandler;
+import io.herd.common.web.rest.exception.ResponseExceptionDTOHttpMessageConverter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.Type;
 import lombok.extern.slf4j.Slf4j;
@@ -235,7 +235,7 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
             RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED
         );
 
-        // Felipe Desiderati: Spring Data Rest should allow to define the complete path
+        // Felipe Desiderati: Spring Data Rest should allow defining the complete path
         // on annotation @RepositoryRestResource.
         // See: https://stackoverflow.com/questions/30396953/how-to-customize-spring-data-rest-to-use-a-multi-segment-path-for-a-repository-r
         // Configures the Base Path. It can be redefined using property: spring.data.rest.base-path

@@ -37,7 +37,8 @@ public class MultiTenantContext {
     private static String defaultTenant;
 
     @Autowired
-    @SuppressWarnings("squid:S3010") // We may ignore the error because it will have only one instance by application context.
+    @SuppressWarnings("squid:S3010")
+    // We may ignore the error because it will have only one instance by application context.
     public MultiTenantContext(@Value("${app.database.multitenant.default-tenant:public}") String defaultTenant) {
         MultiTenantContext.defaultTenant = defaultTenant;
     }

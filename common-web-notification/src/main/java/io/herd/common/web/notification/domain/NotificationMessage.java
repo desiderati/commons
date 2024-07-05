@@ -16,27 +16,31 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.notification;
+package io.herd.common.web.notification.domain;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.herd.common.exception.ApplicationException;
-import lombok.extern.slf4j.Slf4j;
-import org.atmosphere.config.managed.Decoder;
+import lombok.*;
 
-@Slf4j
-public class NotificationJacksonDecoder implements Decoder<String, Notification<?>> {
+import java.io.Serial;
+import java.io.Serializable;
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+/**
+ * This class represents a message to be sent to the client.
+ */
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
+public class NotificationMessage<M> implements Serializable {
 
-    @Override
-    public Notification<?> decode(String string) {
-        try {
-            return mapper.readValue(string, Notification.class);
-        } catch (Exception ex) {
-            String errorMsg = "Unable to deserialize JSON object: " + string;
-            log.error(ex.getMessage(), ex);
-            throw new ApplicationException(errorMsg);
-        }
-    }
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * AtmosphereResource UUID.
+     */
+    private String uuid;
+
+    @NonNull
+    private M payload;
+
 }

@@ -21,11 +21,11 @@ package io.herd.common.web.security.jwt.authentication;
 import io.herd.common.web.security.MultiTenantSupport;
 import io.herd.common.web.security.jwt.JwtService;
 import io.herd.common.web.security.jwt.JwtTokenConfigurer;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 
 public class DefaultJwtAuthenticationTokenConfigurer implements JwtAuthenticationTokenConfigurer {

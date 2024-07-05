@@ -47,7 +47,7 @@ jobs:
       - name: Build with Maven
         # mvn -B: Batch mode causes Maven to not display "Progress: 125/150kB" style lines when running.
         # Must be 'clean package', instead of 'clean test', otherwise this error will occur: "Artifact has not been packaged yet!"
-        run: mvn -B clean package
+        run: mvn -P generate-openapi-sources -B clean package
 
       - name: Create Tag Version
         run: mvn -B scm:tag -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}
