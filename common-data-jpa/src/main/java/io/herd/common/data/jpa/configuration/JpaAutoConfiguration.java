@@ -20,9 +20,7 @@ package io.herd.common.data.jpa.configuration;
 
 import io.herd.common.configuration.DefaultAutoConfiguration;
 import io.herd.common.data.DatabaseProperties;
-import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
 
@@ -43,15 +41,4 @@ import org.springframework.context.annotation.*;
 })
 public class JpaAutoConfiguration {
 
-    /**
-     * Even with Liquibase lib on classpath, Liquibase will only be loaded if property enabled is true.
-     * This should be a default behavior for the auto-configuration.
-     */
-    @Bean
-    @ConditionalOnProperty(name = "spring.liquibase.enabled", havingValue = "false", matchIfMissing = true)
-    public SpringLiquibase liquibase() {
-        SpringLiquibase springLiquibase = new SpringLiquibase();
-        springLiquibase.setShouldRun(false);
-        return springLiquibase;
-    }
 }

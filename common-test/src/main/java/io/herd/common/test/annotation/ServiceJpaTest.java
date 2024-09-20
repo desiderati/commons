@@ -25,6 +25,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
@@ -48,5 +49,12 @@ public @interface ServiceJpaTest {
      */
     @AliasFor(annotation = Import.class, attribute = "value")
     Class<?>[] services() default {};
+
+    /**
+     * @return the properties in form {@literal key=value},
+     * that should be added to the Spring {@link Environment} before the test runs.
+     */
+    @AliasFor(annotation = DataJpaTest.class, attribute = "properties")
+    String[] properties() default {};
 
 }
