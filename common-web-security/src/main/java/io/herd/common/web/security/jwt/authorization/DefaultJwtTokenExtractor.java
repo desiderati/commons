@@ -34,15 +34,21 @@ import java.util.List;
 
 public class DefaultJwtTokenExtractor implements JwtTokenExtractor<Authentication> {
 
+    private final String jwtAuthenticationAuthoritiesParameter;
+
+    public DefaultJwtTokenExtractor(String jwtAuthenticationAuthoritiesParameter) {
+        this.jwtAuthenticationAuthoritiesParameter = jwtAuthenticationAuthoritiesParameter;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public Authentication extract(Claims tokenPayload) {
         String username = tokenPayload.getSubject();
 
         Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
-        if (tokenPayload.get(JwtService.AUTHORITIES_ATTRIBUTE) != null) {
+        if (tokenPayload.get(jwtAuthenticationAuthoritiesParameter) != null) {
             authorities =
-                ((List<String>) tokenPayload.get(JwtService.AUTHORITIES_ATTRIBUTE)).stream()
+                ((List<String>) tokenPayload.get(jwtAuthenticationAuthoritiesParameter)).stream()
                     .map(SimpleGrantedAuthority::new).toList();
         }
 

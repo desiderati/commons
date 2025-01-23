@@ -18,16 +18,14 @@
  */
 package io.herd.common.web.configuration.async;
 
+import io.herd.common.web.graphql.AsyncGraphQLServletContextBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
@@ -73,18 +71,22 @@ public class AsyncWebConfiguration {
         };
     }
 
-    @Bean(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
-    @ConditionalOnProperty(name = "spring.mvc.async.thread-context-inheritable", havingValue = "true")
-    public AsyncTaskExecutor simpleAsyncTaskExecutor() {
-        log.info("Creating simple asynchronous task executor...");
-        SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
-        executor.setTaskDecorator(new RequestAttributesAwareTaskDecorator());
-        executor.setThreadNamePrefix("simple-task-");
-        return executor;
+    @Bean
+    @ConditionalOnProperty(name = "spring.mvc.async.context-propagation-mode", havingValue = "NON_INHERITABLE")
+    public AsyncContextAwareTaskDecorator asyncContextAwareTaskDecorator() {
+        log.info("Creating asynchronous context task decorator...");
+        return new AsyncContextAwareTaskDecorator();
     }
 
     @Bean
-    @ConditionalOnProperty(name = "spring.mvc.async.thread-context-inheritable", havingValue = "true")
+    @ConditionalOnProperty(name = "spring.mvc.async.context-propagation-mode", havingValue = "NON_INHERITABLE")
+    public AsyncGraphQLServletContextBuilder asyncGraphQLServletContextBuilder() {
+        log.info("Creating asynchronous graphql context builder...");
+        return new AsyncGraphQLServletContextBuilder();
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "spring.mvc.async.context-propagation-mode", havingValue = "INHERITABLE")
     public RequestContextFilter requestContextFilter() {
         RequestContextFilter requestContextFilter = new OrderedRequestContextFilter();
         requestContextFilter.setThreadContextInheritable(true);

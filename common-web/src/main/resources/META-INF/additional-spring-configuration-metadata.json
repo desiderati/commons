@@ -5,6 +5,21 @@
       "type": "io.herd.common.web.configuration.CorsProperties"
     }
   ],
+  "hints": [
+    {
+      "name": "spring.mvc.async.context-propagation-mode",
+      "values": [
+        {
+          "value": "INHERITABLE",
+          "description": "The context will be inherited from the parent thread."
+        },
+        {
+          "value": "NON_INHERITABLE",
+          "description": "A new task decorator will be assigned for each request and the context will be copied to the new async child thread."
+        }
+      ]
+    }
+  ],
   "properties": [
     {
       "name": "app.api-base-path",
@@ -31,10 +46,10 @@
       "defaultValue": "/v.*,/public/v.*"
     },
     {
-      "name": "spring.mvc.async.thread-context-inheritable",
-      "description": "Set whether to expose the LocaleContext and RequestAttributes as inheritable for child threads (using an InheritableThreadLocal). If true, a SimpleAsyncTaskExecutor will be used (instead of a ThreadPoolTaskExecutor) since it will never re-use threads. WARNING: Do not use inheritance for child threads if you are accessing a thread pool configured to add new threads on demand, since this will expose the inherited context to such a pooled thread.",
-      "type": "java.lang.Boolean",
-      "defaultValue": false
+      "name": "spring.mvc.async.context-propagation-mode",
+      "description": "It defines how to propagate the request and locale context to asynchronous children threads. The default value is 'NON_INHERITABLE'.",
+      "type": "io.herd.common.web.configuration.async.AsyncContextPropagationMode",
+      "defaultValue": "NON_INHERITABLE"
     },
     {
       "name": "spring.web.cors.allowed-methods",

@@ -30,12 +30,18 @@ import java.util.stream.Collectors;
 
 public class DefaultJwtAuthenticationTokenConfigurer implements JwtAuthenticationTokenConfigurer {
 
+    private final String jwtAuthenticationAuthoritiesParameter;
+
+    public DefaultJwtAuthenticationTokenConfigurer(String jwtAuthenticationAuthoritiesParameter) {
+        this.jwtAuthenticationAuthoritiesParameter = jwtAuthenticationAuthoritiesParameter;
+    }
+
     @Override
     @SuppressWarnings("squid:S1905") // Unnecessary cast
     public JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication authentication) {
         return tokenPayload -> {
             tokenPayload.subject(((User) authentication.getPrincipal()).getUsername());
-            tokenPayload.add(JwtService.AUTHORITIES_ATTRIBUTE,
+            tokenPayload.add(jwtAuthenticationAuthoritiesParameter,
                 authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
 

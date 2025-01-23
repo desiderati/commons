@@ -27,6 +27,7 @@ import java.util.Collection;
 /**
  * This class should be used when we define a {@link AuthenticationProvider} which is responsible for calling
  * another system responsible for the authentication.
+ * See for details: {@link JwtDelegateAuthenticationProvider}
  */
 public class JwtDelegateAuthenticationToken extends UsernamePasswordAuthenticationToken {
 

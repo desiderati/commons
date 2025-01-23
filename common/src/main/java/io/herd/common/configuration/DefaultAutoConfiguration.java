@@ -67,4 +67,9 @@ public class DefaultAutoConfiguration {
         validator.setValidationMessageSource(messageSource);
         return validator;
     }
+
+    @Bean
+    public ApplicationContextProvider applicationContextProvider() {
+        return new ApplicationContextProvider();
+    }
 }

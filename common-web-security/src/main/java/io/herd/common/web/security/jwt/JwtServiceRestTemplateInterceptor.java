@@ -20,10 +20,15 @@ package io.herd.common.web.security.jwt;
 
 import io.herd.common.web.security.jwt.authorization.JwtAuthorizationService;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * We had to use a {@link RestTemplate} instead of a {@link RestClient}, because with {@link RestTemplate}
+ * we can configure the interceptors after the object creation.
+ */
 public class JwtServiceRestTemplateInterceptor implements JwtServiceInterceptor {
 
     private final RestTemplate restTemplate;

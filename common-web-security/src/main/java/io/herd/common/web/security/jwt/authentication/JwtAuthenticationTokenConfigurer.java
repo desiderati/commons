@@ -24,6 +24,6 @@ import org.springframework.security.core.Authentication;
 
 public interface JwtAuthenticationTokenConfigurer {
 
-    JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication auth);
+    JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication authentication);
 
 }

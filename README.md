@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-3.3.0.RC4-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-3.3.0.RELEASE-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE)
 
@@ -24,7 +24,7 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [3.3.0.RC4] - 2024-01-12
+#### [3.3.0.RELEASE] - 2025-01-23
 - Added support to retrieve the authorities passed by the delegated authentication provider.
 - Added support for pre/post authorizations on GraphQL calls.
 - Added Hamkrest and Spek as test dependencies.
@@ -33,6 +33,20 @@ All project changes will be documented in this file.
 - Removed dependency with org.reflections.
 - Updated some dependency versions.
 - Update the copyright.
+- Updated the Java version on buildspec.yml.
+- Maven version should be 3.8.8 because of GitHub Actions.
+- Created the BroadcastController on module common-web-notification.
+- Created the module common-web-notification-client.
+- Renamed AbstractEntity.kt to AbstractIdentity.kt.
+- Revised all module common-jms.
+- Fixed the input in pageable.graphqls.
+- Better Liquibase Maven Plugin integration.
+- Updated the dependencies. Fixed some typos. Fixed minor warnings.
+- Enabled a way of setting custom properties for a test annotated with @ServiceJpaTest.
+- Created a class which provides static access to the Spring application context.
+- Defined a mechanism for context propagation when working with asynchronous tasks our suspended methods.
+- Defined a way of retrieving (statically) an internationalized message.
+- Added an ability to verify if the authenticated used is an administrator.
 
 #### [3.2.1.RELEASE] - 2023-12-13
 - Added support to create request scoped beans within async threads.

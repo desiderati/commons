@@ -51,16 +51,11 @@ import java.util.concurrent.Executor;
 @EnableConfigurationProperties({GraphQLServletProperties.class, AsyncServletProperties.class})
 public class GraphQLWebSecurityConfiguration {
 
-    private final AsyncServletProperties asyncServletProperties;
-
     @Bean("graphqlAsyncTaskExecutor")
-    @ConditionalOnProperty(name = "spring.mvc.async.thread-context-inheritable", havingValue = "true")
+    @ConditionalOnProperty(name = "graphql.servlet.async.delegate-security-context", havingValue = "true")
     public Executor simpleGraphQLAsyncTaskExecutor(
         @Qualifier(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME) AsyncTaskExecutor taskExecutor
     ) {
-        if (asyncServletProperties.isDelegateSecurityContext()) {
-            return new DelegatingSecurityContextAsyncTaskExecutor(taskExecutor);
-        }
-        return null;
+        return new DelegatingSecurityContextAsyncTaskExecutor(taskExecutor);
     }
 }

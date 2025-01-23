@@ -2,37 +2,42 @@ package io.herd.common.web.configuration.async;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.MDC;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Map;
+import java.util.Objects;
 
+/**
+ * A {@link TaskDecorator} that propagates the {@link LocaleContext} and {@link RequestAttributes} from the calling
+ * thread to the children threads.
+ */
 @Slf4j
-public class RequestAttributesAwareTaskDecorator implements TaskDecorator {
+public class AsyncContextAwareTaskDecorator implements TaskDecorator {
 
     @NotNull
     @Override
     public Runnable decorate(@NotNull Runnable runnable) {
-        RequestAttributes requestAttributes = cloneRequestAttributes(RequestContextHolder.currentRequestAttributes());
-        Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
+        LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
+        RequestAttributes requestAttributes =
+            cloneRequestAttributes(RequestContextHolder.currentRequestAttributes());
 
         return () -> {
             try {
+                LocaleContextHolder.setLocaleContext(localeContext);
                 RequestContextHolder.setRequestAttributes(requestAttributes);
-                MDC.setContextMap(mdcContextMap);
                 runnable.run();
             } finally {
-                MDC.clear();
+                LocaleContextHolder.resetLocaleContext();
                 RequestContextHolder.resetRequestAttributes();
             }
         };
     }
 
-    @SuppressWarnings("DataFlowIssue")
-    private RequestAttributes cloneRequestAttributes(RequestAttributes requestAttributes) {
+    public static RequestAttributes cloneRequestAttributes(RequestAttributes requestAttributes) {
         RequestAttributes clonedRequestAttribute;
         try {
             clonedRequestAttribute =
@@ -44,7 +49,7 @@ public class RequestAttributesAwareTaskDecorator implements TaskDecorator {
             for (String name : requestAttributes.getAttributeNames(RequestAttributes.SCOPE_REQUEST)) {
                 clonedRequestAttribute.setAttribute(
                     name,
-                    requestAttributes.getAttribute(name, RequestAttributes.SCOPE_REQUEST),
+                    Objects.requireNonNull(requestAttributes.getAttribute(name, RequestAttributes.SCOPE_REQUEST)),
                     RequestAttributes.SCOPE_REQUEST
                 );
             }
@@ -52,7 +57,7 @@ public class RequestAttributesAwareTaskDecorator implements TaskDecorator {
             for (String name : requestAttributes.getAttributeNames(RequestAttributes.SCOPE_SESSION)) {
                 clonedRequestAttribute.setAttribute(
                     name,
-                    requestAttributes.getAttribute(name, RequestAttributes.SCOPE_SESSION),
+                    Objects.requireNonNull(requestAttributes.getAttribute(name, RequestAttributes.SCOPE_SESSION)),
                     RequestAttributes.SCOPE_SESSION
                 );
             }

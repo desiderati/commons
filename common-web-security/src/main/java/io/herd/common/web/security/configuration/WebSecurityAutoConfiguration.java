@@ -39,11 +39,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authorization.method.AuthorizationManagerAfterMethodInterceptor;
 import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -63,6 +62,7 @@ import org.springframework.security.web.method.annotation.AuthenticationPrincipa
 import org.springframework.security.web.method.annotation.CurrentSecurityContextArgumentResolver;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.filter.CorsFilter;
@@ -102,6 +102,9 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @Value("${spring.web.security.jwt.authentication.login-url:/login}")
     private String jwtAuthenticationLoginUrl;
 
+    @Value("${spring.web.security.jwt.authentication.authorities.parameter:authorities}")
+    private String jwtAuthenticationAuthoritiesParameter;
+
     @Value("${spring.web.security.jwt.authentication.delegation.enabled:false}")
     private boolean jwtDelegateAuthenticationEnabled;
 
@@ -139,16 +142,13 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     private String springDocOpenApiPath;
 
     public WebSecurityAutoConfiguration(
-        @Value("${graphql.servlet.async.enabled:false}")
-        boolean graphqlServletAsyncEnabled,
-
         @Value("${graphql.servlet.async.delegate-security-context:true}")
         boolean graphqlServletAsyncDelegateSecurityContext,
 
         Collection<AuthorizationManagerBeforeMethodInterceptor> preAuthorizeInterceptors,
         Collection<AuthorizationManagerAfterMethodInterceptor> postAuthorizeInterceptors
     ) {
-        if (graphqlServletAsyncEnabled && graphqlServletAsyncDelegateSecurityContext) {
+        if (graphqlServletAsyncDelegateSecurityContext) {
             SecurityContextHolder.setStrategyName(MODE_INHERITABLETHREADLOCAL);
 
             // As we have defined a new SecurityContextHolderStrategy, we must reconfigure
@@ -205,15 +205,12 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Autowired
     public void configureArgumentResolvers(
-        @Value("${graphql.servlet.async.enabled:false}")
-        boolean graphqlServletAsyncEnabled,
-
         @Value("${graphql.servlet.async.delegate-security-context:true}")
         boolean graphqlServletAsyncDelegateSecurityContext,
 
         List<HandlerMethodArgumentResolver> argumentResolvers
     ) {
-        if (graphqlServletAsyncEnabled && graphqlServletAsyncDelegateSecurityContext) {
+        if (graphqlServletAsyncDelegateSecurityContext) {
             argumentResolvers.forEach(
                 it -> {
                     if (it instanceof AuthenticationPrincipalArgumentResolver) {
@@ -248,7 +245,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @ConditionalOnMissingBean(JwtAuthenticationTokenConfigurer.class)
     @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
     public JwtAuthenticationTokenConfigurer jwtAuthenticationTokenConfigurer() {
-        return new DefaultJwtAuthenticationTokenConfigurer();
+        return new DefaultJwtAuthenticationTokenConfigurer(jwtAuthenticationAuthoritiesParameter);
     }
 
     @Bean
@@ -259,14 +256,8 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
             throw new IllegalStateException("Authentication delegate base path should be defined!");
         }
 
-        RestTemplate jwtDelegateAuthenticationRestTemplate =
-            new RestTemplateBuilder()
-                .defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
-                .rootUri(jwtDelegateAuthenticationBasePath)
-                .build();
-
         return new JwtDelegateAuthenticationProvider(
-            jwtDelegateAuthenticationRestTemplate,
+            RestClient.builder().baseUrl(jwtDelegateAuthenticationBasePath).build(),
             jwtDelegateAuthenticationLoginUrl
         );
     }
@@ -284,7 +275,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @ConditionalOnMissingBean(JwtTokenExtractor.class)
     @ConditionalOnProperty(name = "spring.web.security.jwt.authorization.enabled", havingValue = "true")
     public JwtTokenExtractor<Authentication> jwtTokenExtractor() {
-        return new DefaultJwtTokenExtractor();
+        return new DefaultJwtTokenExtractor(jwtAuthenticationAuthoritiesParameter);
     }
 
     /**
@@ -459,6 +450,14 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+    }
+
+    @Bean
+    static public MethodSecurityExpressionHandler methodSecurityExpressionHandler(
+        @Value("${spring.web.security.jwt.authentication.authorities.parameter-administrator:administrator}")
+        String jwtAuthenticationAuthoritiesAdminParameter
+    ) {
+        return new CustomMethodSecurityExpressionHandler(jwtAuthenticationAuthoritiesAdminParameter);
     }
 
     private HttpFirewall allowUrlEncodedSlashHttpFirewall() {

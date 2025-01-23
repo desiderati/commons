@@ -6,7 +6,6 @@ import io.herd.common.google.GoogleCaptchaService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -17,8 +16,7 @@ class CaptchaController(
     private val googleCaptchaService: GoogleCaptchaService,
 ) : PublicController {
 
-    @PostMapping
-    @RequestMapping("/v1/captcha")
+    @PostMapping("/v1/captcha")
     fun validateCaptcha(@RequestBody payload: String): Boolean {
         val payloadNode: JsonNode = objectMapper.readTree(payload)
         val captchaResponse = payloadNode.get("captchaResponse").asText()

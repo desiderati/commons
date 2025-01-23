@@ -47,7 +47,6 @@ import java.util.List;
 @Service
 public class JwtService {
 
-    public static final String AUTHORITIES_ATTRIBUTE = "authorities";
     public static final String TENANT_ATTRIBUTE = "tenant";
 
     private final JwtProperties jwtProperties;
