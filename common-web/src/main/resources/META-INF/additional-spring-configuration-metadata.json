@@ -46,6 +46,16 @@
       "defaultValue": "/v.*,/public/v.*"
     },
     {
+      "name": "spring.graphql.aliased-scalars",
+      "description": "It defines the aliased scalars which will be used by the application.",
+      "type": "java.util.Map<java.lang.String, java.lang.String>"
+    },
+    {
+      "name": "spring.graphql.extended-scalars",
+      "description": "It specifies the extended scalars for graphql-java which will be used by the application.",
+      "type": "java.lang.String"
+    },
+    {
       "name": "spring.mvc.async.context-propagation-mode",
       "description": "It defines how to propagate the request and locale context to asynchronous children threads. The default value is 'NON_INHERITABLE'.",
       "type": "io.herd.common.web.configuration.async.AsyncContextPropagationMode",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 - Felipe Desiderati
+ * Copyright (c) 2025 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,21 +23,22 @@ package io.herd.common
 import com.natpryce.hamkrest.Matcher
 import java.text.Normalizer
 
-fun String.stripAccents(): String {
-    return Normalizer.normalize(this, Normalizer.Form.NFD).let {
+fun String.stripAccents(): String =
+    Normalizer.normalize(this, Normalizer.Form.NFD).let {
         Regex("\\p{InCombiningDiacriticalMarks}+").replace(it, "")
             .replace("[^a-zA-Z0-9]", "")
     }
+
+fun <T> List<T>.copyOf(): List<T> = mutableListOf<T>().also { it.addAll(this) }
+
+fun <T> List<T>.mutableCopyOf(): MutableList<T> = mutableListOf<T>().also { it.addAll(this) }
+
+fun <T> Iterable<T>.containsAll(vararg elements : T): Boolean {
+    return elements.all { this.contains(it) }
 }
 
-fun <T> List<T>.copyOf(): List<T> {
-    return mutableListOf<T>().also { it.addAll(this) }
-}
+fun <T> not(that: Matcher<T>): Matcher<T> = Matcher.Negation(that)
 
-fun <T> List<T>.mutableCopyOf(): MutableList<T> {
-    return mutableListOf<T>().also { it.addAll(this) }
-}
+inline fun not(block: () -> Boolean): Boolean = !block()
 
-fun <T> not(that: Matcher<T>): Matcher<T> {
-    return Matcher.Negation(that)
-}
+infix fun CharSequence?.contentNotEquals(other: CharSequence?): Boolean = not { contentEquals(other) }

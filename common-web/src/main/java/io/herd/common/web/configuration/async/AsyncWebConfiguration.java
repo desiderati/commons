@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 - Felipe Desiderati
+ * Copyright (c) 2025 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,7 +18,6 @@
  */
 package io.herd.common.web.configuration.async;
 
-import io.herd.common.web.graphql.AsyncGraphQLServletContextBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -76,13 +75,6 @@ public class AsyncWebConfiguration {
     public AsyncContextAwareTaskDecorator asyncContextAwareTaskDecorator() {
         log.info("Creating asynchronous context task decorator...");
         return new AsyncContextAwareTaskDecorator();
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "spring.mvc.async.context-propagation-mode", havingValue = "NON_INHERITABLE")
-    public AsyncGraphQLServletContextBuilder asyncGraphQLServletContextBuilder() {
-        log.info("Creating asynchronous graphql context builder...");
-        return new AsyncGraphQLServletContextBuilder();
     }
 
     @Bean

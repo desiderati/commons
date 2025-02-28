@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-3.3.0.RELEASE-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-4.0.0.RC1-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE)
 
@@ -23,6 +23,18 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [4.0.0.RC1] - 2025-02-27
+- Created a class which provides static access to the Spring application context.
+- Defined a mechanism for context propagation when working with asynchronous tasks our suspended methods.
+- Defined a way of retrieving (statically) an internationalized message.
+- Defined a way to validate entities using typed errors and ArrowKt.
+- Added an ability to verify if the authenticated used is an administrator.
+- Updated Copyright
+- Migrated to Spring GraphQL.
+  * Configured the Altair and Voyager for GraphQL.
+  * Defined a way of registering custom scalars automatically.
+  * Better configuration for @Pageable directive.
 
 #### [3.3.0.RELEASE] - 2025-01-23
 - Added support to retrieve the authorities passed by the delegated authentication provider.

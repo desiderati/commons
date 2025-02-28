@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <!--/*@thymesVar id="pageTitle" type="java.lang.String"*/-->
+        <title th:text="${pageTitle}"></title>
+
+        <!--/*@thymesVar id="altairBaseUrl" type="java.lang.String"*/-->
+        <base th:href="${altairBaseUrl}"/>
+
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1"/>
+        <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+        <link href="styles.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <app-root>
+            <style>
+                .loading-screen {
+                    /* Prevents the loading screen from showing until CSS is downloaded. */
+                    display: none;
+                }
+            </style>
+            <div class="loading-screen styled">
+                <div class="loading-screen-inner">
+                    <div class="loading-screen-logo-container">
+                        <img src="assets/img/logo_350.svg" alt="Altair"/>
+                    </div>
+                    <div class="loading-screen-loading-indicator">
+                        <span class="loading-indicator-dot"></span>
+                        <span class="loading-indicator-dot"></span>
+                        <span class="loading-indicator-dot"></span>
+                    </div>
+                </div>
+            </div>
+        </app-root>
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', () => {
+                AltairGraphQL.init([[${options}]])
+            })
+        </script>
+        <script rel="preload" as="script" type="text/javascript" src="runtime.js"></script>
+        <script rel="preload" as="script" type="text/javascript" src="polyfills.js"></script>
+        <script rel="preload" as="script" type="text/javascript" src="main.js"></script>
+    </body>
+</html>

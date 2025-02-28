@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 - Felipe Desiderati
+ * Copyright (c) 2025 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,20 +18,16 @@
  */
 package io.herd.common.web.configuration;
 
-import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebAutoConfiguration;
-import graphql.kickstart.tools.TypeDefinitionFactory;
-import graphql.schema.*;
+import graphql.schema.GraphQLScalarType;
 import io.herd.common.data.jpa.configuration.JpaAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.async.AsyncWebConfiguration;
-import io.herd.common.web.graphql.PageableTypeDefinitionConnectionFactory;
-import io.herd.common.web.graphql.exception.GraphQLExceptionHandler;
+import io.herd.common.web.graphql.NameSchemaDirectiveWiring;
 import io.herd.common.web.rest.exception.ResponseExceptionDTOHttpMessageConverter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springdoc.webmvc.api.MultipleOpenApiActuatorResource;
 import org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource;
 import org.springdoc.webmvc.api.OpenApiActuatorResource;
@@ -42,17 +38,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.graphql.GraphQlAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.*;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.Validator;
@@ -75,7 +71,8 @@ import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
 @Slf4j
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@AutoConfigureAfter({HibernateJpaAutoConfiguration.class, GraphQLWebAutoConfiguration.class})
+@AutoConfigureBefore(GraphQlAutoConfiguration.class)
+@AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
 @EnableWebMvc
 @PropertySource("classpath:application-common-web.properties")
 @ComponentScan({
@@ -121,14 +118,6 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
     @Bean("webCorsProperties")
     @ConfigurationProperties("spring.web.cors")
     public CorsProperties webCorsProperties() {
-        return new CorsProperties();
-    }
-
-    @Validated
-    @Bean("graphqlCorsProperties")
-    @ConditionalOnProperty(value = "graphql.servlet.enabled", havingValue = "true", matchIfMissing = true)
-    @ConfigurationProperties("graphql.servlet.cors")
-    public CorsProperties graphqlCorsProperties() {
         return new CorsProperties();
     }
 
@@ -252,37 +241,17 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
     }
 
     @Bean
-    @ConditionalOnMissingBean(GraphQLExceptionHandler.class)
-    public GraphQLExceptionHandler graphQLExceptionHandler(MessageSource messageSource) {
-        return new GraphQLExceptionHandler(messageSource);
-    }
-
-    @Bean
-    public GraphQLScalarType voidGraphQLScalarType() {
-        return GraphQLScalarType.newScalar()
-            .name("Void")
-            .description("Void Scalar")
-            .coercing(new Coercing<Void, String>() {
-
-                @Override
-                public String serialize(@NotNull Object dataFetcherResult) throws CoercingSerializeException {
-                    return "";
-                }
-
-                @Override
-                public @NotNull Void parseValue(@NotNull Object input) throws CoercingParseValueException {
-                    return null;
-                }
-
-                @Override
-                public @NotNull Void parseLiteral(@NotNull Object input) throws CoercingParseLiteralException {
-                    return null;
-                }
-            }).build();
-    }
-
-    @Bean
-    public TypeDefinitionFactory pageableTypeDefinitionConnectionFactory() {
-        return new PageableTypeDefinitionConnectionFactory();
+    public RuntimeWiringConfigurer runtimeWiringConfigurer(
+        ObjectProvider<GraphQLScalarType> graphQLScalarTypes,
+        ObjectProvider<NameSchemaDirectiveWiring> customDirectives
+    ) {
+        return (wiringBuilder) -> {
+            graphQLScalarTypes.orderedStream().forEach(wiringBuilder::scalar);
+            customDirectives.orderedStream().forEach(
+                nameSchemaDirectiveWiring -> wiringBuilder.directive(
+                    nameSchemaDirectiveWiring.getDirectiveName(), nameSchemaDirectiveWiring
+                )
+            );
+        };
     }
 }

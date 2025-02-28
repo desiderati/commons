@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 - Felipe Desiderati
+ * Copyright (c) 2025 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,7 +18,6 @@
  */
 package io.herd.common.web.security.configuration;
 
-import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebSecurityAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.CorsProperties;
 import io.herd.common.web.configuration.WebAutoConfiguration;
@@ -33,16 +32,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.*;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.authorization.method.AuthorizationManagerAfterMethodInterceptor;
 import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -53,6 +51,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -67,12 +66,14 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.core.context.SecurityContextHolder.MODE_INHERITABLETHREADLOCAL;
@@ -82,15 +83,11 @@ import static org.springframework.security.core.context.SecurityContextHolder.MO
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 @PropertySource("classpath:application-common-web-security.properties")
-@AutoConfigureBefore(GraphQLWebSecurityAutoConfiguration.class)
 @ComponentScan(basePackages = "io.herd.common.web.security",
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
-@Import({
-    WebAutoConfiguration.class,
-    GraphQLWebSecurityConfiguration.class
-}) // To be used with @WebMvcTest
+@Import(WebAutoConfiguration.class) // To be used with @WebMvcTest
 public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Value("${spring.web.security.default.authentication.enabled:false}")
@@ -120,16 +117,19 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @Value("${spring.web.security.sign-request.authorization.enabled:false}")
     private boolean signRequestAuthorizationEnabled;
 
-    @Value("${graphql.servlet.security.enabled:true}")
-    private boolean graphqlServletSecurityEnabled;
+    @Value("${spring.graphql.security.enabled:true}")
+    private boolean springGraphqlSecurityEnabled;
 
-    @Value("${graphql.servlet.mapping}")
-    private String graphqlServletMapping;
+    @Value("${spring.graphql.path:/graphql}")
+    private String springGraphqlPath;
 
-    @Value("${graphql.playground.enabled:false}")
-    private boolean graphqlPlaygroundEnabled;
+    @Value("${spring.graphql.graphiql.enabled:false}")
+    private boolean graphqlGraphiqlEnabled;
 
-    @Value("${graphql.voyager.enabled:false}")
+    @Value("${spring.graphql.altair.enabled:false}")
+    private boolean graphqlAltairEnabled;
+
+    @Value("${spring.graphql.voyager.enabled:false}")
     private boolean graphqlVoyagerEnabled;
 
     @Value("${spring.web.atmosphere.security.enabled:true}")
@@ -142,13 +142,13 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     private String springDocOpenApiPath;
 
     public WebSecurityAutoConfiguration(
-        @Value("${graphql.servlet.async.delegate-security-context:true}")
-        boolean graphqlServletAsyncDelegateSecurityContext,
+        @Value("${spring.mvc.async.delegate-security-context:true}")
+        boolean springMvcAsyncDelegateSecurityContext,
 
         Collection<AuthorizationManagerBeforeMethodInterceptor> preAuthorizeInterceptors,
         Collection<AuthorizationManagerAfterMethodInterceptor> postAuthorizeInterceptors
     ) {
-        if (graphqlServletAsyncDelegateSecurityContext) {
+        if (springMvcAsyncDelegateSecurityContext) {
             SecurityContextHolder.setStrategyName(MODE_INHERITABLETHREADLOCAL);
 
             // As we have defined a new SecurityContextHolderStrategy, we must reconfigure
@@ -205,12 +205,11 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Autowired
     public void configureArgumentResolvers(
-        @Value("${graphql.servlet.async.delegate-security-context:true}")
-        boolean graphqlServletAsyncDelegateSecurityContext,
-
+        @Value("${spring.mvc.async.delegate-security-context:true}")
+        boolean springMvcAsyncDelegateSecurityContext,
         List<HandlerMethodArgumentResolver> argumentResolvers
     ) {
-        if (graphqlServletAsyncDelegateSecurityContext) {
+        if (springMvcAsyncDelegateSecurityContext) {
             argumentResolvers.forEach(
                 it -> {
                     if (it instanceof AuthenticationPrincipalArgumentResolver) {
@@ -384,23 +383,21 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
                 }
 
                 // GraphQL Support.
-                if (!graphqlServletSecurityEnabled) {
+                if (!springGraphqlSecurityEnabled) {
                     // It should be used only on development environments.
                     // As the GraphQL Url is registered by another Servlet, we must configure the security like this!
                     authorizeHttpRequests.requestMatchers(
                         new MvcRequestMatcher.Builder(introspector)
-                            .servletPath(UrlUtils.sanitize(graphqlServletMapping))
+                            .servletPath(UrlUtils.sanitize(springGraphqlPath))
                             .pattern("/**")
                     ).permitAll();
                 }
 
-                if (graphqlPlaygroundEnabled) {
+                if (graphqlGraphiqlEnabled) {
                     // It should be used only on development environments.
                     // The URL mapping is not customized!
-                    authorizeHttpRequests.requestMatchers("/playground").permitAll();
-                    authorizeHttpRequests.requestMatchers("/playground/**").permitAll();
-                    authorizeHttpRequests.requestMatchers("/vendor/playground").permitAll();
-                    authorizeHttpRequests.requestMatchers("/vendor/playground/**").permitAll();
+                    authorizeHttpRequests.requestMatchers("/graphiql").permitAll();
+                    authorizeHttpRequests.requestMatchers("/graphiql/**").permitAll();
                 }
 
                 if (graphqlVoyagerEnabled) {
@@ -410,6 +407,15 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
                     authorizeHttpRequests.requestMatchers("/voyager/**").permitAll();
                     authorizeHttpRequests.requestMatchers("/vendor/voyager").permitAll();
                     authorizeHttpRequests.requestMatchers("/vendor/voyager/**").permitAll();
+                }
+
+                if (graphqlAltairEnabled) {
+                    // It should be used only on development environments.
+                    // The URL mapping is not customized!
+                    authorizeHttpRequests.requestMatchers("/altair").permitAll();
+                    authorizeHttpRequests.requestMatchers("/altair/**").permitAll();
+                    authorizeHttpRequests.requestMatchers("/vendor/altair").permitAll();
+                    authorizeHttpRequests.requestMatchers("/vendor/altair/**").permitAll();
                 }
 
                 if (jwtAuthenticationEnabled) {
@@ -464,5 +470,14 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
         DefaultHttpFirewall firewall = new DefaultHttpFirewall();
         firewall.setAllowUrlEncodedSlash(true);
         return firewall;
+    }
+
+    @Bean("delegatingSecurityContextAsyncTaskExecutor")
+    @ConditionalOnProperty(name = "spring.mvc.async.delegate-security-context", havingValue = "true")
+    @ConditionalOnClass({DispatcherServlet.class, DefaultAuthenticationEventPublisher.class})
+    public Executor delegatingSecurityContextAsyncTaskExecutor(
+        @Qualifier(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME) AsyncTaskExecutor taskExecutor
+    ) {
+        return new DelegatingSecurityContextAsyncTaskExecutor(taskExecutor);
     }
 }

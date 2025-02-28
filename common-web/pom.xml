@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2024 - Felipe Desiderati
+  ~ Copyright (c) 2025 - Felipe Desiderati
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   ~ associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -68,18 +68,22 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
 
         <!-- GraphQL Client -->
         <dependency>
-            <groupId>com.graphql-java-kickstart</groupId>
-            <artifactId>graphql-spring-boot-starter</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-graphql</artifactId>
         </dependency>
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java-extended-scalars</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.apollographql.apollo3</groupId>
+            <groupId>com.apollographql.apollo</groupId>
             <artifactId>apollo-runtime</artifactId>
         </dependency>
 
@@ -87,14 +91,6 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        </dependency>
-
-        <!--suppress MavenDuplicateDependenciesInspection-->
-        <dependency>
-            <groupId>org.spekframework.spek2</groupId>
-            <artifactId>spek-runner-junit5</artifactId>
-            <version>${spek.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

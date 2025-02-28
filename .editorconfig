@@ -17,6 +17,9 @@ ij_smart_tabs = false
 ij_wrap_on_typing = false
 
 [*.css]
+indent_size = 2
+tab_width = 2
+ij_continuation_indent_size = 2
 ij_css_align_closing_brace_with_properties = false
 ij_css_blank_lines_around_nested_selector = 1
 ij_css_blank_lines_between_blocks = 1
@@ -1153,6 +1156,8 @@ ij_toml_keep_indents_on_empty_lines = false
 
 [{*.yaml,*.yml}]
 indent_size = 2
+tab_width = 2
+ij_continuation_indent_size = 2
 ij_yaml_align_values_properties = do_not_align
 ij_yaml_autoinsert_sequence_marker = true
 ij_yaml_block_mapping_on_new_line = false

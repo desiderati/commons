@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 - Felipe Desiderati
+ * Copyright (c) 2025 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -16,23 +16,25 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.validation;
+package io.herd.common.validation
 
-import jakarta.validation.*;
-import lombok.experimental.UtilityClass;
+import jakarta.validation.ConstraintViolationException
+import jakarta.validation.Validation
 
-import java.util.Set;
+class ValidationUtils {
+    companion object {
+        fun <T> validate(obj: T, vararg groups: Class<*>?) {
+            obj.validate(*groups)
+        }
+    }
+}
 
-@UtilityClass
-public class ValidationUtils {
-
-    public <T> void validate(T object, Class<?>... groups) {
-        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-            Validator validator = factory.getValidator();
-            Set<ConstraintViolation<T>> constraintViolations = validator.validate(object, groups);
-            if (!constraintViolations.isEmpty()) {
-                throw new ConstraintViolationException(constraintViolations);
-            }
+fun <T> T.validate(vararg groups: Class<*>?) {
+    Validation.buildDefaultValidatorFactory().use { factory ->
+        val validator = factory.validator
+        val constraintViolations = validator.validate(this, *groups)
+        if (constraintViolations.isNotEmpty()) {
+            throw ConstraintViolationException(constraintViolations)
         }
     }
 }

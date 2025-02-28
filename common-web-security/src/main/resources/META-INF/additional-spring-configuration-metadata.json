@@ -11,8 +11,14 @@
   ],
   "properties": [
     {
-      "name": "graphql.servlet.security.enabled",
+      "name": "spring.graphql.security.enabled",
       "description": "It defines if the GraphQL Servlet default path will be secured or not. Useful for development environments, which we can use Voyager to show the GraphQL Schema without authentication.",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.mvc.async.delegate-security-context",
+      "description": "If true, it enables the propagation of the security context to the asynchronous children threads.",
       "type": "java.lang.Boolean",
       "defaultValue": true
     },

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 - Felipe Desiderati
+ * Copyright (c) 2025 - Felipe Desiderati
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -77,7 +77,7 @@ public class SignRequestAuthorizationService {
     @SuppressWarnings("unused")
     public Request sign(Request request) {
         try {
-            ValidationUtils.validate(signRequestAuthorizationClientProperties, SignValidation.class);
+            ValidationUtils.Companion.validate(signRequestAuthorizationClientProperties, SignValidation.class);
 
             SimpleDateFormat dateFormat = new SimpleDateFormat(HEADER_DATE_FORMAT, Locale.US);
             Request newRequest = request.newBuilder()

@@ -1,0 +1,25 @@
+input PageRequestInput {
+    pageNumber: Int! = 0
+    pageSize: Int! = 25
+    # We need to define a default ordering, otherwise GraphQL will not be able to instantiate
+    # the corresponding PageRequest class.
+    sort: PageRequestSortInput! = {
+        direction: "ASC"
+        properties: ["id"]
+    }
+}
+
+input PageRequestSortInput {
+    direction: String! = "ASC"
+    properties: [String!]! = ["id"]
+}
+
+type Pageable {
+    totalElements: Int!
+    totalPages: Int!
+    content: [Void!]!
+}
+
+directive @content(
+    for: String!
+) on FIELD_DEFINITION
