@@ -16,10 +16,14 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security;
+package io.herd.common.web.security.jwt;
 
-public interface MultiTenantSupport {
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet.Builder;
 
-    String getTenant();
+@FunctionalInterface
+public interface JwtClaimsConfigurer {
+
+    JwtClaimsSet configure(Builder jwtClaimsSetBuilder);
 
 }

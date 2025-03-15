@@ -18,6 +18,7 @@
  */
 package io.herd.common.web.configuration;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,28 +26,31 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.annotation.RequestScope;
 
 /**
  * It defines if a default client is created to access another service via RESTful API.
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(RestTemplate.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ConditionalOnProperty(name = "spring.web.client.rest-template.enabled", havingValue = "true")
-public class RestApiClientConfiguration {
-
-    @Value("${spring.web.client.rest-template.base-path}")
-    private String restApiBasePath;
+@ConditionalOnProperty(name = "spring.web.http.clients.enabled", havingValue = "true")
+public class HttpClientsConfiguration {
 
     @Bean
-    @RequestScope
-    public RestTemplate defaultRestTemplateClient() {
+    @ConditionalOnClass(RestTemplate.class)
+    public RestTemplate defaultRestTemplate(
+        @Value("${spring.web.http.clients.base-path}") String restTemplateBasePath
+    ) {
         return new RestTemplateBuilder()
-            .defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
-            .rootUri(restApiBasePath)
+            //.defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
+            .rootUri(restTemplateBasePath)
             .build();
+    }
+
+    @Bean
+    @ConditionalOnClass(RestClient.class)
+    public RestClient defaultRestClient(@Qualifier("defaultRestTemplate") RestTemplate defaultRestTemplate) {
+        return RestClient.create(defaultRestTemplate);
     }
 }

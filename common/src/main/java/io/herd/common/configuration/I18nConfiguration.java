@@ -22,15 +22,14 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -49,18 +48,18 @@ import java.util.Arrays;
     // @ImportAutoConfiguration(RefreshAutoConfiguration.class) to your tests.
     RefreshAutoConfiguration.class
 })
-public class I18nConfiguration implements EnvironmentAware {
+public class I18nConfiguration {
 
     private static final String[] i18nDefaultFiles =
         new String[]{"classpath*:i18n/exceptions", "classpath*:i18n/http-exceptions", "classpath*:i18n/templates",
             "classpath*:i18n/default-validation-messages", "classpath*:i18n/validation-messages"};
 
-    private Environment environment;
-
     @Bean
     @RefreshScope
-    public MessageSource messageSource() {
-        String i18nFilesProperty = environment.getRequiredProperty("i18n.files");
+    public MessageSource messageSource(
+        @Value("${i18n.files}") String i18nFilesProperty,
+        @Value("${i18n.files.encoding:ISO-8859-1}") String i18nFilesEncoding
+    ) {
         String[] i18nFiles = null;
         if (StringUtils.isNotBlank(i18nFilesProperty)) {
             i18nFiles = i18nFilesProperty.split(",");
@@ -72,7 +71,20 @@ public class I18nConfiguration implements EnvironmentAware {
             new PathMatchingReloadableResourceBundleMessageSource();
         source.setCacheSeconds(300); // Reload messages every 5 minutes
         source.setBasenames(i18nAllFiles);
-        source.setDefaultEncoding(StandardCharsets.UTF_8.toString());
-        return source;
+
+        return switch (i18nFilesEncoding) {
+            case "ISO-8859-1" -> {
+                source.setDefaultEncoding(StandardCharsets.ISO_8859_1.toString());
+                yield source;
+            }
+            case "UTF-8" -> {
+                source.setDefaultEncoding(StandardCharsets.UTF_8.toString());
+                yield source;
+            }
+            default -> {
+                log.warn("Invalid i18n file encoding!");
+                yield source;
+            }
+        };
     }
 }

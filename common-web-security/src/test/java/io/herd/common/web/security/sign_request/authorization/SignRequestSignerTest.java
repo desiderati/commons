@@ -18,11 +18,13 @@
  */
 package io.herd.common.web.security.sign_request.authorization;
 
+import io.herd.common.web.security.sign_request.SignRequestSigner;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.DelegatingServletInputStream;
 
 import java.io.IOException;
@@ -41,7 +43,7 @@ public class SignRequestSignerTest {
         doReturn(new DelegatingServletInputStream(
             IOUtils.toInputStream("Testing Request Signature!", StandardCharsets.UTF_8)
         )).when(servletRequest).getInputStream();
-        when(servletRequest.getHeader(SignRequestSigner.HEADER_DATE)).thenReturn("Fri, 17 Jan 2020 18:30:00 GMT");
+        when(servletRequest.getHeader(HttpHeaders.DATE)).thenReturn("Fri, 17 Jan 2020 18:30:00 GMT");
 
         String secretKey = "!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5";
         String signedValue = SignRequestSigner.builder().httpServletRequest(servletRequest)

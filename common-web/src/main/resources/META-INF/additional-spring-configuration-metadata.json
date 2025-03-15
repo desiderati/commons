@@ -91,13 +91,13 @@
       "type": "java.lang.String"
     },
     {
-      "name": "spring.web.client.rest-template.enabled",
+      "name": "spring.web.http.clients.enabled",
       "description": "It defines if a default client will be created to access another service via RESTful API.",
       "type": "java.lang.Boolean",
       "defaultValue": false
     },
     {
-      "name": "spring.web.client.rest-template.base-path",
+      "name": "spring.web.http.clients.base-path",
       "description": "Specify the RESTful API base path, that will be accessed.",
       "type": "java.lang.String"
     }

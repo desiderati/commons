@@ -16,38 +16,26 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.sign_request.authorization;
+package io.herd.common.web.security.sign_request;
 
-import jakarta.servlet.ReadListener;
-import jakarta.servlet.ServletInputStream;
+import io.herd.common.data.multitenant.MultiTenantSupport;
+import lombok.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.*;
 
-public class SignRequestServletInputStream extends ServletInputStream {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+public class SignRequestAuthorizedClient implements MultiTenantSupport {
 
-    private final InputStream inputStream;
+    @ToString.Include
+    private UUID id;
 
-    public SignRequestServletInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
-    }
+    private String secretKey;
+    private String tenant;
+    private List<String> roles = new ArrayList<>();
+    private Map<String, Object> additionalProperties = new HashMap<>();
 
-    @Override
-    public boolean isFinished() {
-        return true;
-    }
-
-    @Override
-    public boolean isReady() {
-        return true;
-    }
-
-    @Override
-    public void setReadListener(ReadListener readListener) {
-        // No need to be implemented!
-    }
-
-    public int read() throws IOException {
-        return inputStream.read();
-    }
 }

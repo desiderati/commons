@@ -1,9 +1,9 @@
 # I had to create this file because without this the tests int the web context will not work.
 
 schema {
-    query: MainQuery
+    query: Query
 }
 
-type MainQuery {
+type Query {
     HelloWorld: String!
 }

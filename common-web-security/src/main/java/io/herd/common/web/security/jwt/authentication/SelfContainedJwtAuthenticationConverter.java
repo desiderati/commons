@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -34,13 +33,7 @@ import java.io.IOException;
  * Class used for retrieving the user/password from the request. This information will be
  * used by the {@link AuthenticationManager} to authenticate the user.
  */
-public class DefaultJwtAuthenticationConverter implements AuthenticationConverter {
-
-    private final boolean jwtDelegateAuthenticationEnabled;
-
-    public DefaultJwtAuthenticationConverter(boolean jwtDelegateAuthenticationEnabled) {
-        this.jwtDelegateAuthenticationEnabled = jwtDelegateAuthenticationEnabled;
-    }
+public class SelfContainedJwtAuthenticationConverter implements AuthenticationConverter {
 
     @Override
     public Authentication convert(HttpServletRequest request) {
@@ -50,11 +43,7 @@ public class DefaultJwtAuthenticationConverter implements AuthenticationConverte
             String password = jsonNode.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY).asText();
 
             // Never get the roles from the request. The roles must be informed by the Authentication Manager.
-            if (jwtDelegateAuthenticationEnabled) {
-                return new JwtDelegateAuthenticationToken(username, password);
-            } else {
-                return new UsernamePasswordAuthenticationToken(username, password);
-            }
+            return new SelfContainedJwtAuthenticationToken(username, password);
         } catch (IOException e) {
             throw new AuthenticationServiceException("Authentication Failed: " + e.getMessage(), e);
         }

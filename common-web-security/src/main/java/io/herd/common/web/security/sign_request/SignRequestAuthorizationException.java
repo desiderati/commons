@@ -16,28 +16,23 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security;
+package io.herd.common.web.security.sign_request;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import io.herd.common.exception.ApplicationException;
 
-import java.util.Collection;
+import java.io.Serial;
 
-@Getter
-@Setter
-@SuppressWarnings("squid:S2160") // Override equals(..)
-public class UserWithMultiTenantSupport extends User implements MultiTenantSupport {
+public class SignRequestAuthorizationException extends ApplicationException {
 
-    private String tenant;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public UserWithMultiTenantSupport(
-        String username, String password,
-        Collection<? extends GrantedAuthority> authorities,
-        String tenant
-    ) {
-        super(username, password, authorities);
-        this.tenant = tenant;
+    @SuppressWarnings("unused")
+    public SignRequestAuthorizationException(String msg) {
+        super(msg);
+    }
+
+    public SignRequestAuthorizationException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

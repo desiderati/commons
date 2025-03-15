@@ -16,23 +16,13 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.sign_request.authorization;
+package io.herd.common.web.security.sign_request;
 
-import io.herd.common.exception.ApplicationException;
+import java.util.Optional;
+import java.util.UUID;
 
-import java.io.Serial;
+public interface SignRequestAuthorizedClientRepository {
 
-public class SignRequestAuthorizationException extends ApplicationException {
+    Optional<SignRequestAuthorizedClient> findById(UUID id);
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    @SuppressWarnings("unused")
-    public SignRequestAuthorizationException(String msg) {
-        super(msg);
-    }
-
-    public SignRequestAuthorizationException(String msg, Throwable cause) {
-        super(msg, cause);
-    }
 }

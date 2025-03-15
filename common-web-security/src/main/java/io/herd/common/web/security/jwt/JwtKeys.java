@@ -16,14 +16,27 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.jwt.authentication;
+package io.herd.common.web.security.jwt;
 
-import io.herd.common.web.security.jwt.JwtTokenConfigurer;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.core.Authentication;
+import lombok.Getter;
+import lombok.Setter;
 
-public interface JwtAuthenticationTokenConfigurer {
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
-    JwtTokenConfigurer retrieveJwtTokenConfigurer(HttpServletRequest request, Authentication authentication);
+@Getter
+@Setter // Never forget to put the setXXX (...) for configuration files!
+public class JwtKeys {
+
+    /**
+     * Both used by Asymmetric Encryption.
+     */
+    private RSAPrivateKey privateKey;
+    private RSAPublicKey publicKey;
+
+    /**
+     * Used by Symmetric Encryption.
+     */
+    private String secretKey;
 
 }

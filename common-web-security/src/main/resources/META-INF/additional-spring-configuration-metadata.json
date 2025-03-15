@@ -6,7 +6,7 @@
     },
     {
       "name": "spring.web.security.sign-request.authorization.client",
-      "type": "io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationClientProperties"
+      "type": "io.herd.common.web.security.sign_request.SignRequestAuthorizationClientProperties"
     }
   ],
   "properties": [
@@ -23,7 +23,7 @@
       "defaultValue": true
     },
     {
-      "name": "spring.web.client.rest-template.decorate-with-auth-header",
+      "name": "spring.web.http.clients.decorate-with-auth-header",
       "description": "If a default RESTful API client was created, we can decorate the requests made by it with the authentication header.",
       "type": "java.lang.Boolean",
       "defaultValue": false

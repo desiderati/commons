@@ -16,10 +16,9 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package io.herd.common.web.security.jwt.authentication
 
-import io.herd.common.web.security.jwt.authorization.JwtAuthorizationService
+import io.herd.common.web.security.jwt.JwtService
 import lombok.extern.slf4j.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -31,23 +30,36 @@ import org.springframework.security.authentication.dao.AbstractUserDetailsAuthen
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClient
 
+/**
+ * This class will be available when we always have to delegate via Rest API the login process
+ * to another application which also uses the self-contained JWT authentication approach.
+ */
 @Slf4j
-class JwtDelegateAuthenticationProvider(
-    private val jwtDelegateAuthenticationRestClient: RestClient,
-    private val jwtDelegateAuthenticationLoginUrl: String
+class SelfContainedJwtAuthenticationDelegateProvider(
+    private val jwtAuthenticationDelegateRestClient: RestClient,
+    private val jwtAuthenticationDelegateLoginUrl: String
 ) : AbstractUserDetailsAuthenticationProvider() {
 
-    private var jwtAuthorizationService: JwtAuthorizationService? = null
+    private lateinit var jwtService: JwtService
+    private lateinit var jwtAuthenticationHeaderConfigurer: SelfContainedJwtAuthenticationHeaderConfigurer
 
     @Autowired
-    fun setJwtAuthorizationService(jwtAuthorizationService: JwtAuthorizationService?) {
-        this.jwtAuthorizationService = jwtAuthorizationService
+    fun setJwtService(jwtService: JwtService) {
+        this.jwtService = jwtService
+    }
+
+    @Autowired
+    fun setJwtAuthenticationHeaderConfigurer(
+        jwtAuthenticationHeaderConfigurer: SelfContainedJwtAuthenticationHeaderConfigurer
+    ) {
+        this.jwtAuthenticationHeaderConfigurer = jwtAuthenticationHeaderConfigurer
     }
 
     override fun additionalAuthenticationChecks(
@@ -64,25 +76,32 @@ class JwtDelegateAuthenticationProvider(
                 add(SPRING_SECURITY_FORM_PASSWORD_KEY, authentication.credentials as String?)
             }
 
-        if (authentication !is JwtDelegateAuthenticationToken) throw IllegalArgumentException(
-            "Authentication object should be an instance of JwtDelegateAuthenticationToken class!"
+        if (authentication !is SelfContainedJwtAuthenticationToken) throw IllegalArgumentException(
+            "Authentication object should be an instance of SelfContainedJwtAuthenticationToken class!"
         )
 
         try {
-            return jwtDelegateAuthenticationRestClient.post()
-                .uri(jwtDelegateAuthenticationLoginUrl)
+            return jwtAuthenticationDelegateRestClient.post()
+                .uri(jwtAuthenticationDelegateLoginUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .exchange { _, response ->
                     when (response.statusCode) {
                         HttpStatus.OK -> {
                             authentication.authorizationHeader =
-                                response.headers[JwtAuthorizationService.HEADER_AUTHORIZATION]?.get(0)
+                                jwtAuthenticationHeaderConfigurer.resolveAuthorizationHeader(response.headers)
+                                    ?: throw AuthenticationServiceException(
+                                        "Delegated authentication provider returned without " +
+                                            "an authorization header defined!"
+                                    )
 
-                            val delegateAuthentication =
-                                jwtAuthorizationService?.getAuthenticationFromAuthorizationHeader(
+                            val jwtToken =
+                                jwtAuthenticationHeaderConfigurer.resolveBearerToken(
                                     authentication.authorizationHeader
                                 )
+
+                            val delegateAuthentication =
+                                jwtService.extractFromToken<JwtAuthenticationToken>(jwtToken)
 
                             User(
                                 requestBody.getFirst(SPRING_SECURITY_FORM_USERNAME_KEY),
@@ -90,9 +109,11 @@ class JwtDelegateAuthenticationProvider(
                                 delegateAuthentication?.authorities ?: emptyList()
                             )
                         }
+
                         HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN -> throw BadCredentialsException(
                             "Authentication request is rejected because the credentials are invalid!"
                         )
+
                         else -> throw BadCredentialsException(
                             "Authentication request is rejected because there's a problem " +
                                 "with the delegated authentication provider!"
@@ -111,13 +132,13 @@ class JwtDelegateAuthenticationProvider(
         authentication: Authentication,
         user: UserDetails
     ): Authentication {
-        if (authentication !is JwtDelegateAuthenticationToken) throw IllegalArgumentException(
+        if (authentication !is SelfContainedJwtAuthenticationToken) throw IllegalArgumentException(
             "Authentication object should be an instance of JwtDelegateAuthenticationToken class!"
         )
 
         // We need to create a new Authentication object, because this one will contain the authorities.
         super.createSuccessAuthentication(principal, authentication, user).let {
-            return JwtDelegateAuthenticationToken(
+            return SelfContainedJwtAuthenticationToken(
                 it.principal,
                 it.credentials,
                 it.authorities

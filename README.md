@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-4.0.0.RC1-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-4.0.0.RC2-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE)
 
@@ -24,7 +24,7 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [4.0.0.RC1] - 2025-02-27
+#### [4.0.0.RC2] - 2025-02-27
 - Created a class which provides static access to the Spring application context.
 - Defined a mechanism for context propagation when working with asynchronous tasks our suspended methods.
 - Defined a way of retrieving (statically) an internationalized message.

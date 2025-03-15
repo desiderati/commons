@@ -1,16 +1,11 @@
-input PageRequestInput {
-    pageNumber: Int! = 0
-    pageSize: Int! = 25
-    # We need to define a default ordering, otherwise GraphQL will not be able to instantiate
-    # the corresponding PageRequest class.
-    sort: PageRequestSortInput! = {
-        direction: "ASC"
-        properties: ["id"]
-    }
+input PageableInput {
+    pageNumber: Int = 0
+    pageSize: Int = 25
+    sort: PageableSortInput
 }
 
-input PageRequestSortInput {
-    direction: String! = "ASC"
+input PageableSortInput {
+    direction: String = "ASC"
     properties: [String!]! = ["id"]
 }
 

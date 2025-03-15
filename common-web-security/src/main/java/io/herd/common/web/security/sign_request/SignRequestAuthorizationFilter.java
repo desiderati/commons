@@ -16,17 +16,15 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.jwt.authorization;
+package io.herd.common.web.security.sign_request;
 
 import io.herd.common.data.multitenant.MultiTenantContext;
-import io.herd.common.web.security.MultiTenantSupport;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,18 +40,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Authorization via JWT Token.
+ * Authorization via Sign Request.
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "spring.web.security.jwt.authorization.enabled", havingValue = "true")
-public class JwtAuthorizationFilter extends OncePerRequestFilter {
+@ConditionalOnProperty(name = "spring.web.security.sign-request.authorization.enabled", havingValue = "true")
+public class SignRequestAuthorizationFilter extends OncePerRequestFilter {
 
-    private JwtAuthorizationService jwtAuthorizationService;
+    private final SignRequestAuthorizationService signRequestAuthorizationService;
 
     @Autowired
-    public void setJwtAuthorizationService(JwtAuthorizationService jwtAuthorizationService) {
-        this.jwtAuthorizationService = jwtAuthorizationService;
+    public SignRequestAuthorizationFilter(SignRequestAuthorizationService signRequestAuthorizationService) {
+        this.signRequestAuthorizationService = signRequestAuthorizationService;
     }
 
     /**
@@ -62,10 +60,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
      * So preventing it from being run twice!
      */
     @Bean
-    public FilterRegistrationBean<JwtAuthorizationFilter> jwtAuthorizationFilterRegistration(
-        @Qualifier("jwtAuthorizationFilter") JwtAuthorizationFilter filter
+    public FilterRegistrationBean<SignRequestAuthorizationFilter> signRequestAuthorizationFilterRegistration(
+        @Qualifier("signRequestAuthorizationFilter") SignRequestAuthorizationFilter filter
     ) {
-        FilterRegistrationBean<JwtAuthorizationFilter> registration = new FilterRegistrationBean<>(filter);
+        FilterRegistrationBean<SignRequestAuthorizationFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
     }
@@ -77,17 +75,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         @NotNull FilterChain filterChain
     ) throws ServletException, IOException {
 
+        HttpServletRequest signServletRequest = new SignRequestWrapper(servletRequest);
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             Authentication authentication = null;
             try {
-                authentication = jwtAuthorizationService.verifyAuthentication(servletRequest);
-                if (authentication != null
-                    && authentication.getPrincipal() instanceof MultiTenantSupport multiTenantSupport
-                ) {
-                    if (StringUtils.isNotBlank(multiTenantSupport.getTenant())) {
-                        MultiTenantContext.set(multiTenantSupport.getTenant());
-                    }
-                }
+                authentication = signRequestAuthorizationService.verifySignature(signServletRequest);
             } catch (AuthenticationServiceException failed) {
                 log.error("Authorization Failed: {}", failed.getMessage(), failed);
             }
@@ -99,7 +91,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
 
         try {
-            filterChain.doFilter(servletRequest, servletResponse);
+            filterChain.doFilter(signServletRequest, servletResponse);
         } finally {
             MultiTenantContext.clear();
         }

@@ -82,7 +82,7 @@
     </repositories>
 
     <properties>
-        <revision>4.0.0.RC1</revision>
+        <revision>4.0.0.RC2</revision>
 
         <!-- Major versions. -->
         <commons-herd.io.version>${revision}</commons-herd.io.version>

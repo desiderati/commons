@@ -23,6 +23,7 @@ import io.herd.common.data.jpa.configuration.JpaAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.async.AsyncWebConfiguration;
 import io.herd.common.web.graphql.NameSchemaDirectiveWiring;
+import io.herd.common.web.graphql.PageableArgumentResolver;
 import io.herd.common.web.rest.exception.ResponseExceptionDTOHttpMessageConverter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.Type;
@@ -48,6 +49,7 @@ import org.springframework.context.annotation.*;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.graphql.data.method.annotation.support.AnnotatedControllerConfigurer;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.NonNull;
@@ -85,7 +87,7 @@ import static io.herd.common.web.UrlUtils.URL_PATH_SEPARATOR;
     JpaAutoConfiguration.class,
     JpaWebConfiguration.class,
     OpenApiConfiguration.class,
-    RestApiClientConfiguration.class
+    HttpClientsConfiguration.class
 })
 public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigurer, RepositoryRestConfigurer {
 
@@ -253,5 +255,17 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
                 )
             );
         };
+    }
+
+    @Autowired
+    public void configureArgumentResolvers(
+        PageableArgumentResolver pageableArgumentResolver,
+        ObjectProvider<AnnotatedControllerConfigurer> annotatedControllerConfigurerProvider
+    ) {
+        var annotatedControllerConfigurer = annotatedControllerConfigurerProvider.getIfAvailable();
+        if (annotatedControllerConfigurer != null) {
+            annotatedControllerConfigurer.addCustomArgumentResolver(pageableArgumentResolver);
+            annotatedControllerConfigurer.afterPropertiesSet(); // Just to reload the argument resolvers list.
+        }
     }
 }

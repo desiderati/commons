@@ -16,7 +16,7 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.sign_request.authorization;
+package io.herd.common.web.security.sign_request;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -27,6 +27,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okio.Buffer;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -41,7 +42,6 @@ import java.util.Base64;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SignRequestSigner {
 
-    static final String HEADER_DATE = "Date";
     static final String HEADER_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
 
     private final Request request;
@@ -73,7 +73,7 @@ public class SignRequestSigner {
             }
             return request.method() + "\n" +
                 computeRequestBodyHash(buffer.inputStream()) + "\n" +
-                request.header(HEADER_DATE);
+                request.header(HttpHeaders.DATE);
         }
     }
 
@@ -81,7 +81,7 @@ public class SignRequestSigner {
     private String generateStringToSign(HttpServletRequest request) {
         return request.getMethod() + "\n" +
             computeRequestBodyHash(request.getInputStream()) + "\n" +
-            request.getHeader(HEADER_DATE);
+            request.getHeader(HttpHeaders.DATE);
     }
 
     /**

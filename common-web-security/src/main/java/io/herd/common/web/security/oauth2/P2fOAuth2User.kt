@@ -16,10 +16,14 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.jwt;
+package io.herd.common.web.security.oauth2
 
-public interface JwtServiceInterceptor {
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User
 
-    void onBeforeExtractPayload(String token);
-
-}
+class P2fOAuth2User(
+    val authorizationHeader: String,
+    authorities: MutableCollection<out GrantedAuthority>,
+    attributes: MutableMap<String, Any>,
+    nameAttributeKey: String
+) : DefaultOAuth2User(authorities, attributes, nameAttributeKey)

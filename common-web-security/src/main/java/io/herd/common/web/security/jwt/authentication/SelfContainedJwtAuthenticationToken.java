@@ -16,13 +16,33 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.sign_request.authorization;
+package io.herd.common.web.security.jwt.authentication;
 
-import java.util.Optional;
-import java.util.UUID;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 
-public interface SignRequestAuthorizedClientRepository {
+import java.util.Collection;
 
-    Optional<SignRequestAuthorizedClient> findById(UUID id);
+/**
+ * This class can be used when we define a {@link AuthenticationProvider} which is responsible for calling
+ * another system responsible for the authentication.
+ *
+ * @see for details: {@link SelfContainedJwtAuthenticationDelegateProvider}
+ */
+public class SelfContainedJwtAuthenticationToken extends UsernamePasswordAuthenticationToken {
 
+    public String authorizationHeader;
+
+    public SelfContainedJwtAuthenticationToken(Object principal, Object credentials) {
+        super(principal, credentials);
+    }
+
+    public SelfContainedJwtAuthenticationToken(
+        Object principal,
+        Object credentials,
+        Collection<? extends GrantedAuthority> authorities
+    ) {
+        super(principal, credentials, authorities);
+    }
 }

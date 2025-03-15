@@ -18,26 +18,30 @@
  */
 package io.herd.common.web.security.configuration;
 
+import io.herd.common.data.multitenant.MultiTenantSupport;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.CorsProperties;
 import io.herd.common.web.configuration.WebAutoConfiguration;
-import io.herd.common.web.security.jwt.JwtServiceRestTemplateInterceptor;
-import io.herd.common.web.security.jwt.JwtTokenExtractor;
+import io.herd.common.web.security.jwt.JwtEncryptionMethod;
+import io.herd.common.web.security.jwt.JwtKeys;
+import io.herd.common.web.security.jwt.JwtService;
 import io.herd.common.web.security.jwt.authentication.*;
-import io.herd.common.web.security.jwt.authorization.DefaultJwtTokenExtractor;
-import io.herd.common.web.security.jwt.authorization.JwtAuthorizationFilter;
-import io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationFilter;
+import io.herd.common.web.security.sign_request.SignRequestAuthorizationFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
@@ -50,11 +54,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.AbstractOAuth2Token;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
@@ -63,7 +72,6 @@ import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -74,6 +82,7 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.core.context.SecurityContextHolder.MODE_INHERITABLETHREADLOCAL;
@@ -101,9 +110,6 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
     @Value("${spring.web.security.jwt.authentication.authorities.parameter:authorities}")
     private String jwtAuthenticationAuthoritiesParameter;
-
-    @Value("${spring.web.security.jwt.authentication.delegation.enabled:false}")
-    private boolean jwtDelegateAuthenticationEnabled;
 
     @Value("${spring.web.security.jwt.authentication.delegation.base-path}")
     private String jwtDelegateAuthenticationBasePath;
@@ -162,8 +168,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
         }
     }
 
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    private JwtAuthorizationFilter jwtAuthorizationFilter;
+    private SelfContainedJwtAuthenticationFilter jwtAuthenticationFilter;
     private SignRequestAuthorizationFilter signRequestAuthorizationFilter;
     private String defaultApiBasePath;
     private CorsProperties webSecurityCorsProperties;
@@ -175,13 +180,8 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Autowired(required = false)
-    public void setJwtAuthenticationFilter(@Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public void setJwtAuthenticationFilter(@Lazy SelfContainedJwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
-
-    @Autowired(required = false)
-    public void setJwtAuthorizationFilter(@Lazy JwtAuthorizationFilter jwtAuthorizationFilter) {
-        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
     }
 
     @Autowired(required = false)
@@ -207,6 +207,7 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     public void configureArgumentResolvers(
         @Value("${spring.mvc.async.delegate-security-context:true}")
         boolean springMvcAsyncDelegateSecurityContext,
+
         List<HandlerMethodArgumentResolver> argumentResolvers
     ) {
         if (springMvcAsyncDelegateSecurityContext) {
@@ -234,47 +235,123 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
+    @ConfigurationProperties("spring.web.security.jwt.authentication.keys")
+    @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
+    public JwtKeys jwtKeys() {
+        return new JwtKeys();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtService.class)
+    @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
+    public JwtService jwtService(
+        JwtKeys jwtKeys,
+        JwtAuthenticationConverter jwtConverter,
+
+        @Value("${spring.web.security.jwt.authentication.encryption-method:asymmetric}")
+        JwtEncryptionMethod jwtEncryptionMethod,
+
+        @Value("${spring.web.security.jwt.authentication.expiration-period:1}") int expirationPeriod
+    ) {
+        return new JwtService(jwtKeys, jwtConverter, jwtEncryptionMethod, expirationPeriod);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(AuthenticationConverter.class)
     @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
     public AuthenticationConverter authenticationConverter() {
-        return new DefaultJwtAuthenticationConverter(jwtDelegateAuthenticationEnabled);
+        return new SelfContainedJwtAuthenticationConverter();
     }
 
+//    @Bean
+//    @ConditionalOnExpression(
+//        "${app.database.multitenant.strategy} == 'schema' and ${spring.web.security.jwt.authentication.enabled}"
+//    )
+//    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+//        // O problema é que o parâmetro que seria passado para classe seria somente criado,
+//        // caso este objeto não fosse criado.
+//        return new MultiTenantJwtAuthenticationConverter(????);
+//    }
+
     @Bean
-    @ConditionalOnMissingBean(JwtAuthenticationTokenConfigurer.class)
+    @ConditionalOnMissingBean(SelfContainedJwtAuthenticationClaimsConfigurer.class)
     @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
-    public JwtAuthenticationTokenConfigurer jwtAuthenticationTokenConfigurer() {
-        return new DefaultJwtAuthenticationTokenConfigurer(jwtAuthenticationAuthoritiesParameter);
+    public SelfContainedJwtAuthenticationClaimsConfigurer jwtAuthenticationClaimsConfigurer() {
+        return (request, authentication) -> jwtClaimsSetBuilder -> {
+            jwtClaimsSetBuilder.subject(((UserDetails) authentication.getPrincipal()).getUsername())
+                .claim(jwtAuthenticationAuthoritiesParameter,
+                    authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority).collect(Collectors.toList())
+                );
+
+            // TODO Felipe Desiderati: Atualmente com a implentação que existe, esta parte será sempre falso!
+            if (authentication instanceof MultiTenantSupport) {
+                jwtClaimsSetBuilder.claim(
+                    MultiTenantSupport.TENANT,
+                    ((MultiTenantSupport) authentication).getTenant()
+                );
+            }
+
+            return jwtClaimsSetBuilder.build();
+        };
     }
 
     @Bean
-    @ConditionalOnMissingBean(JwtDelegateAuthenticationProvider.class)
-    @ConditionalOnExpression("${spring.web.security.jwt.authentication.enabled} and ${spring.web.security.jwt.authentication.delegation.enabled}")
-    public JwtDelegateAuthenticationProvider jwtDelegateAuthenticationProvider() {
+    @ConditionalOnMissingBean(SelfContainedJwtAuthenticationHeaderConfigurer.class)
+    @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
+    public SelfContainedJwtAuthenticationHeaderConfigurer jwtAuthenticationHeaderConfigurer() {
+        return new SelfContainedJwtAuthenticationHeaderBearerTokenConfigurer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SelfContainedJwtAuthenticationDelegateProvider.class)
+    @ConditionalOnExpression(
+        "${spring.web.security.jwt.authentication.enabled} and ${spring.web.security.jwt.authentication.delegation.enabled}"
+    )
+    public SelfContainedJwtAuthenticationDelegateProvider jwtDelegateAuthenticationProvider() {
         if (StringUtils.isBlank(jwtDelegateAuthenticationBasePath)) {
             throw new IllegalStateException("Authentication delegate base path should be defined!");
         }
 
-        return new JwtDelegateAuthenticationProvider(
+        return new SelfContainedJwtAuthenticationDelegateProvider(
             RestClient.builder().baseUrl(jwtDelegateAuthenticationBasePath).build(),
             jwtDelegateAuthenticationLoginUrl
         );
     }
 
-    @Bean
-    @RequestScope
-    @ConditionalOnProperty(value = "spring.web.client.rest-template.decorate-with-auth-header", havingValue = "true")
-    public JwtServiceRestTemplateInterceptor defaultRestTemplateClientJwtServiceInterceptor(
-        @Qualifier("defaultRestTemplateClient") RestTemplate defaultRestTemplateClient
+    @Autowired
+    @ConditionalOnProperty(value = "spring.web.http.clients.decorate-with-auth-header", havingValue = "true")
+    public void defaultRestTemplateJwtServiceInterceptor(
+        @Qualifier("defaultRestTemplate") RestTemplate defaultRestTemplate,
+        @Qualifier("defaultRestClient") RestClient defaultRestClient,
+        ConfigurableListableBeanFactory beanFactory,
+        SelfContainedJwtAuthenticationHeaderConfigurer jwtAuthenticationHeaderConfigurer
     ) {
-        return new JwtServiceRestTemplateInterceptor(defaultRestTemplateClient);
-    }
+        ClientHttpRequestInterceptor authHeaderClientHttpRequestInterceptor = (request, body, execution) -> {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) {
+                return execution.execute(request, body);
+            }
 
-    @Bean
-    @ConditionalOnMissingBean(JwtTokenExtractor.class)
-    @ConditionalOnProperty(name = "spring.web.security.jwt.authorization.enabled", havingValue = "true")
-    public JwtTokenExtractor<Authentication> jwtTokenExtractor() {
-        return new DefaultJwtTokenExtractor(jwtAuthenticationAuthoritiesParameter);
+            if (!(authentication.getCredentials() instanceof AbstractOAuth2Token token)) {
+                return execution.execute(request, body);
+            }
+
+            jwtAuthenticationHeaderConfigurer.configureAuthorizationHeader(
+                request,
+                jwtAuthenticationHeaderConfigurer.configureBearerToken(token.getTokenValue())
+            );
+            return execution.execute(request, body);
+        };
+
+        defaultRestTemplate.getInterceptors().add(authHeaderClientHttpRequestInterceptor);
+        if (defaultRestClient != null) {
+            var decoratedDefaultRestClient = defaultRestClient.mutate().requestInterceptor(
+                authHeaderClientHttpRequestInterceptor
+            ).build();
+            ((DefaultListableBeanFactory) beanFactory).destroySingleton("defaultRestClient");
+            beanFactory.autowireBean(decoratedDefaultRestClient);
+        }
     }
 
     /**
@@ -309,12 +386,23 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain filterChain(
         HttpSecurity httpSecurity,
-        HandlerMappingIntrospector introspector
+        HandlerMappingIntrospector introspector,
+        OAuth2ClientProperties oAuth2ClientProperties
     ) throws Exception {
-        // We don't need to enable CSRF support because our Token is invulnerable.
+        // We don't need to enable CSRF support when using JWT Tokens.
         // And also because with it enabled, we will not be able to call our back-end
         // from the front-end.
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        final boolean oauthAuthenticationEnabled = !oAuth2ClientProperties.getRegistration().isEmpty();
+        if (jwtAuthorizationEnabled || (!defaultAuthenticationEnabled && !oauthAuthenticationEnabled)) {
+            httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        } else {
+            httpSecurity.csrf(csrf -> {
+                if (jwtAuthenticationEnabled) {
+                    csrf.ignoringRequestMatchers(jwtAuthenticationLoginUrl);
+                }
+                csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+            });
+        }
 
         // If the GraphQL CORS filter is enabled, it must be registered before the authentication filters!
         if (graphQLCorsFilter != null) {
@@ -324,15 +412,10 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
         // We have to enable Cross-Origin Resource Sharing.
         httpSecurity.cors(withDefaults());
 
-        // TODO Felipe Desiderati: Permitir que possa ser personalizado esta sessão.
-        // We can perform custom exception handling if authentication fails.
-        // For instance, if some error occurs during the login process a 403 custom error page will be displayed!
-        //httpSecurity.exceptionHandling().authenticationEntryPoint(new Http403ForbiddenEntryPoint());
-
         // We do not wish to enable session. Only if default authentication is enabled.
         httpSecurity.sessionManagement(sessionManagement ->
             sessionManagement.sessionCreationPolicy(
-                defaultAuthenticationEnabled ?
+                defaultAuthenticationEnabled || oauthAuthenticationEnabled ?
                     SessionCreationPolicy.IF_REQUIRED :
                     SessionCreationPolicy.STATELESS
             )
@@ -340,12 +423,12 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
 
         // Disables page caching.
         httpSecurity.headers(headers -> headers.cacheControl(withDefaults()));
-
         httpSecurity.authorizeHttpRequests(authorizeHttpRequests -> {
             if (!defaultAuthenticationEnabled
                 && !jwtAuthenticationEnabled
                 && !jwtAuthorizationEnabled
                 && !signRequestAuthorizationEnabled
+                && !oauthAuthenticationEnabled
             ) {
                 // If none configured, it uses the default behavior.
                 authorizeHttpRequests.anyRequest().permitAll();
@@ -418,15 +501,19 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
                     authorizeHttpRequests.requestMatchers("/vendor/altair/**").permitAll();
                 }
 
+                if (oauthAuthenticationEnabled) {
+                    // We enable default OAuth2 paths.
+                    authorizeHttpRequests
+                        // TODO Felipe Desiderati: Permitir que seja customizado!
+                        .requestMatchers(HttpMethod.GET, defaultApiBasePath + "/oauth2/authorization/**")
+                        .permitAll();
+                }
+
                 if (jwtAuthenticationEnabled) {
                     // Login URL.
                     authorizeHttpRequests =
                         authorizeHttpRequests.requestMatchers(HttpMethod.POST, jwtAuthenticationLoginUrl).permitAll();
                     httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-                }
-
-                if (jwtAuthorizationEnabled) {
-                    httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
                 }
 
                 if (signRequestAuthorizationEnabled) {
@@ -438,6 +525,18 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
                 authorizeHttpRequests.anyRequest().authenticated();
             }
         });
+
+        if (oauthAuthenticationEnabled) {
+            // We enable default OAuth2 paths.
+            // TODO Felipe Desiderati: Permitir que seja customizado!
+            //  Permitir que possamos escolher entre definir ou não a tela de login.
+            httpSecurity.oauth2Login(it -> it.loginProcessingUrl("/oauth2/login/*").permitAll());
+            //httpSecurity.oauth2Client(withDefaults());
+        }
+
+        if (jwtAuthorizationEnabled) {
+            httpSecurity.oauth2ResourceServer(it -> it.jwt(withDefaults()));
+        }
 
         if (defaultAuthenticationEnabled) {
             // It will be enabled the filter: UsernamePasswordAuthenticationFilter

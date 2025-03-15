@@ -16,12 +16,14 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.jwt;
+package io.herd.common.data.multitenant
 
-import io.jsonwebtoken.Claims;
+interface MultiTenantSupport {
 
-public interface JwtTokenExtractor<T> {
+    companion object {
+        const val TENANT: String = "tenant"
+    }
 
-    T extract(Claims tokenPayload);
+    fun getTenant(): String
 
 }

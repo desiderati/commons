@@ -16,15 +16,16 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.sign_request.authorization;
+package io.herd.common.web.security.sign_request;
 
 import io.herd.common.exception.ApplicationException;
 import io.herd.common.validation.ValidationUtils;
-import io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationClientProperties.SignValidation;
+import io.herd.common.web.security.sign_request.SignRequestAuthorizationClientProperties.SignValidation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,8 +42,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import static io.herd.common.web.security.sign_request.authorization.SignRequestSigner.HEADER_DATE;
-import static io.herd.common.web.security.sign_request.authorization.SignRequestSigner.HEADER_DATE_FORMAT;
+import static io.herd.common.web.security.sign_request.SignRequestSigner.HEADER_DATE_FORMAT;
 
 /**
  * We cannot associate the creation of this Bean to the variable
@@ -53,8 +53,8 @@ import static io.herd.common.web.security.sign_request.authorization.SignRequest
 @Service
 public class SignRequestAuthorizationService {
 
-    private static final String HEADER_AUTHORIZATION = "Authorization";
-    private static final String TOKEN_SIGNED_REQUEST = "SIGNED_REQUEST";
+    private static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
+    private static final String SIGNED_REQUEST_TOKEN = "SignedRequest";
 
     private static final int VALID_TIME_WINDOW = 15; // Minutes
     private static final String DEFAULT_AUTHORIZATION_ERROR_MSG = "Unable to authorize the request due to: ";
@@ -81,7 +81,7 @@ public class SignRequestAuthorizationService {
 
             SimpleDateFormat dateFormat = new SimpleDateFormat(HEADER_DATE_FORMAT, Locale.US);
             Request newRequest = request.newBuilder()
-                .addHeader(HEADER_DATE, dateFormat.format(new Date()))
+                .addHeader(HttpHeaders.DATE, dateFormat.format(new Date()))
                 .build();
 
             String sign = SignRequestSigner.builder().request(newRequest)
@@ -90,7 +90,7 @@ public class SignRequestAuthorizationService {
             newRequest = newRequest.newBuilder()
                 .addHeader(
                     HEADER_AUTHORIZATION,
-                    TOKEN_SIGNED_REQUEST + " " + signRequestAuthorizationClientProperties.getId() + ":" + sign
+                    SIGNED_REQUEST_TOKEN + " " + signRequestAuthorizationClientProperties.getId() + ":" + sign
                 )
                 .build();
             return newRequest;
@@ -106,8 +106,8 @@ public class SignRequestAuthorizationService {
     public Authentication verifySignature(HttpServletRequest request) {
         try {
             final String auth = request.getHeader(HEADER_AUTHORIZATION);
-            if (auth != null && auth.startsWith(TOKEN_SIGNED_REQUEST) && verifyDate(request)) {
-                String[] authArr = auth.replace(TOKEN_SIGNED_REQUEST + " ", "").split(":");
+            if (auth != null && auth.startsWith(SIGNED_REQUEST_TOKEN) && verifyDate(request)) {
+                String[] authArr = auth.replace(SIGNED_REQUEST_TOKEN + " ", "").split(":");
 
                 final String keyId = authArr[0];
                 final String sign = authArr[1];
@@ -122,7 +122,9 @@ public class SignRequestAuthorizationService {
                         AuthorityUtils.createAuthorityList(
                             authorizedClient.getRoles().stream().map(role -> "ROLE_" + role).toArray(String[]::new));
 
-                    return new UsernamePasswordAuthenticationToken(authorizedClient, null, grantedAuthorities);
+                    return new UsernamePasswordAuthenticationToken(
+                        authorizedClient, null, grantedAuthorities
+                    );
                 } else {
                     log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Invalid signed request!");
                 }
@@ -134,14 +136,17 @@ public class SignRequestAuthorizationService {
     }
 
     private boolean verifyDate(HttpServletRequest request) {
-        if (request.getHeader(HEADER_DATE) == null) {
+        if (request.getHeader(HttpHeaders.DATE) == null) {
             log.warn(DEFAULT_AUTHORIZATION_ERROR_MSG + "Request date header not informed!");
             return false;
         }
 
         ZonedDateTime currentDate = ZonedDateTime.now();
         ZonedDateTime requestDate =
-            ZonedDateTime.ofInstant(Instant.ofEpochMilli(request.getDateHeader(HEADER_DATE)), ZoneId.of("UTC"));
+            ZonedDateTime.ofInstant(
+                Instant.ofEpochMilli(request.getDateHeader(HttpHeaders.DATE)), ZoneId.of("UTC")
+            );
+
         boolean dateOutOfRange = requestDate.isBefore(currentDate.minusMinutes(VALID_TIME_WINDOW))
             || requestDate.isAfter(currentDate.plusMinutes(VALID_TIME_WINDOW));
         if (dateOutOfRange) {

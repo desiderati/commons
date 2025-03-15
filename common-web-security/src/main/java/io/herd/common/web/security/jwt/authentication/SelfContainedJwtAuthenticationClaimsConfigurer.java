@@ -16,26 +16,14 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.sign_request.authorization;
+package io.herd.common.web.security.jwt.authentication;
 
-import io.herd.common.web.security.MultiTenantSupport;
-import lombok.*;
+import io.herd.common.web.security.jwt.JwtClaimsConfigurer;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
 
-import java.util.*;
+public interface SelfContainedJwtAuthenticationClaimsConfigurer {
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
-public class SignRequestAuthorizedClient implements MultiTenantSupport {
-
-    @ToString.Include
-    private UUID id;
-
-    private String secretKey;
-    private String tenant;
-    private List<String> roles = new ArrayList<>();
-    private Map<String, Object> additionalProperties = new HashMap<>();
+    JwtClaimsConfigurer retrieveJwtClaimsConfigurer(HttpServletRequest request, Authentication authentication);
 
 }
