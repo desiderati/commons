@@ -26,6 +26,7 @@ import graphql.util.LogKit
 import io.herd.common.exception.ApplicationException
 import io.herd.common.validation.TypedValidationException
 import org.slf4j.Logger
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.context.MessageSource
@@ -42,6 +43,7 @@ import java.util.*
 @Validated
 @ConditionalOnWebApplication
 @ConditionalOnSingleCandidate(GraphQLExceptionHandlerController::class)
+@ConditionalOnClass(LogKit::class)
 @ControllerAdvice(annotations = [Controller::class])
 class GraphQLExceptionHandlerController(private val messageSource: MessageSource) {
 

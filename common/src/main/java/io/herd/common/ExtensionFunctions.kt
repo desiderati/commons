@@ -21,19 +21,20 @@
 package io.herd.common
 
 import com.natpryce.hamkrest.Matcher
+import org.springframework.core.MethodParameter
+import org.springframework.core.annotation.AnnotationUtils
+import org.springframework.lang.Nullable
 import java.text.Normalizer
 
-fun String.stripAccents(): String =
-    Normalizer.normalize(this, Normalizer.Form.NFD).let {
-        Regex("\\p{InCombiningDiacriticalMarks}+").replace(it, "")
-            .replace("[^a-zA-Z0-9]", "")
-    }
+fun String.stripAccents(): String = Normalizer.normalize(this, Normalizer.Form.NFD).let {
+    Regex("\\p{InCombiningDiacriticalMarks}+").replace(it, "").replace("[^a-zA-Z0-9]", "")
+}
 
 fun <T> List<T>.copyOf(): List<T> = mutableListOf<T>().also { it.addAll(this) }
 
 fun <T> List<T>.mutableCopyOf(): MutableList<T> = mutableListOf<T>().also { it.addAll(this) }
 
-fun <T> Iterable<T>.containsAll(vararg elements : T): Boolean {
+fun <T> Iterable<T>.containsAll(vararg elements: T): Boolean {
     return elements.all { this.contains(it) }
 }
 
@@ -42,3 +43,24 @@ fun <T> not(that: Matcher<T>): Matcher<T> = Matcher.Negation(that)
 inline fun not(block: () -> Boolean): Boolean = !block()
 
 infix fun CharSequence?.contentNotEquals(other: CharSequence?): Boolean = not { contentEquals(other) }
+
+/**
+ * Obtains the annotation which can be directly on the [MethodParameter] or on a custom annotation that
+ * is meta-annotated with it.
+ */
+@Nullable
+fun <A : Annotation> findMethodAnnotation(annotationType: Class<A>, parameter: MethodParameter): A? {
+    var annotation = parameter.getParameterAnnotation(annotationType)
+    if (annotation != null) {
+        return annotation
+    }
+
+    val annotationsToSearch = parameter.parameterAnnotations
+    for (toSearch in annotationsToSearch) {
+        annotation = AnnotationUtils.findAnnotation(toSearch.annotationClass.java, annotationType)
+        if (annotation != null) {
+            return annotation
+        }
+    }
+    return null
+}

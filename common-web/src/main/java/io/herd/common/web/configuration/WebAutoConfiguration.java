@@ -23,7 +23,7 @@ import io.herd.common.data.jpa.configuration.JpaAutoConfiguration;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.async.AsyncWebConfiguration;
 import io.herd.common.web.graphql.NameSchemaDirectiveWiring;
-import io.herd.common.web.graphql.PageableArgumentResolver;
+import io.herd.common.web.graphql.PageableGraphQLArgumentResolver;
 import io.herd.common.web.rest.exception.ResponseExceptionDTOHttpMessageConverter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.Type;
@@ -250,16 +250,14 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
         return (wiringBuilder) -> {
             graphQLScalarTypes.orderedStream().forEach(wiringBuilder::scalar);
             customDirectives.orderedStream().forEach(
-                nameSchemaDirectiveWiring -> wiringBuilder.directive(
-                    nameSchemaDirectiveWiring.getDirectiveName(), nameSchemaDirectiveWiring
-                )
+                directive -> wiringBuilder.directive(directive.getDirectiveName(), directive)
             );
         };
     }
 
     @Autowired
     public void configureArgumentResolvers(
-        PageableArgumentResolver pageableArgumentResolver,
+        PageableGraphQLArgumentResolver pageableArgumentResolver,
         ObjectProvider<AnnotatedControllerConfigurer> annotatedControllerConfigurerProvider
     ) {
         var annotatedControllerConfigurer = annotatedControllerConfigurerProvider.getIfAvailable();

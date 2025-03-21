@@ -30,10 +30,10 @@ import org.springframework.stereotype.Component
  * Custom HandlerMethodArgumentResolver for resolving Pageable method parameters in Spring GraphQL controllers.
  */
 @Component
-class PageableArgumentResolver : HandlerMethodArgumentResolver {
+class PageableGraphQLArgumentResolver : HandlerMethodArgumentResolver {
 
     override fun supportsParameter(parameter: MethodParameter): Boolean =
-        parameter.nestedIfOptional().nestedParameterType == Pageable::class.java
+        Pageable::class.java.isAssignableFrom(parameter.nestedIfOptional().nestedParameterType)
 
     @Suppress("unchecked_cast")
     override fun resolveArgument(

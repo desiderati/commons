@@ -25,9 +25,13 @@ import graphql.schema.idl.SchemaDirectiveWiringEnvironment
 import io.herd.common.contentNotEquals
 import io.herd.common.not
 import org.springframework.stereotype.Component
+import org.springframework.graphql.execution.ConnectionTypeDefinitionConfigurer
+import org.springframework.graphql.execution.TypeDefinitionConfigurer
 
 /**
  * It adds support to pagination using Spring Data Jpa Pageable.
+ *
+ * We could have implemented the [TypeDefinitionConfigurer] as [ConnectionTypeDefinitionConfigurer] did.
  */
 @Component
 class PageableDirective : NameSchemaDirectiveWiring {

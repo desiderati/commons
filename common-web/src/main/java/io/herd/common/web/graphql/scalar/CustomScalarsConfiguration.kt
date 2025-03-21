@@ -35,6 +35,7 @@ class CustomScalarsConfiguration {
             .name("Void")
             .description("Void Scalar")
             .coercing(object : Coercing<Void?, String> {
+
                 @Throws(CoercingSerializeException::class)
                 override fun serialize(
                     dataFetcherResult: Any,

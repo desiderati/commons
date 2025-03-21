@@ -24,7 +24,15 @@ Changelog
 
 All project changes will be documented in this file.
 
-#### [4.0.0.RC2] - 2025-02-27
+#### [4.0.0.RC2] - 2025-03-17
+- Remove legacy JWT implementation in favor of Spring's OAuth2 support.
+- Removed custom JWT classes and configurations, consolidating the project to use Spring Security's OAuth2 JWT Resource Server integration. This improves maintainability, reduces redundancy, and aligns with widely-accepted security standards. Also updated property mappings to reflect this change.
+- Added the possibility of configuring the charset encoding for i18n files.
+- Renamed RestApiClientConfiguration to HttpClientsConfiguration.
+- Created a custom HandlerMethodArgumentResolver for resolving Pageable method parameters in Spring GraphQL controllers.
+- Initial idea for a custom OAuth2 Service.
+
+#### [4.0.0.RC1] - 2025-02-27
 - Created a class which provides static access to the Spring application context.
 - Defined a mechanism for context propagation when working with asynchronous tasks our suspended methods.
 - Defined a way of retrieving (statically) an internationalized message.

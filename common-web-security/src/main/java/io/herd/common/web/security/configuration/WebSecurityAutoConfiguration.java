@@ -27,7 +27,9 @@ import io.herd.common.web.security.jwt.JwtKeys;
 import io.herd.common.web.security.jwt.JwtService;
 import io.herd.common.web.security.jwt.authentication.*;
 import io.herd.common.web.security.sign_request.SignRequestAuthorizationFilter;
+import io.herd.common.web.security.support.*;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +42,7 @@ import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguratio
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.graphql.data.method.annotation.support.AnnotatedControllerConfigurer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.lang.NonNull;
@@ -68,7 +71,6 @@ import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.security.web.method.annotation.CurrentSecurityContextArgumentResolver;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
@@ -77,7 +79,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import java.util.Collection;
 import java.util.List;
@@ -386,7 +387,6 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain filterChain(
         HttpSecurity httpSecurity,
-        HandlerMappingIntrospector introspector,
         OAuth2ClientProperties oAuth2ClientProperties
     ) throws Exception {
         // We don't need to enable CSRF support when using JWT Tokens.
@@ -468,11 +468,9 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
                 // GraphQL Support.
                 if (!springGraphqlSecurityEnabled) {
                     // It should be used only on development environments.
-                    // As the GraphQL Url is registered by another Servlet, we must configure the security like this!
+                    authorizeHttpRequests.requestMatchers(UrlUtils.sanitize(springGraphqlPath)).permitAll();
                     authorizeHttpRequests.requestMatchers(
-                        new MvcRequestMatcher.Builder(introspector)
-                            .servletPath(UrlUtils.sanitize(springGraphqlPath))
-                            .pattern("/**")
+                        UrlUtils.appendDoubleAsterisk(springGraphqlPath)
                     ).permitAll();
                 }
 
@@ -578,5 +576,55 @@ public class WebSecurityAutoConfiguration implements WebMvcConfigurer {
         @Qualifier(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME) AsyncTaskExecutor taskExecutor
     ) {
         return new DelegatingSecurityContextAsyncTaskExecutor(taskExecutor);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthenticatedUsernameGetter.class)
+    public AuthenticatedUsernameGetter authenticatedUsernameGetter() {
+        return new AuthenticatedUsernameGetterImpl();
+    }
+
+    @Bean
+    public AuthenticatedUsernameGraphQLArgumentResolver authenticatedUsernameGraphQLArgumentResolver(
+        AuthenticatedUsernameGetter authenticatedUsernameGetter
+    ) {
+        return new AuthenticatedUsernameGraphQLArgumentResolver(authenticatedUsernameGetter);
+    }
+
+    @Bean
+    @ConditionalOnBean(UserDataRetriever.class)
+    public UserDataGraphQLArgumentResolver userDataGraphQLArgumentResolver(
+        AuthenticatedUsernameGetter authenticatedUsernameGetter,
+        UserDataRetriever<? extends UserData> userDataRetriever
+    ) {
+        return new UserDataGraphQLArgumentResolver(authenticatedUsernameGetter, userDataRetriever);
+    }
+
+    @Bean
+    @ConditionalOnBean(UserDataRetriever.class)
+    public UserDataArgumentResolver userDataArgumentResolver(
+        AuthenticatedUsernameGetter authenticatedUsernameGetter,
+        UserDataRetriever<? extends UserData> userDataRetriever
+    ) {
+        return new UserDataArgumentResolver(authenticatedUsernameGetter, userDataRetriever);
+    }
+
+    @Autowired
+    public void configureArgumentResolvers(
+        AuthenticatedUsernameGraphQLArgumentResolver authenticatedUsernameGraphQLArgumentResolver,
+        ObjectProvider<UserDataGraphQLArgumentResolver> userDataGraphQLArgumentResolverProvider,
+        ObjectProvider<AnnotatedControllerConfigurer> annotatedControllerConfigurerProvider
+    ) {
+        var annotatedControllerConfigurer = annotatedControllerConfigurerProvider.getIfAvailable();
+        if (annotatedControllerConfigurer != null) {
+            annotatedControllerConfigurer.addCustomArgumentResolver(authenticatedUsernameGraphQLArgumentResolver);
+
+            var userDataGraphQLArgumentResolver = userDataGraphQLArgumentResolverProvider.getIfAvailable();
+            if (userDataGraphQLArgumentResolver != null) {
+                annotatedControllerConfigurer.addCustomArgumentResolver(userDataGraphQLArgumentResolver);
+            }
+
+            annotatedControllerConfigurer.afterPropertiesSet(); // Just to reload the argument resolvers list.
+        }
     }
 }

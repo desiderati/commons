@@ -46,7 +46,10 @@ public class SecurityExceptionHandlingController extends ExceptionHandlingContro
 
     @Autowired
     public SecurityExceptionHandlingController(
-        @Value("${spring.web.exception-handler.should-log-as-warning}") @NotEmpty List<@NotBlank String> shouldLogAsWarning,
+        @NotEmpty
+        @Value("${spring.web.exception-handler.should-log-as-warning}")
+        List<@NotBlank String> shouldLogAsWarning,
+
         ObjectMapper objectMapper,
         ModelMapper modelMapper
     ) {

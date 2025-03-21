@@ -27,8 +27,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.io.IOException;
-
 /**
  * Class used for retrieving the user/password from the request. This information will be
  * used by the {@link AuthenticationManager} to authenticate the user.
@@ -39,12 +37,23 @@ public class SelfContainedJwtAuthenticationConverter implements AuthenticationCo
     public Authentication convert(HttpServletRequest request) {
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(request.getInputStream());
-            String username = jsonNode.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY).asText();
-            String password = jsonNode.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY).asText();
+            JsonNode usernameNode =
+                jsonNode.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
+            if (usernameNode == null) {
+                throw new AuthenticationServiceException("Invalid username key!");
+            }
+            String username = usernameNode.asText();
+
+            JsonNode passwordNode =
+                jsonNode.get(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_PASSWORD_KEY);
+            if (passwordNode == null) {
+                throw new AuthenticationServiceException("Invalid password key!");
+            }
+            String password = passwordNode.asText();
 
             // Never get the roles from the request. The roles must be informed by the Authentication Manager.
             return new SelfContainedJwtAuthenticationToken(username, password);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new AuthenticationServiceException("Authentication Failed: " + e.getMessage(), e);
         }
     }
