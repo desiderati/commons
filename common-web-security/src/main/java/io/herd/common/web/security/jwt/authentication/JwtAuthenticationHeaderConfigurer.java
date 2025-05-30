@@ -36,7 +36,7 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
  * @see BearerTokenAuthenticationExtractor
  * @see DefaultBearerTokenResolver
  */
-public interface SelfContainedJwtAuthenticationHeaderConfigurer {
+public interface JwtAuthenticationHeaderConfigurer {
 
     /**
      * @return The authentication header name.

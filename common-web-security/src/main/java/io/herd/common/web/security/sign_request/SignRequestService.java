@@ -20,12 +20,13 @@ package io.herd.common.web.security.sign_request;
 
 import io.herd.common.exception.ApplicationException;
 import io.herd.common.validation.ValidationUtils;
-import io.herd.common.web.security.sign_request.SignRequestAuthorizationClientProperties.SignValidation;
+import io.herd.common.web.security.sign_request.SignRequestClientProperties.SignValidation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -45,13 +46,19 @@ import java.util.UUID;
 import static io.herd.common.web.security.sign_request.SignRequestSigner.HEADER_DATE_FORMAT;
 
 /**
- * We cannot associate the creation of this Bean to the variable
- * <code>spring.web.security.sign-request.authorization.enabled</code> = true,
- * as it can be used to sign requests when used by an Open API client.
+ * Service class responsible for handling the signing and verification of requests.
+ * This is typically used for ensuring secure communication between clients and
+ * APIs by signing requests with a secret key and validating these signatures.
+ * <p>
+ * The service can handle signing and verification for HTTP requests using both custom
+ * and Spring's request models.
+ * <p>
+ * It provides mechanisms to validate authorization, ensure request integrity,
+ * and add the necessary headers for secure communication.
  */
 @Slf4j
 @Service
-public class SignRequestAuthorizationService {
+public class SignRequestService {
 
     private static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
     private static final String SIGNED_REQUEST_TOKEN = "SignedRequest";
@@ -59,13 +66,13 @@ public class SignRequestAuthorizationService {
     private static final int VALID_TIME_WINDOW = 15; // Minutes
     private static final String DEFAULT_AUTHORIZATION_ERROR_MSG = "Unable to authorize the request due to: ";
 
-    private final SignRequestAuthorizationClientProperties signRequestAuthorizationClientProperties;
+    private final SignRequestClientProperties signRequestAuthorizationClientProperties;
 
-    private final SignRequestAuthorizedClientRepository signRequestAuthorizedClientRepository;
+    private final SignRequestAuthorizationClientRepository signRequestAuthorizedClientRepository;
 
-    public SignRequestAuthorizationService(
-        SignRequestAuthorizationClientProperties signRequestAuthorizationClientProperties,
-        @Autowired(required = false) SignRequestAuthorizedClientRepository signRequestAuthorizedClientRepository
+    public SignRequestService(
+        SignRequestClientProperties signRequestAuthorizationClientProperties,
+        @Autowired(required = false) SignRequestAuthorizationClientRepository signRequestAuthorizedClientRepository
     ) {
         this.signRequestAuthorizationClientProperties = signRequestAuthorizationClientProperties;
         this.signRequestAuthorizedClientRepository = signRequestAuthorizedClientRepository;
@@ -84,8 +91,11 @@ public class SignRequestAuthorizationService {
                 .addHeader(HttpHeaders.DATE, dateFormat.format(new Date()))
                 .build();
 
-            String sign = SignRequestSigner.builder().request(newRequest)
-                .secret(signRequestAuthorizationClientProperties.getSecretKey()).build().sign();
+            String sign = SignRequestSigner.builder()
+                .request(newRequest)
+                .secret(signRequestAuthorizationClientProperties.getSecretKey())
+                .build()
+                .sign();
 
             newRequest = newRequest.newBuilder()
                 .addHeader(
@@ -94,6 +104,35 @@ public class SignRequestAuthorizationService {
                 )
                 .build();
             return newRequest;
+        } catch (Exception e) {
+            throw new AuthenticationServiceException("Unable to sign the request due to: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Method responsible for signing the request using API Secret and API ID.
+     * This version works with Spring's HttpRequest.
+     */
+    @SuppressWarnings("unused")
+    public HttpRequest sign(HttpRequest httpRequest, byte[] body) {
+        try {
+            ValidationUtils.Companion.validate(signRequestAuthorizationClientProperties, SignValidation.class);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(HEADER_DATE_FORMAT, Locale.US);
+            httpRequest.getHeaders().add(HttpHeaders.DATE, dateFormat.format(new Date()));
+
+            String sign = SignRequestSigner.builder()
+                .httpRequest(httpRequest)
+                .secret(signRequestAuthorizationClientProperties.getSecretKey())
+                .build()
+                .sign(body);
+
+            httpRequest.getHeaders().add(
+                HEADER_AUTHORIZATION,
+                SIGNED_REQUEST_TOKEN + " " + signRequestAuthorizationClientProperties.getId() + ":" + sign
+            );
+
+            return httpRequest;
         } catch (Exception e) {
             throw new AuthenticationServiceException("Unable to sign the request due to: " + e.getMessage(), e);
         }
@@ -111,7 +150,7 @@ public class SignRequestAuthorizationService {
 
                 final String keyId = authArr[0];
                 final String sign = authArr[1];
-                final SignRequestAuthorizedClient authorizedClient =
+                final SignRequestAuthorizationClient authorizedClient =
                     signRequestAuthorizedClientRepository.findById(UUID.fromString(keyId))
                         .orElseThrow(() -> new ApplicationException("API Key not registered for Id: " + keyId));
 

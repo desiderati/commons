@@ -18,24 +18,31 @@
  */
 package io.herd.common.web.security.sign_request;
 
-import io.herd.common.data.multitenant.MultiTenantSupport;
-import lombok.*;
+import io.herd.common.exception.ApplicationException;
 
-import java.util.*;
+import java.io.Serial;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
-public class SignRequestAuthorizedClient implements MultiTenantSupport {
+/**
+ * A custom exception class that represents errors occurring during the signing of requests.
+ * <p>
+ * This exception is typically used in situations where the signing process for a request cannot be completed
+ * due to issues such as invalid input, missing configuration, or internal processing errors.
+ * <p>
+ * This class extends {@code ApplicationException}, allowing for additional context or arguments to be
+ * passed through the exception’s constructors and supporting structured exception handling
+ * for request signing operations.
+ */
+public class SignRequestException extends ApplicationException {
 
-    @ToString.Include
-    private UUID id;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private String secretKey;
-    private String tenant;
-    private List<String> roles = new ArrayList<>();
-    private Map<String, Object> additionalProperties = new HashMap<>();
+    @SuppressWarnings("unused")
+    public SignRequestException(String msg) {
+        super(msg);
+    }
 
+    public SignRequestException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

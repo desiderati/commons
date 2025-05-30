@@ -42,13 +42,13 @@ import org.springframework.web.client.RestClient
  * to another application which also uses the self-contained JWT authentication approach.
  */
 @Slf4j
-class SelfContainedJwtAuthenticationDelegateProvider(
+class JwtAuthenticationDelegateProvider(
     private val jwtAuthenticationDelegateRestClient: RestClient,
-    private val jwtAuthenticationDelegateLoginUrl: String
+    private val jwtDelegateAuthenticationBasePathLogin: String
 ) : AbstractUserDetailsAuthenticationProvider() {
 
     private lateinit var jwtService: JwtService
-    private lateinit var jwtAuthenticationHeaderConfigurer: SelfContainedJwtAuthenticationHeaderConfigurer
+    private lateinit var jwtAuthenticationHeaderConfigurer: JwtAuthenticationHeaderConfigurer
 
     @Autowired
     fun setJwtService(jwtService: JwtService) {
@@ -57,7 +57,7 @@ class SelfContainedJwtAuthenticationDelegateProvider(
 
     @Autowired
     fun setJwtAuthenticationHeaderConfigurer(
-        jwtAuthenticationHeaderConfigurer: SelfContainedJwtAuthenticationHeaderConfigurer
+        jwtAuthenticationHeaderConfigurer: JwtAuthenticationHeaderConfigurer
     ) {
         this.jwtAuthenticationHeaderConfigurer = jwtAuthenticationHeaderConfigurer
     }
@@ -76,13 +76,13 @@ class SelfContainedJwtAuthenticationDelegateProvider(
                 add(SPRING_SECURITY_FORM_PASSWORD_KEY, authentication.credentials as String?)
             }
 
-        if (authentication !is SelfContainedJwtAuthenticationToken) throw IllegalArgumentException(
-            "Authentication object should be an instance of SelfContainedJwtAuthenticationToken class!"
+        if (authentication !is io.herd.common.web.security.jwt.authentication.JwtAuthenticationToken) throw IllegalArgumentException(
+            "Authentication object should be an instance of JwtAuthenticationToken class!"
         )
 
         try {
             return jwtAuthenticationDelegateRestClient.post()
-                .uri(jwtAuthenticationDelegateLoginUrl)
+                .uri(jwtDelegateAuthenticationBasePathLogin)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .exchange { _, response ->
@@ -132,13 +132,13 @@ class SelfContainedJwtAuthenticationDelegateProvider(
         authentication: Authentication,
         user: UserDetails
     ): Authentication {
-        if (authentication !is SelfContainedJwtAuthenticationToken) throw IllegalArgumentException(
+        if (authentication !is io.herd.common.web.security.jwt.authentication.JwtAuthenticationToken) throw IllegalArgumentException(
             "Authentication object should be an instance of JwtDelegateAuthenticationToken class!"
         )
 
         // We need to create a new Authentication object, because this one will contain the authorities.
         super.createSuccessAuthentication(principal, authentication, user).let {
-            return SelfContainedJwtAuthenticationToken(
+            return JwtAuthenticationToken(
                 it.principal,
                 it.credentials,
                 it.authorities

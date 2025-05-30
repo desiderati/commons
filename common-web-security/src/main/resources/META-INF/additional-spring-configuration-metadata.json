@@ -5,8 +5,8 @@
       "type": "io.herd.common.web.configuration.CorsProperties"
     },
     {
-      "name": "spring.web.security.sign-request.authorization.client",
-      "type": "io.herd.common.web.security.sign_request.SignRequestAuthorizationClientProperties"
+      "name": "spring.web.security.sign-request.client",
+      "type": "io.herd.common.web.security.sign_request.SignRequestClientProperties"
     }
   ],
   "properties": [
@@ -24,13 +24,25 @@
     },
     {
       "name": "spring.web.http.clients.decorate-with-auth-header",
-      "description": "If a default RESTful API client was created, we can decorate the requests made by it with the authentication header.",
+      "description": "When a default RESTful API client is initialized, request interceptors can be applied to automatically append the Authorization header with a JWT token. This mechanism is only enabled when JWT-based authentication is configured.",
       "type": "java.lang.Boolean",
       "defaultValue": false
     },
     {
-      "name": "spring.web.security.default.authentication.enabled",
-      "description": "It defines if the default Authentication will be enabled or not.",
+      "name": "spring.web.http.clients.decorate-with-sign-request-header",
+      "description": "When a default RESTful API client is initialized, request interceptors can be applied to automatically append the Sign Request header. This mechanism is only enabled when Sign Request authorization is configured.",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    },
+    {
+      "name": "spring.web.security.form-based.authentication.enabled",
+      "description": "It defines if the Form-Based Authentication will be enabled or not.",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    },
+    {
+      "name": "spring.web.security.http-basic.authorization.enabled",
+      "description": "It defines if the HTTP Basic Authentication will be enabled or not.",
       "type": "java.lang.Boolean",
       "defaultValue": false
     },
@@ -39,6 +51,16 @@
       "description": "It defines if JWT Authentication will be enabled or not. Process of retrieving the user/password from the Request Body and verifying if the password matches. Here we will obtain all roles configured for the user.",
       "type": "java.lang.Boolean",
       "defaultValue": false
+    },
+    {
+      "name": "spring.web.security.jwt.authentication.issuer",
+      "description": "Defines the issuer of the JWT tokens used for authentication. This value is included in the \"iss\" claim of each token and validated by the Resource Server.",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "spring.web.security.jwt.authentication.audience",
+      "description": "Defines the expected audience value in the JWT, separating multiple values by comma. This value is included in the \"aud\" claim of each token and ensures the JWT token was issued for the right service.",
+      "type": "java.lang.String"
     },
     {
       "name": "spring.web.security.jwt.authentication.authorities.parameter",
@@ -53,10 +75,10 @@
       "defaultValue": "administrator"
     },
     {
-      "name": "spring.web.security.jwt.authentication.login-url",
+      "name": "spring.web.security.jwt.authentication.base-path-login",
       "description": "Sets the URL that determines if authentication is required.",
       "type": "java.lang.String",
-      "defaultValue": "/login"
+      "defaultValue": "/authenticate"
     },
     {
       "name": "spring.web.security.jwt.authentication.expiration-period",
@@ -101,15 +123,15 @@
       "defaultValue": false
     },
     {
-      "name": "spring.web.security.jwt.authentication.delegation.base-path",
-      "description": "It defines the base path for the JWT Authentication Delegation API.",
+      "name": "spring.web.security.jwt.authentication.delegation.base-path-url",
+      "description": "It defines the base path for the JWT Authentication Delegation API. Must be defined if authentication delegation is enabled.",
       "type": "java.lang.String"
     },
     {
-      "name": "spring.web.security.jwt.authentication.delegation.login-url",
+      "name": "spring.web.security.jwt.authentication.delegation.base-path-login",
       "description": "Sets the URL that determines if authentication is required for the JWT Authentication Delegation API.",
       "type": "java.lang.String",
-      "defaultValue": "/login"
+      "defaultValue": "/authenticate"
     },
     {
       "name": "spring.web.security.jwt.authorization.enabled",
@@ -124,12 +146,12 @@
       "defaultValue": false
     },
     {
-      "name": "spring.web.security.sign-request.authorization.client.id",
+      "name": "spring.web.security.sign-request.client.id",
       "description": "Defines the client id.",
       "type": "java.util.UUID"
     },
     {
-      "name": "spring.web.security.sign-request.authorization.client.secret-key",
+      "name": "spring.web.security.sign-request.client.secret-key",
       "description": "Defines the secret key associated with the client id, which will be used to sign the request.",
       "type": "java.lang.String"
     }

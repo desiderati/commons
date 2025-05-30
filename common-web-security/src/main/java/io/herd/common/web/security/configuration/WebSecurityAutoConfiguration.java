@@ -18,16 +18,11 @@
  */
 package io.herd.common.web.security.configuration;
 
-import io.herd.common.data.multitenant.MultiTenantSupport;
 import io.herd.common.web.UrlUtils;
 import io.herd.common.web.configuration.WebAutoConfiguration;
-import io.herd.common.web.security.jwt.JwtEncryptionMethod;
-import io.herd.common.web.security.jwt.JwtKeys;
-import io.herd.common.web.security.jwt.JwtService;
-import io.herd.common.web.security.jwt.authentication.*;
+import io.herd.common.web.security.jwt.authentication.JwtAuthenticationFilter;
 import io.herd.common.web.security.sign_request.SignRequestAuthorizationFilter;
 import io.herd.common.web.security.support.*;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +32,12 @@ import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.graphql.data.method.annotation.support.AnnotatedControllerConfigurer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.authorization.method.AuthorizationManagerAfterMethodInterceptor;
 import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
@@ -54,13 +47,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -74,7 +63,6 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -84,11 +72,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.core.context.SecurityContextHolder.MODE_INHERITABLETHREADLOCAL;
 
+/**
+ * This class provides comprehensive security configuration for web applications,
+ * supporting multiple authentication mechanisms and security features.
+ * <p>
+ * It configures authentication methods (form-based, HTTP basic, JWT), authorization,
+ * CSRF protection, CORS, session management, and more.
+ * <p>
+ * The configuration is highly customizable through application properties and
+ * conditional beans.
+ */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableWebSecurity
@@ -100,19 +97,21 @@ import static org.springframework.security.core.context.SecurityContextHolder.MO
 )
 @Import({
     WebAutoConfiguration.class,
-    WebSecurityCorsConfiguration.class,
-    HttpClientsSecurityConfiguration.class
+    JwtAuthenticationConfiguration.class
 }) // To be used with @WebMvcTest
 public class WebSecurityAutoConfiguration {
 
-    @Value("${spring.web.security.default.authentication.enabled:false}")
-    private boolean defaultAuthenticationEnabled;
+    @Value("${spring.web.security.form-based.authentication.enabled:false}")
+    private boolean formBasedAuthenticationEnabled;
+
+    @Value("${spring.web.security.http-basic.authorization.enabled:false}")
+    private boolean httpBasicBasedAuthorizationEnabled;
 
     @Value("${spring.web.security.jwt.authentication.enabled:false}")
     private boolean jwtAuthenticationEnabled;
 
-    @Value("${spring.web.security.jwt.authentication.login-url:/login}")
-    private String jwtAuthenticationLoginUrl;
+    @Value("${spring.web.security.jwt.authentication.base-path-login:/authenticate}")
+    private String jwtAuthenticationBasePathLogin;
 
     @Value("${spring.web.security.jwt.authorization.enabled:false}")
     private boolean jwtAuthorizationEnabled;
@@ -144,6 +143,17 @@ public class WebSecurityAutoConfiguration {
     @Value("${springdoc.api-docs.path:/api-docs}")
     private String springDocOpenApiPath;
 
+    /**
+     * This constructor initializes the security configuration and sets up the security context
+     * holder strategy based on the application properties.
+     * <p>
+     * If async delegate security context is enabled, it configures the security context to be
+     * inherited by child threads and reconfigures the method security interceptors.
+     *
+     * @param springMvcAsyncDelegateSecurityContext Whether to delegate security context to async tasks
+     * @param preAuthorizeInterceptors              Collection of pre-authorize interceptors
+     * @param postAuthorizeInterceptors             Collection of post-authorize interceptors
+     */
     public WebSecurityAutoConfiguration(
         @Value("${spring.mvc.async.delegate-security-context:true}")
         boolean springMvcAsyncDelegateSecurityContext,
@@ -166,9 +176,9 @@ public class WebSecurityAutoConfiguration {
         }
     }
 
-    private SelfContainedJwtAuthenticationFilter jwtAuthenticationFilter;
-    private SignRequestAuthorizationFilter signRequestAuthorizationFilter;
     private String defaultApiBasePath;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private SignRequestAuthorizationFilter signRequestAuthorizationFilter;
     private CorsFilter graphQLCorsFilter;
 
     @Autowired
@@ -177,7 +187,7 @@ public class WebSecurityAutoConfiguration {
     }
 
     @Autowired(required = false)
-    public void setJwtAuthenticationFilter(@Lazy SelfContainedJwtAuthenticationFilter jwtAuthenticationFilter) {
+    public void setJwtAuthenticationFilter(@Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -193,6 +203,16 @@ public class WebSecurityAutoConfiguration {
         this.graphQLCorsFilter = graphQLCorsFilter;
     }
 
+    /**
+     * Configures security-aware argument resolvers for controller methods.
+     * When async security context delegation is enabled, this method ensures that
+     * security-related argument resolvers use the correct security context strategy.
+     * This is crucial for methods using @AuthenticationPrincipal or @CurrentSecurityContext
+     * annotations in async execution environments.
+     *
+     * @param springMvcAsyncDelegateSecurityContext Whether to delegate security context to async tasks
+     * @param argumentResolvers                     The list of method argument resolvers to configure
+     */
     @Autowired
     public void configureArgumentResolvers(
         @Value("${spring.mvc.async.delegate-security-context:true}")
@@ -217,104 +237,6 @@ public class WebSecurityAutoConfiguration {
         }
     }
 
-    @Configuration
-    @ConditionalOnClass(JwtAuthenticationConverter.class)
-    @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
-    public static class JwtServiceConfiguration {
-
-        @Value("${spring.web.security.jwt.authentication.authorities.parameter:authorities}")
-        private String jwtAuthenticationAuthoritiesParameter;
-
-        @Value("${spring.web.security.jwt.authentication.delegation.base-path:}")
-        private String jwtDelegateAuthenticationBasePath;
-
-        @Value("${spring.web.security.jwt.authentication.delegation.login-url:/login}")
-        private String jwtDelegateAuthenticationLoginUrl;
-
-
-        @Bean
-        @ConfigurationProperties("spring.web.security.jwt.authentication.keys")
-        public JwtKeys jwtKeys() {
-            return new JwtKeys();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(JwtService.class)
-        public JwtService jwtService(
-            JwtKeys jwtKeys,
-            JwtAuthenticationConverter jwtConverter,
-
-            @Value("${spring.web.security.jwt.authentication.encryption-method:asymmetric}")
-            JwtEncryptionMethod jwtEncryptionMethod,
-
-            @Value("${spring.web.security.jwt.authentication.expiration-period:1}")
-            int expirationPeriod,
-
-            @Value("${spring.web.security.jwt.authentication.delegation.enabled:false}")
-            boolean jwtAuthenticationDelegationEnabled
-        ) {
-            return new JwtService(
-                jwtKeys, jwtConverter, jwtEncryptionMethod, expirationPeriod, jwtAuthenticationDelegationEnabled
-            );
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(SelfContainedJwtAuthenticationClaimsConfigurer.class)
-        public SelfContainedJwtAuthenticationClaimsConfigurer jwtAuthenticationClaimsConfigurer() {
-            return (request, authentication) -> jwtClaimsSetBuilder -> {
-                jwtClaimsSetBuilder.subject(((UserDetails) authentication.getPrincipal()).getUsername())
-                    .claim(jwtAuthenticationAuthoritiesParameter,
-                        authentication.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority).collect(Collectors.toList())
-                    );
-
-                // TODO Felipe Desiderati: Atualmente com a implementação que existe, esta parte será sempre falso!
-                if (authentication instanceof MultiTenantSupport) {
-                    jwtClaimsSetBuilder.claim(
-                        MultiTenantSupport.TENANT,
-                        ((MultiTenantSupport) authentication).getTenant()
-                    );
-                }
-
-                return jwtClaimsSetBuilder.build();
-            };
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(AuthenticationConverter.class)
-        public AuthenticationConverter jwtAuthenticationConverter() {
-            return new SelfContainedJwtAuthenticationConverter();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(SelfContainedJwtAuthenticationHeaderConfigurer.class)
-        public SelfContainedJwtAuthenticationHeaderConfigurer jwtAuthenticationHeaderConfigurer() {
-            return new SelfContainedJwtAuthenticationHeaderBearerTokenConfigurer();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(SelfContainedJwtAuthenticationDelegateProvider.class)
-        @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.delegation.enabled", havingValue = "true")
-        public SelfContainedJwtAuthenticationDelegateProvider jwtDelegateAuthenticationProvider() {
-            if (StringUtils.isBlank(jwtDelegateAuthenticationBasePath)) {
-                throw new IllegalStateException("Authentication delegate base path should be defined!");
-            }
-
-            return new SelfContainedJwtAuthenticationDelegateProvider(
-                RestClient.builder().baseUrl(jwtDelegateAuthenticationBasePath).build(),
-                jwtDelegateAuthenticationLoginUrl
-            );
-        }
-
-        @Bean
-        static public MethodSecurityExpressionHandler methodSecurityExpressionHandler(
-            @Value("${spring.web.security.jwt.authentication.authorities.parameter-administrator:administrator}")
-            String jwtAuthenticationAuthoritiesAdminParameter
-        ) {
-            return new CustomMethodSecurityExpressionHandler(jwtAuthenticationAuthoritiesAdminParameter);
-        }
-    }
-
     // TODO Felipe Desiderati: Testar e validar estar parte!
     //  @Bean
     //  @ConditionalOnExpression(
@@ -327,19 +249,22 @@ public class WebSecurityAutoConfiguration {
     //  }
 
     /**
-     * This method allows configuration of web-based security at a resource level, based on a selection match.
-     * E.g., The example below restricts the URLs that start with /admin/ to users that have an ADMIN role, and
-     * declares that any other URLs need to be successfully authenticated.
-     * <pre>
-     * public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-     *     http.authorizeRequests()
-     *         .antMatchers("/admin/**").hasRole("ADMIN")
-     *         .anyRequest().authenticated();
-     * }
-     * </pre>
+     * Configures the application's security filter chain.
+     * <p>
+     * This method establishes a comprehensive set of security rules, including:
+     * <ul>
+     *   <li>CSRF protection (enabled or disabled based on the selected authentication method)</li>
+     *   <li>CORS support</li>
+     *   <li>Session management (stateless or conditional based on authentication strategy)</li>
+     *   <li>Support for multiple authentication methods (JWT, form-based login, HTTP Basic, OAuth2)</li>
+     *   <li>Authorization rules for protected resources and endpoints</li>
+     *   <li>Configuration of public endpoints (e.g., Actuator, Swagger UI, GraphQL tools)</li>
+     * </ul>
+     * <p>
+     * The entire configuration is designed to be flexible and customizable via application properties.
      */
     @Bean
-    public SecurityFilterChain filterChain(
+    public SecurityFilterChain securityFilterChain(
         HttpSecurity httpSecurity,
         ObjectProvider<OAuth2ClientProperties> oAuth2ClientProperties
     ) throws Exception {
@@ -348,12 +273,14 @@ public class WebSecurityAutoConfiguration {
         final boolean oauthAuthenticationEnabled = oAuth2ClientProperties.getIfAvailable() != null &&
             !oAuth2ClientProperties.getIfAvailable().getRegistration().isEmpty();
 
-        if (jwtAuthorizationEnabled || (!defaultAuthenticationEnabled && !oauthAuthenticationEnabled)) {
+        // TODO Felipe Desiderati: Será que não devo permitir determinadas combinações de autorizações???
+
+        if (jwtAuthorizationEnabled || (!formBasedAuthenticationEnabled && !oauthAuthenticationEnabled)) {
             httpSecurity.csrf(AbstractHttpConfigurer::disable);
         } else {
             httpSecurity.csrf(csrf -> {
                 if (jwtAuthenticationEnabled) {
-                    csrf.ignoringRequestMatchers(jwtAuthenticationLoginUrl);
+                    csrf.ignoringRequestMatchers(jwtAuthenticationBasePathLogin);
                 }
 
                 // Since Atmosphere endpoints are typically accessed via WebSockets or long polling,
@@ -377,7 +304,7 @@ public class WebSecurityAutoConfiguration {
         // We have to enable Cross-Origin Resource Sharing.
         httpSecurity.cors(withDefaults());
 
-        if (defaultAuthenticationEnabled) {
+        if (formBasedAuthenticationEnabled) {
             // For some reason, when we enable both FormLogin and HttpBasic authentication,
             // the DefaultAuthenticationEntryPoint configurations are not set correctly.
             // As a result, the API requests that are not authenticated are being redirected to the login page
@@ -404,7 +331,7 @@ public class WebSecurityAutoConfiguration {
         // We do not wish to enable session. Only if default or oauth authentication is enabled.
         httpSecurity.sessionManagement(sessionManagement ->
             sessionManagement.sessionCreationPolicy(
-                defaultAuthenticationEnabled || oauthAuthenticationEnabled ?
+                formBasedAuthenticationEnabled || oauthAuthenticationEnabled ?
                     SessionCreationPolicy.IF_REQUIRED :
                     SessionCreationPolicy.STATELESS
             )
@@ -415,7 +342,8 @@ public class WebSecurityAutoConfiguration {
 
         // Configures the endpoints.
         httpSecurity.authorizeHttpRequests(authorizeHttpRequests -> {
-            if (!defaultAuthenticationEnabled
+            if (!formBasedAuthenticationEnabled
+                && !httpBasicBasedAuthorizationEnabled
                 && !jwtAuthenticationEnabled
                 && !jwtAuthorizationEnabled
                 && !signRequestAuthorizationEnabled
@@ -443,6 +371,9 @@ public class WebSecurityAutoConfiguration {
                 authorizeHttpRequests.requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll();
                 authorizeHttpRequests.requestMatchers(HttpMethod.GET, "/webjars/**").permitAll();
                 authorizeHttpRequests.requestMatchers(HttpMethod.GET, springDocOpenApiPath).permitAll();
+                authorizeHttpRequests.requestMatchers(
+                    HttpMethod.GET, UrlUtils.appendDoubleAsterisk(springDocOpenApiPath)
+                ).permitAll();
 
                 // It enables all calls to the public API.
                 authorizeHttpRequests.requestMatchers(defaultApiBasePath + "/public/**").permitAll();
@@ -503,7 +434,7 @@ public class WebSecurityAutoConfiguration {
                     // When using form-based authentication, Spring Security defines a default login URL
                     // unless explicitly overridden.
                     authorizeHttpRequests =
-                        authorizeHttpRequests.requestMatchers(HttpMethod.POST, jwtAuthenticationLoginUrl).permitAll();
+                        authorizeHttpRequests.requestMatchers(HttpMethod.POST, jwtAuthenticationBasePathLogin).permitAll();
                     httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
                 }
 
@@ -531,17 +462,25 @@ public class WebSecurityAutoConfiguration {
             httpSecurity.oauth2ResourceServer(it -> it.jwt(withDefaults()));
         }
 
-        if (defaultAuthenticationEnabled) {
-            // It will be enabled the filter: UsernamePasswordAuthenticationFilter
+        if (formBasedAuthenticationEnabled) {
+            // It will enable: UsernamePasswordAuthenticationFilter
+            httpSecurity.formLogin(withDefaults());
+        }
+
+        if (httpBasicBasedAuthorizationEnabled) {
             httpSecurity.httpBasic(httpBasic ->
                 httpBasic.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
             );
-            httpSecurity.formLogin(withDefaults());
         }
 
         return httpSecurity.build();
     }
 
+    /**
+     * Creates a request matcher that matches requests with non-HTML content types.
+     * This matcher is used to differentiate between browser requests (HTML) and API requests.
+     * Unlike Spring's default configuration, this uses exact media type matching for more precise control.
+     */
     private @NotNull RequestMatcher getNotHtmlMatcher(HeaderContentNegotiationStrategy contentNegotiationStrategy) {
         MediaTypeRequestMatcher htmlMatcher =
             new MediaTypeRequestMatcher(contentNegotiationStrategy, MediaType.TEXT_HTML);
@@ -549,6 +488,12 @@ public class WebSecurityAutoConfiguration {
         return new NegatedRequestMatcher(htmlMatcher);
     }
 
+    /**
+     * Creates a request matcher for REST API requests.
+     * This matcher identifies requests with common API content types like JSON, XML, etc.
+     * It's used to apply the appropriate security handling for API requests vs. browser requests.
+     * The matcher ignores the wildcard media type to prevent false positives.
+     */
     private @NotNull MediaTypeRequestMatcher getRestMatcher(
         HeaderContentNegotiationStrategy contentNegotiationStrategy
     ) {
@@ -568,9 +513,19 @@ public class WebSecurityAutoConfiguration {
     }
 
     /**
-     * This method is used for configuration settings that impact global security (ignore resources, set debug mode,
-     * reject requests by implementing a custom firewall definition). For example, the following method would cause
-     * any request that starts with /context-path/** to be ignored for authentication purposes.
+     * Configures global web security settings.
+     * <p>
+     * This method is intended for settings that affect the overall web security configuration, such as:
+     * <ul>
+     *   <li>Excluding specific resources from security filters</li>
+     *   <li>Enabling or disabling debug mode</li>
+     *   <li>Registering custom HTTP firewall definitions</li>
+     * </ul>
+     * <p>
+     * In this implementation, it sets up a custom HTTP firewall that allows URL-encoded slashes,
+     * which can be required by applications that handle path parameters with encoded separators.
+     *
+     * @return the configured {@code WebSecurityCustomizer} bean
      */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -583,6 +538,18 @@ public class WebSecurityAutoConfiguration {
         return firewall;
     }
 
+    /**
+     * Creates a security-aware async task executor.
+     * This method creates an executor that propagates the security context to async tasks.
+     * It wraps the application's task executor in a {@link DelegatingSecurityContextAsyncTaskExecutor},
+     * which ensures that the security context is available in async tasks.
+     * <p>
+     * This is particularly useful for async operations that need access to the current user's
+     * authentication information.
+     *
+     * @param taskExecutor The application's task executor
+     * @return A security-aware async task executor
+     */
     @Bean("delegatingSecurityContextAsyncTaskExecutor")
     @ConditionalOnProperty(name = "spring.mvc.async.delegate-security-context", havingValue = "true")
     @ConditionalOnClass({DispatcherServlet.class, DefaultAuthenticationEventPublisher.class})
@@ -592,12 +559,31 @@ public class WebSecurityAutoConfiguration {
         return new DelegatingSecurityContextAsyncTaskExecutor(taskExecutor);
     }
 
+    /**
+     * Creates a service for retrieving the authenticated username.
+     * This bean provides a standardized way to access the current user's username
+     * across different parts of the application.
+     */
     @Bean
     @ConditionalOnMissingBean(AuthenticatedUsernameGetter.class)
     public AuthenticatedUsernameGetter authenticatedUsernameGetter() {
         return new AuthenticatedUsernameGetterImpl();
     }
 
+    /**
+     * Creates and registers a GraphQL argument resolver for authenticated usernames.
+     * <p>
+     * This resolver enables GraphQL operations to automatically inject the current username
+     * into method parameters annotated with the appropriate annotation.
+     * It also registers any available UserDataGraphQLArgumentResolver to support
+     * injecting complete user data objects.
+     * <p>
+     * The resolver is automatically registered with the GraphQL controller configurer.
+     *
+     * @param authenticatedUsernameGetter             The service for retrieving authenticated usernames
+     * @param userDataGraphQLArgumentResolverProvider Provider for user data resolver (if available)
+     * @param annotatedControllerConfigurerProvider   Provider for the GraphQL controller configurer
+     */
     @Bean
     public AuthenticatedUsernameGraphQLArgumentResolver authenticatedUsernameGraphQLArgumentResolver(
         AuthenticatedUsernameGetter authenticatedUsernameGetter,
@@ -620,6 +606,18 @@ public class WebSecurityAutoConfiguration {
         return authenticatedUsernameGraphQLArgumentResolver;
     }
 
+    /**
+     * Creates a GraphQL argument resolver for user data objects.
+     * <p>
+     * This resolver enables GraphQL operations to automatically inject complete user data
+     * objects into method parameters annotated with the appropriate annotation.
+     * It uses the authenticated username to retrieve the corresponding user data.
+     * <p>
+     * Only created when a UserDataRetriever implementation is available.
+     *
+     * @param authenticatedUsernameGetter The service for retrieving authenticated usernames
+     * @param userDataRetriever           The service for retrieving user data by username
+     */
     @Bean
     @ConditionalOnBean(UserDataRetriever.class)
     public UserDataGraphQLArgumentResolver userDataGraphQLArgumentResolver(
@@ -629,6 +627,18 @@ public class WebSecurityAutoConfiguration {
         return new UserDataGraphQLArgumentResolver(authenticatedUsernameGetter, userDataRetriever);
     }
 
+    /**
+     * Creates a REST controller argument resolver for user data objects.
+     * <p>
+     * This resolver enables REST controllers to automatically inject complete user data
+     * objects into method parameters annotated with the appropriate annotation.
+     * Similar to the GraphQL version, but for standard Spring MVC controllers.
+     * <p>
+     * Only created when a UserDataRetriever implementation is available.
+     *
+     * @param authenticatedUsernameGetter The service for retrieving authenticated usernames
+     * @param userDataRetriever           The service for retrieving user data by username
+     */
     @Bean
     @ConditionalOnBean(UserDataRetriever.class)
     public UserDataArgumentResolver userDataArgumentResolver(

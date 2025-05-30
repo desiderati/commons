@@ -24,6 +24,11 @@ import jakarta.servlet.ServletInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A custom implementation of {@link ServletInputStream} that wraps an {@link InputStream}.
+ * This class is specifically designed to interface with servlet APIs while enabling processing
+ * or manipulation of the underlying input stream.
+ */
 public class SignRequestServletInputStream extends ServletInputStream {
 
     private final InputStream inputStream;

@@ -51,7 +51,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
-public class SelfContainedJwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     /**
      * Class used for retrieving the user/password from the request. This information will be
@@ -59,20 +59,20 @@ public class SelfContainedJwtAuthenticationFilter extends AbstractAuthentication
      */
     private AuthenticationConverter authenticationConverter;
     private AuthenticationManagerBuilder authenticationManagerBuilder;
-    private SelfContainedJwtAuthenticationClaimsConfigurer jwtAuthenticationClaimsConfigurer;
-    private SelfContainedJwtAuthenticationHeaderConfigurer jwtAuthenticationHeaderConfigurer;
+    private JwtAuthenticationClaimsConfigurer jwtAuthenticationClaimsConfigurer;
+    private JwtAuthenticationHeaderConfigurer jwtAuthenticationHeaderConfigurer;
 
     @Autowired
-    public SelfContainedJwtAuthenticationFilter(
+    public JwtAuthenticationFilter(
         JwtService jwtService,
-        @Value("${spring.web.security.jwt.authentication.login-url:/login}") String loginUrl
+        @Value("${spring.web.security.jwt.authentication.base-path-login:/authenticate}") String loginUrl
     ) {
         // Indicates whether this filter should attempt to process a login request.
         super(new AntPathRequestMatcher(loginUrl, "POST"));
         setAuthenticationSuccessHandler((request, response, authentication) -> {
             String authorizationHeader = null;
-            if (authentication instanceof SelfContainedJwtAuthenticationToken) {
-                authorizationHeader = ((SelfContainedJwtAuthenticationToken) authentication).authorizationHeader;
+            if (authentication instanceof JwtAuthenticationToken) {
+                authorizationHeader = ((JwtAuthenticationToken) authentication).authorizationHeader;
             }
 
             if (authorizationHeader == null) {
@@ -112,14 +112,14 @@ public class SelfContainedJwtAuthenticationFilter extends AbstractAuthentication
 
     @Autowired // Prevent circular dependency.
     public void setJwtAuthenticationClaimsConfigurer(
-        SelfContainedJwtAuthenticationClaimsConfigurer jwtAuthenticationClaimsConfigurer
+        JwtAuthenticationClaimsConfigurer jwtAuthenticationClaimsConfigurer
     ) {
         this.jwtAuthenticationClaimsConfigurer = jwtAuthenticationClaimsConfigurer;
     }
 
     @Autowired // Prevent circular dependency.
     public void setJwtAuthenticationHeaderConfigurer(
-        SelfContainedJwtAuthenticationHeaderConfigurer jwtAuthenticationHeaderConfigurer
+        JwtAuthenticationHeaderConfigurer jwtAuthenticationHeaderConfigurer
     ) {
         this.jwtAuthenticationHeaderConfigurer = jwtAuthenticationHeaderConfigurer;
     }
@@ -132,10 +132,10 @@ public class SelfContainedJwtAuthenticationFilter extends AbstractAuthentication
      * @see WebSecurityAutoConfiguration
      */
     @Bean
-    public FilterRegistrationBean<SelfContainedJwtAuthenticationFilter> authenticationClientFilterRegistration(
-        @Qualifier("selfContainedJwtAuthenticationFilter") SelfContainedJwtAuthenticationFilter filter
+    public FilterRegistrationBean<JwtAuthenticationFilter> authenticationClientFilterRegistration(
+        @Qualifier("jwtAuthenticationFilter") JwtAuthenticationFilter filter
     ) {
-        FilterRegistrationBean<SelfContainedJwtAuthenticationFilter> registration =
+        FilterRegistrationBean<JwtAuthenticationFilter> registration =
             new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;

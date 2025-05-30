@@ -35,6 +35,8 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * It will be responsible for encoding and decoding JWT tokens.
@@ -45,18 +47,26 @@ public class JwtService {
     private NimbusJwtEncoder jwtEncoder;
     private final NimbusJwtDecoder jwtDecoder;
 
+    private final String jwtIssuer;
+    private final String jwtAudience;
     private final JwtKeys jwtKeys;
     private final Converter<Jwt, ?> jwtConverter;
     private final JwtEncryptionMethod jwtEncryptionMethod;
     private final int expirationPeriod;
 
     public JwtService(
+        String jwtIssuer,
+        String jwtAudience,
         JwtKeys jwtKeys,
         Converter<Jwt, ?> jwtConverter,
         JwtEncryptionMethod jwtEncryptionMethod,
         int expirationPeriod,
         boolean jwtAuthenticationDelegationEnabled
     ) {
+        assert jwtIssuer != null;
+        this.jwtIssuer = jwtIssuer;
+        this.jwtAudience = jwtAudience;
+
         assert jwtKeys != null;
         this.jwtKeys = jwtKeys;
         this.jwtConverter = jwtConverter;
@@ -131,12 +141,19 @@ public class JwtService {
 
     public String generateToken(JwtClaimsConfigurer configurer) {
         Instant now = Instant.now();
-        JwtClaimsSet claims = configurer.configure(
-            JwtClaimsSet.builder()
-                .issuedAt(Instant.now())
-                .expiresAt(now.plus(expirationPeriod > 0 ? expirationPeriod : Integer.MAX_VALUE, ChronoUnit.HOURS))
-        );
 
+        // Some claims will be configured by default!
+        var builder = JwtClaimsSet.builder()
+            .id(UUID.randomUUID().toString())
+            .issuer(jwtIssuer)
+            .issuedAt(now)
+            .expiresAt(now.plus(expirationPeriod > 0 ? expirationPeriod : Integer.MAX_VALUE, ChronoUnit.HOURS));
+
+        if (jwtAudience != null) {
+            builder.audience(Arrays.stream(jwtAudience.split(",")).toList());
+        }
+
+        JwtClaimsSet claims = configurer.configure(builder);
         if (jwtEncryptionMethod == JwtEncryptionMethod.ASYMMETRIC) {
             if (jwtEncoder == null) {
                 throw new IllegalStateException(

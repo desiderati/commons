@@ -18,10 +18,8 @@
  */
 package io.herd.common.web.security.support
 
-import org.springframework.security.core.Authentication
-
 /**
- * Annotation that is used to resolve [Authentication.getName] to a method argument.
+ * Annotation that is used to resolve [org.springframework.security.core.Authentication.getName] to a method argument.
  */
 @Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.RUNTIME)

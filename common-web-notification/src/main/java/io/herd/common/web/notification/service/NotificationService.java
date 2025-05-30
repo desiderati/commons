@@ -57,7 +57,7 @@ public class NotificationService {
     }
 
     public <P> void broadcastToSpecificBroadcaster(String broadcasterId, P payload) {
-        String prefix = UrlUtils.appendSlash(atmosphereUrlMapping);
+        String prefix = UrlUtils.appendSlash(atmosphereUrlMapping + "/notification");
         Broadcaster broadcaster = atmosphereBroadcasterFactory.lookup(prefix + broadcasterId);
         if (broadcaster == null) {
             log.warn("Atmosphere Broadcaster '{}' not found!", prefix + broadcasterId);

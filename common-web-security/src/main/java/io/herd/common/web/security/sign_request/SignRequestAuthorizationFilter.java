@@ -40,18 +40,43 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Authorization via Sign Request.
+ * The SignRequestAuthorizationFilter is a custom filter extending {@code OncePerRequestFilter} that
+ * performs the authorization of HTTP requests by validating their signatures.
+ * It integrates with the Spring Security framework and is enabled conditionally based on the property
+ * {@code spring.web.security.sign-request.authorization.enabled=true}.
+ * <p>
+ * This filter ensures that the request carries a valid digital signature to be processed,
+ * enhancing the security of the system.
+ * <p>
+ * Responsibilities:
+ * - Validates the signature of HTTP requests using the {@link SignRequestService}.
+ * - Sets the authenticated principal into the {@link SecurityContextHolder} after successful validation.
+ * - Ensures the filter is registered only through Spring Security, avoiding duplicate execution.
+ * <p>
+ * This filter employs a {@link SignRequestWrapper} to allow the request body to be read multiple
+ * times, as required for signature validation.
+ * If authentication fails, the signature verification errors are logged and the security context
+ * remains unauthenticated.
+ * <p>
+ * The registration of this filter as a Spring bean is explicitly disabled to allow correct
+ * registration via Spring Security configuration.
+ * </p>
+ * Configuration Dependency:
+ * - To activate the filter, set the property {@code spring.web.security.sign-request.authorization.enabled=true}.
+ * <p>
+ * Thread Safety:
+ * - Instances of this class are expected to be stateless and designed for concurrent request handling.
  */
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "spring.web.security.sign-request.authorization.enabled", havingValue = "true")
 public class SignRequestAuthorizationFilter extends OncePerRequestFilter {
 
-    private final SignRequestAuthorizationService signRequestAuthorizationService;
+    private final SignRequestService signRequestService;
 
     @Autowired
-    public SignRequestAuthorizationFilter(SignRequestAuthorizationService signRequestAuthorizationService) {
-        this.signRequestAuthorizationService = signRequestAuthorizationService;
+    public SignRequestAuthorizationFilter(SignRequestService signRequestService) {
+        this.signRequestService = signRequestService;
     }
 
     /**
@@ -79,7 +104,7 @@ public class SignRequestAuthorizationFilter extends OncePerRequestFilter {
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             Authentication authentication = null;
             try {
-                authentication = signRequestAuthorizationService.verifySignature(signServletRequest);
+                authentication = signRequestService.verifySignature(signServletRequest);
             } catch (AuthenticationServiceException failed) {
                 log.error("Authorization Failed: {}", failed.getMessage(), failed);
             }

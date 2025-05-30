@@ -18,6 +18,7 @@
  */
 package io.herd.common.web.security.controller;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @ResponseBody
 @RequestMapping("/csrf")
+@ConditionalOnProperty(name = "spring.web.security.form-based.authentication.enabled", havingValue = "true")
 public class CsrfTokenController {
 
     /**

@@ -16,14 +16,27 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.jwt.authentication;
+package io.herd.common.web.security.sign_request;
 
-import io.herd.common.web.security.jwt.JwtClaimsConfigurer;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.core.Authentication;
+import java.util.Optional;
+import java.util.UUID;
 
-public interface SelfContainedJwtAuthenticationClaimsConfigurer {
+/**
+ * Repository interface for managing {@link SignRequestAuthorizationClient} entities.
+ * This interface provides methods for retrieving authorized clients by their unique identifier.
+ * <p>
+ * The primary responsibility of this repository is to support the sign request authorization
+ * process by enabling the lookup of authorized clients from a persistent or in-memory data source.
+ */
+public interface SignRequestAuthorizationClientRepository {
 
-    JwtClaimsConfigurer retrieveJwtClaimsConfigurer(HttpServletRequest request, Authentication authentication);
+    /**
+     * Finds a {@link SignRequestAuthorizationClient} by its unique identifier.
+     *
+     * @param id the unique identifier of the {@link SignRequestAuthorizationClient} to be retrieved.
+     * @return an {@link Optional} containing the {@link SignRequestAuthorizationClient} if found,
+     * or an empty {@link Optional} if not.
+     */
+    Optional<SignRequestAuthorizationClient> findById(UUID id);
 
 }

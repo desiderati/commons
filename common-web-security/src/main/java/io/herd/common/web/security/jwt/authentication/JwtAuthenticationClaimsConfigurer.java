@@ -18,31 +18,12 @@
  */
 package io.herd.common.web.security.jwt.authentication;
 
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
+import io.herd.common.web.security.jwt.JwtClaimsConfigurer;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
 
-import java.util.Collection;
+public interface JwtAuthenticationClaimsConfigurer {
 
-/**
- * This class can be used when we define a {@link AuthenticationProvider} which is responsible for calling
- * another system responsible for the authentication.
- *
- * @see for details: {@link SelfContainedJwtAuthenticationDelegateProvider}
- */
-public class SelfContainedJwtAuthenticationToken extends UsernamePasswordAuthenticationToken {
+    JwtClaimsConfigurer retrieveJwtClaimsConfigurer(HttpServletRequest request, Authentication authentication);
 
-    public String authorizationHeader;
-
-    public SelfContainedJwtAuthenticationToken(Object principal, Object credentials) {
-        super(principal, credentials);
-    }
-
-    public SelfContainedJwtAuthenticationToken(
-        Object principal,
-        Object credentials,
-        Collection<? extends GrantedAuthority> authorities
-    ) {
-        super(principal, credentials, authorities);
-    }
 }

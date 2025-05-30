@@ -18,48 +18,75 @@
  */
 package io.herd.common.web.security.sign_request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections4.map.HashedMap;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Configuration properties class for managing authorized clients used in the sign request process.
+ * This class is responsible for loading and handling a list of authorized clients defined in an
+ * external JSON configuration file.
+ * It serves as a repository for authorized clients and provides a method for retrieving clients
+ * by their unique identifier.
+ * <p>
+ * The authorized clients are represented as a list of {@link SignRequestAuthorizationClient} objects,
+ * containing information such as unique client identifiers and their associated configurations.
+ * <p>
+ * This class also implements {@link SignRequestAuthorizationClientRepository}, providing a method
+ * to find an authorized client by its unique identifier.
+ */
 @Getter
 @Setter // Never forget to put the setXXX (...) for configuration files!
-@Validated
 @Component
-@ConfigurationProperties("spring.web.security.sign-request.authorization.client")
-public class SignRequestAuthorizationClientProperties {
+@ConfigurationProperties("spring.web.security.sign-request.authorization")
+@org.springframework.context.annotation.PropertySource(
+    value = "classpath:sign-request-authorized-clients.json",
+    factory = SignRequestAuthorizationClientProperties.JsonPropertySourceFactory.class)
+@ConditionalOnProperty(name = "spring.web.security.sign-request.authorization.enabled", havingValue = "true")
+public class SignRequestAuthorizationClientProperties implements SignRequestAuthorizationClientRepository {
 
-    public interface SignValidation {
+    public static class JsonPropertySourceFactory implements PropertySourceFactory {
 
+        @NotNull
+        @Override
+        public PropertySource<?> createPropertySource(
+            String name,
+            EncodedResource resource
+        ) throws IOException {
+
+            List<SignRequestAuthorizationClient> authorizedClients =
+                new ObjectMapper().readValue(resource.getInputStream(), new TypeReference<>() {
+                });
+            Map<String, Object> authorizedClientsProperties = new HashedMap<>();
+            authorizedClientsProperties.put(
+                "spring.web.security.sign-request.authorization.authorized-clients", authorizedClients
+            );
+            return new MapPropertySource("sign-request-authorized-clients", authorizedClientsProperties);
+        }
     }
 
-    private UUID id;
-    private String secretKey;
+    private List<SignRequestAuthorizationClient> authorizedClients;
 
-    /**
-     * We had to put the validation annotations in the methods instead of the fields, because, when declaring
-     * validation rules for a properties file, we need to annotate the referring class with {@link Validated}.
-     * <p>
-     * If not annotated, a warning message would be printed in the application log: "The @ConfigurationProperties
-     * bean class io.herd.common.web.security.sign_request.authorization.SignRequestAuthorizationClientProperties
-     * contains validation constraints but had not been annotated with @Validated."
-     * <p>
-     * This way, when we annotate a class with {@link Validated}, Spring Boot will create a Proxy for this class
-     * and thus the validation will not work correctly if the validation annotations are not in the methods.
-     */
-    @NotNull(groups = SignValidation.class)
-    public UUID getId() {
-        return id;
-    }
-
-    @NotBlank(groups = SignValidation.class)
-    public String getSecretKey() {
-        return secretKey;
+    @Override
+    public Optional<SignRequestAuthorizationClient> findById(UUID id) {
+        return authorizedClients.stream().filter(
+            authorizedClient -> authorizedClient.getId().equals(id)
+        ).findAny();
     }
 }

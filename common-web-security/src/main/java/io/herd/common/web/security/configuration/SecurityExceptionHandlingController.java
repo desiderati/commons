@@ -39,11 +39,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller advice for handling security-related exceptions.
+ * <p>
+ * This class extends the base exception handling controller to provide specific handling
+ * for security exceptions like AccessDeniedException.
+ * <p>
+ * It converts security exceptions into appropriate HTTP responses with status codes and
+ * error messages.
+ * <p>
+ * This controller advice applies to all RestController and RepositoryRestController classes.
+ */
 @Slf4j
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ControllerAdvice(annotations = {RestController.class, RepositoryRestController.class})
 public class SecurityExceptionHandlingController extends ExceptionHandlingController {
 
+    /**
+     * @param shouldLogAsWarning List of exception class names that should be logged as warnings
+     * @param objectMapper       The object mapper for JSON serialization
+     * @param modelMapper        The model mapper for object mapping
+     */
     @Autowired
     public SecurityExceptionHandlingController(
         @NotEmpty
@@ -56,6 +72,13 @@ public class SecurityExceptionHandlingController extends ExceptionHandlingContro
         super(shouldLogAsWarning, objectMapper, modelMapper);
     }
 
+    /**
+     * Handles AccessDeniedException by converting it to a FORBIDDEN HTTP response.
+     *
+     * @param request The HTTP request that triggered the exception
+     * @param ex      The AccessDeniedException that was thrown
+     * @return A ResponseEntity with FORBIDDEN status and error details
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ResponseExceptionDTO> handleAccessDeniedException(
         HttpServletRequest request, AccessDeniedException ex

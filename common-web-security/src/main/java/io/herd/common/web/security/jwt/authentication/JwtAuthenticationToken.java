@@ -16,23 +16,33 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.security.sign_request;
+package io.herd.common.web.security.jwt.authentication;
 
-import io.herd.common.exception.ApplicationException;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 
-import java.io.Serial;
+import java.util.Collection;
 
-public class SignRequestAuthorizationException extends ApplicationException {
+/**
+ * This class can be used when we define a {@link AuthenticationProvider} which is responsible for calling
+ * another system responsible for the authentication.
+ *
+ * @see for details: {@link JwtAuthenticationDelegateProvider}
+ */
+public class JwtAuthenticationToken extends UsernamePasswordAuthenticationToken {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    public String authorizationHeader;
 
-    @SuppressWarnings("unused")
-    public SignRequestAuthorizationException(String msg) {
-        super(msg);
+    public JwtAuthenticationToken(Object principal, Object credentials) {
+        super(principal, credentials);
     }
 
-    public SignRequestAuthorizationException(String msg, Throwable cause) {
-        super(msg, cause);
+    public JwtAuthenticationToken(
+        Object principal,
+        Object credentials,
+        Collection<? extends GrantedAuthority> authorities
+    ) {
+        super(principal, credentials, authorities);
     }
 }

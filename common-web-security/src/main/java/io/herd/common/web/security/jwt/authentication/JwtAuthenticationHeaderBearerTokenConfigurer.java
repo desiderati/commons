@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 @Getter
 @Setter
-public class SelfContainedJwtAuthenticationHeaderBearerTokenConfigurer implements SelfContainedJwtAuthenticationHeaderConfigurer {
+public class JwtAuthenticationHeaderBearerTokenConfigurer implements JwtAuthenticationHeaderConfigurer {
 
     private static final String BEARER_TOKEN = "Bearer";
 

@@ -33,14 +33,31 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+/**
+ * Custom implementation of the method security expression handler.
+ * <p>
+ * It creates a custom security expression root that includes additional expressions for checking
+ * administrator privileges.
+ */
 public class CustomMethodSecurityExpressionHandler extends DefaultMethodSecurityExpressionHandler {
 
-    private final String jwtAuthenticationAuthoritiesAdminParameter;
+    private final String administratorAuthority;
 
-    public CustomMethodSecurityExpressionHandler(String jwtAuthenticationAuthoritiesAdminParameter) {
-        this.jwtAuthenticationAuthoritiesAdminParameter = jwtAuthenticationAuthoritiesAdminParameter;
+    public CustomMethodSecurityExpressionHandler(String administratorAuthority) {
+        this.administratorAuthority = administratorAuthority;
     }
 
+    /**
+     * Creates an evaluation context for evaluating security expressions.
+     * <p>
+     * It extracts the authentication object, creates a security expression root, and sets up
+     * the evaluation context with the method information.
+     *
+     * @param authenticationSupplier The supplier for the authentication object
+     * @param mi                     The method invocation being secured
+     * @return The evaluation context for security expressions
+     * @throws IllegalArgumentException if the authentication object is null
+     */
     @Override
     public EvaluationContext createEvaluationContext(
         Supplier<Authentication> authenticationSupplier,
@@ -61,13 +78,25 @@ public class CustomMethodSecurityExpressionHandler extends DefaultMethodSecurity
         return ctx;
     }
 
+    /**
+     * Creates a custom security expression root for method security.
+     * <p>
+     * This method overrides the default implementation to create our custom security expression root
+     * that includes additional expressions for checking administrator privileges.
+     * <p>
+     * It initializes the root with the authentication object and sets up various evaluators and resolvers.
+     *
+     * @param authentication The authentication object
+     * @param invocation     The method invocation being secured
+     * @return The custom security expression root
+     */
     @Override
     protected MethodSecurityExpressionOperations createSecurityExpressionRoot(
         Authentication authentication,
         MethodInvocation invocation
     ) {
         CustomMethodSecurityExpressionRoot root =
-            new CustomMethodSecurityExpressionRoot(jwtAuthenticationAuthoritiesAdminParameter, authentication);
+            new CustomMethodSecurityExpressionRoot(administratorAuthority, authentication);
         root.setThis(invocation.getThis());
         root.setPermissionEvaluator(getPermissionEvaluator());
         root.setTrustResolver(getTrustResolver());

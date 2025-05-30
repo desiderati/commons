@@ -31,7 +31,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * Class used for retrieving the user/password from the request. This information will be
  * used by the {@link AuthenticationManager} to authenticate the user.
  */
-public class SelfContainedJwtAuthenticationConverter implements AuthenticationConverter {
+public class JwtAuthenticationConverter implements AuthenticationConverter {
 
     @Override
     public Authentication convert(HttpServletRequest request) {
@@ -52,7 +52,7 @@ public class SelfContainedJwtAuthenticationConverter implements AuthenticationCo
             String password = passwordNode.asText();
 
             // Never get the roles from the request. The roles must be informed by the Authentication Manager.
-            return new SelfContainedJwtAuthenticationToken(username, password);
+            return new JwtAuthenticationToken(username, password);
         } catch (Exception e) {
             throw new AuthenticationServiceException("Authentication Failed: " + e.getMessage(), e);
         }

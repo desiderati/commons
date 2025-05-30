@@ -18,7 +18,7 @@
  */
 package io.herd.common.web.security.oauth2
 
-import io.herd.common.web.security.jwt.authentication.SelfContainedJwtAuthenticationHeaderConfigurer
+import io.herd.common.web.security.jwt.authentication.JwtAuthenticationHeaderConfigurer
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.core.Authentication
@@ -26,7 +26,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 
 class OAuth2AuthenticationSuccessHandler(
-    private var jwtAuthenticationHeaderConfigurer: SelfContainedJwtAuthenticationHeaderConfigurer
+    private var jwtAuthenticationHeaderConfigurer: JwtAuthenticationHeaderConfigurer
 ) : AuthenticationSuccessHandler {
 
     override fun onAuthenticationSuccess(

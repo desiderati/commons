@@ -28,6 +28,7 @@ import okhttp3.RequestBody;
 import okio.Buffer;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -37,7 +38,20 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Objects;
 
+/**
+ * Provides functionality to sign HTTP requests using the HMAC-SHA256 algorithm.
+ * The class is designed to handle various types of requests, including:
+ * <ul>
+ *     <li>{@link Request}</li>
+ *     <li>{@link HttpRequest}</li>
+ *     <li>{@link HttpServletRequest}</li>
+ * </ul>
+ * <p>
+ * And allows generating a cryptographic signature by hashing the request content and other metadata.
+ * This class is immutable and uses the builder pattern to create instances.
+ */
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SignRequestSigner {
@@ -46,22 +60,32 @@ public class SignRequestSigner {
 
     private final Request request;
     private final HttpServletRequest httpServletRequest;
+    private final HttpRequest httpRequest;
     private final String secret;
 
     public String sign() {
+        return sign(null);
+    }
+
+    public String sign(byte[] body) {
         try {
             if (request != null && StringUtils.isNotBlank(secret)) {
                 return signString(generateStringToSign(request));
+
+            } else if (httpRequest != null && StringUtils.isNotBlank(secret)) {
+                assert body != null;
+                return signString(generateStringToSign(httpRequest, body));
+
             } else if (httpServletRequest != null && StringUtils.isNotBlank(secret)) {
                 return signString(generateStringToSign(httpServletRequest));
             }
         } catch (Exception ex) {
-            throw new SignRequestAuthorizationException(
+            throw new SignRequestException(
                 "An error occurred while signing request: " + ex.getMessage(), ex);
         }
 
         throw new IllegalStateException(
-            "Neither 'request' or 'httpServletRequest' were configured. Or 'secret' was blank!");
+            "Neither 'request', 'httpRequest' or 'httpServletRequest' were configured. Or 'secret' was blank!");
     }
 
     @SneakyThrows(IOException.class)
@@ -73,15 +97,21 @@ public class SignRequestSigner {
             }
             return request.method() + "\n" +
                 computeRequestBodyHash(buffer.inputStream()) + "\n" +
-                request.header(HttpHeaders.DATE);
+                Objects.requireNonNull(request.header(HttpHeaders.DATE));
         }
     }
 
+    private String generateStringToSign(HttpRequest httpRequest, byte[] body) {
+        return httpRequest.getMethod() + "\n" +
+            computeRequestBodyHash(body) + "\n" +
+            Objects.requireNonNull(httpRequest.getHeaders().get(HttpHeaders.DATE)).getFirst();
+    }
+
     @SneakyThrows(IOException.class)
-    private String generateStringToSign(HttpServletRequest request) {
-        return request.getMethod() + "\n" +
-            computeRequestBodyHash(request.getInputStream()) + "\n" +
-            request.getHeader(HttpHeaders.DATE);
+    private String generateStringToSign(HttpServletRequest httpServletRequest) {
+        return httpServletRequest.getMethod() + "\n" +
+            computeRequestBodyHash(httpServletRequest.getInputStream()) + "\n" +
+            Objects.requireNonNull(httpServletRequest.getHeader(HttpHeaders.DATE));
     }
 
     /**
@@ -98,6 +128,16 @@ public class SignRequestSigner {
                 digest.update(buffer, 0, n);
             }
         }
+        return Base64.getEncoder().encodeToString(digest.digest());
+    }
+
+    /**
+     * Instead of signing the whole request content directly, first we need to generate the hash.
+     */
+    @SneakyThrows(NoSuchAlgorithmException.class)
+    private String computeRequestBodyHash(byte[] body) {
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+        digest.update(body);
         return Base64.getEncoder().encodeToString(digest.digest());
     }
 

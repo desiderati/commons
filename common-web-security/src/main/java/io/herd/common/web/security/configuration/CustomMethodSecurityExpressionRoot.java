@@ -23,6 +23,22 @@ import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 
+/**
+ * Custom implementation of {@link SecurityExpressionRoot} to support method-level security with extended expressions.
+ * <p>
+ * This class introduces additional security expressions, such as {@code isAdministrator()},
+ * allowing fine-grained access control based on user roles.
+ * <p>
+ * You can use {@code isAdministrator()} within annotations like {@code @PreAuthorize} to restrict
+ * access to methods that should only be executed by administrator users.
+ * <pre>
+ *   &#064;GetMapping
+ *   &#064;PreAuthorize("isAdministrator()")
+ *   public Result performAdminAction() {
+ *       ...
+ *   }
+ * </pre>
+ */
 public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
     implements MethodSecurityExpressionOperations {
 
@@ -32,23 +48,31 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
 
     private Object target;
 
-    private final String jwtAuthenticationAuthoritiesAdminParameter;
+    private final String administratorAuthority;
 
-    public CustomMethodSecurityExpressionRoot(
-        String jwtAuthenticationAuthoritiesAdminParameter,
-        Authentication authentication
-    ) {
+    /**
+     * @param administratorAuthority The parameter name for administrator authorities
+     * @param authentication         The authentication object
+     */
+    public CustomMethodSecurityExpressionRoot(String administratorAuthority, Authentication authentication) {
         super(authentication);
-        this.jwtAuthenticationAuthoritiesAdminParameter = jwtAuthenticationAuthoritiesAdminParameter;
+        this.administratorAuthority = administratorAuthority;
     }
 
     /**
-     * It checks if the authenticated user is an administrator or not.
+     * Checks if the authenticated user is an administrator.
+     * <p>
+     * This method examines the authorities of the authenticated user to determine
+     * if they have the administrator authority.
+     * <p>
+     * The administrator authority is defined by the #administratorAuthority.
+     *
+     * @return true if the user has administrator authority, false otherwise
      */
     @SuppressWarnings("unused")
     public boolean isAdministrator() {
         return getAuthentication().getAuthorities().stream().anyMatch(
-            authority -> authority.getAuthority().equalsIgnoreCase(jwtAuthenticationAuthoritiesAdminParameter)
+            authority -> authority.getAuthority().equalsIgnoreCase(administratorAuthority)
         );
     }
 
@@ -72,13 +96,6 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
         return this.returnObject;
     }
 
-    /**
-     * Sets the "this" property for use in expressions. Typically, this will be the "this"
-     * property of the {@code JoinPoint} representing the method invocation which is being
-     * protected.
-     *
-     * @param target the target object on which the method in is being invoked.
-     */
     void setThis(Object target) {
         this.target = target;
     }

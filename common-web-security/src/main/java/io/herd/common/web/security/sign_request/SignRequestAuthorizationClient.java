@@ -18,11 +18,30 @@
  */
 package io.herd.common.web.security.sign_request;
 
-import java.util.Optional;
-import java.util.UUID;
+import io.herd.common.data.multitenant.MultiTenantSupport;
+import lombok.*;
 
-public interface SignRequestAuthorizedClientRepository {
+import java.util.*;
 
-    Optional<SignRequestAuthorizedClient> findById(UUID id);
+/**
+ * Represents an authorized client for signing requests with multi-tenant support.
+ * This class encapsulates information such as the client's unique identifier,
+ * secret key used for signing requests, tenant information for multi-tenant setups,
+ * associated roles, and any additional properties related to the client.
+ */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+public class SignRequestAuthorizationClient implements MultiTenantSupport {
+
+    @ToString.Include
+    private UUID id;
+
+    private String secretKey;
+    private String tenant;
+    private List<String> roles = new ArrayList<>();
+    private Map<String, Object> additionalProperties = new HashMap<>();
 
 }

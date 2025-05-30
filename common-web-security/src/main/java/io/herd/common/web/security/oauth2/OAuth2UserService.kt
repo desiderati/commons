@@ -19,7 +19,7 @@
 package io.herd.common.web.security.oauth2
 
 import io.herd.common.web.security.jwt.JwtService
-import io.herd.common.web.security.jwt.authentication.SelfContainedJwtAuthenticationHeaderConfigurer
+import io.herd.common.web.security.jwt.authentication.JwtAuthenticationHeaderConfigurer
 import lombok.extern.slf4j.Slf4j
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.convert.converter.Converter
@@ -52,14 +52,14 @@ class OAuth2UserService : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
         OAuth2UserRequestEntityConverter()
 
     private lateinit var jwtService: JwtService
-    private lateinit var jwtAuthenticationHeaderConfigurer: SelfContainedJwtAuthenticationHeaderConfigurer
+    private lateinit var jwtAuthenticationHeaderConfigurer: JwtAuthenticationHeaderConfigurer
 
     fun setJwtService(jwtService: JwtService) {
         this.jwtService = jwtService
     }
 
     fun setJwtAuthenticationHeaderConfigurer(
-        jwtAuthenticationHeaderConfigurer: SelfContainedJwtAuthenticationHeaderConfigurer
+        jwtAuthenticationHeaderConfigurer: JwtAuthenticationHeaderConfigurer
     ) {
         this.jwtAuthenticationHeaderConfigurer = jwtAuthenticationHeaderConfigurer
     }

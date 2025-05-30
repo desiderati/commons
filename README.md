@@ -1,8 +1,5 @@
-Commons Herd.io
----------------
-
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-4.0.0.RC4-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-4.0.0.RC5-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE)
 
@@ -24,22 +21,36 @@ Changelog
 
 All project changes will be documented in this file.
 
+#### [4.0.0.RC5] - 2025-05-30
+- Improved documentation in `common-web-security` module:
+  * Added documentation for JWT authentication
+  * Added documentation for sign request functionality
+  * Added documentation for user data resolver
+- Enhanced security components in `common-web-security` module:
+  * Renamed **SignRequestAuthorizationException** to **SignRequestException**
+  * Renamed **SignRequestAuthorizedClientRepository** to **SignRequestAuthorizationClientRepository**
+  * Improved **JwtService** implementation
+- Improved notification system in `common-web-notification` module:
+  * Enhanced **NotificationService** implementation
+  * Updated SpringDoc properties configuration
+- Moved Google Calendar API secret from main resources to test resources in `common-google` module
+
 #### [4.0.0.RC4] - 2025-04-15
 - Enhanced notification system in `common-web-notification` module:
-  * Improved BroadcastController and NotificationController
-  * Refactored NotificationService implementation
+  * Improved **BroadcastController** and **NotificationController**
+  * Refactored **NotificationService** implementation
   * Added SpringDoc properties configuration
 - Significant security improvements in `common-web-security` module:
-  * Added HttpClientsSecurityConfiguration for secure client connections
-  * Created WebSecurityCorsConfiguration for better CORS handling
-  * Added CsrfTokenController for CSRF protection
+  * Added **HttpClientsSecurityConfiguration** for secure client connections
+  * Created **WebSecurityCorsConfiguration** for better CORS handling
+  * Added **CsrfTokenController** for CSRF protection
   * Enhanced JWT service and security configurations
 - Web module enhancements:
   * Updated OpenAPI configuration
   * Improved SpringDoc properties
-  * Enhanced WebAutoConfiguration
+  * Enhanced **WebAutoConfiguration**
 - Validation improvements:
-  * Enhanced TypedValidationEntity in `common module`
+  * Enhanced **TypedValidationEntity** in `common module`
   * Updated corresponding tests
 
 #### [4.0.0.RC3] - 2025-03-21
@@ -48,24 +59,24 @@ All project changes will be documented in this file.
   with Spring Security’s OAuth2 integration.
 
 #### [4.0.0.RC2] - 2025-03-17
-- Remove legacy JWT implementation in favor of Spring's OAuth2 support.
+- Remove the legacy JWT implementation in favor of Spring's OAuth2 support.
 - Removed custom JWT classes and configurations, consolidating the project to use Spring Security's OAuth2 JWT Resource Server integration. This improves maintainability, reduces redundancy, and aligns with widely-accepted security standards. Also updated property mappings to reflect this change.
 - Added the possibility of configuring the charset encoding for i18n files.
-- Renamed RestApiClientConfiguration to HttpClientsConfiguration.
-- Created a custom HandlerMethodArgumentResolver for resolving Pageable method parameters in Spring GraphQL controllers.
+- Renamed **RestApiClientConfiguration** to **HttpClientsConfiguration**.
+- Created a custom **HandlerMethodArgumentResolver** for resolving Pageable method parameters in Spring GraphQL controllers.
 - Initial idea for a custom OAuth2 Service.
 
 #### [4.0.0.RC1] - 2025-02-27
 - Created a class which provides static access to the Spring application context.
 - Defined a mechanism for context propagation when working with asynchronous tasks our suspended methods.
 - Defined a way of retrieving (statically) an internationalized message.
-- Defined a way to validate entities using typed errors and ArrowKt.
+- Defined a way to validate entities using typed errors and **ArrowKt**.
 - Added an ability to verify if the authenticated used is an administrator.
 - Updated Copyright
 - Migrated to Spring GraphQL.
   * Configured the Altair and Voyager for GraphQL.
   * Defined a way of registering custom scalars automatically.
-  * Better configuration for @Pageable directive.
+  * Better configuration for **@Pageable** directive.
 
 #### [3.3.0.RELEASE] - 2025-01-23
 - Added support to retrieve the authorities passed by the delegated authentication provider.
@@ -73,19 +84,19 @@ All project changes will be documented in this file.
 - Added Hamkrest and Spek as test dependencies.
 - Added initial support for ArrowKt.
 - Added the pageable functionality for GraphQL.
-- Removed dependency with org.reflections.
+- Removed dependency with `org.reflections`.
 - Updated some dependency versions.
 - Update the copyright.
-- Updated the Java version on buildspec.yml.
+- Updated the Java version on `buildspec.yml`.
 - Maven version should be 3.8.8 because of GitHub Actions.
-- Created the BroadcastController on module common-web-notification.
-- Created the module common-web-notification-client.
-- Renamed AbstractEntity.kt to AbstractIdentity.kt.
-- Revised all module common-jms.
-- Fixed the input in pageable.graphqls.
+- Created the **BroadcastController** on module `common-web-notification`.
+- Created the module `common-web-notification-client`.
+- Renamed AbstractEntity.kt to **AbstractIdentity.kt**.
+- Revised all module `common-jms`.
+- Fixed the input in `pageable.graphqls`.
 - Better Liquibase Maven Plugin integration.
 - Updated the dependencies. Fixed some typos. Fixed minor warnings.
-- Enabled a way of setting custom properties for a test annotated with @ServiceJpaTest.
+- Enabled a way of setting custom properties for a test annotated with **@ServiceJpaTest**.
 - Created a class which provides static access to the Spring application context.
 - Defined a mechanism for context propagation when working with asynchronous tasks our suspended methods.
 - Defined a way of retrieving (statically) an internationalized message.
