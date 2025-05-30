@@ -103,8 +103,8 @@ public class SignRequestSigner {
 
     @SneakyThrows({InvalidKeyException.class, NoSuchAlgorithmException.class})
     private String signString(String stringToSign) {
-        SecretKeySpec signingKey = new SecretKeySpec(secret.getBytes(), "HmacSHA1");
-        Mac mac = Mac.getInstance("HmacSHA1");
+        SecretKeySpec signingKey = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
+        Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(signingKey);
         return Base64.getEncoder().encodeToString(mac.doFinal(stringToSign.getBytes()));
     }

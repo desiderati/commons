@@ -25,7 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @Data
-@ConfigurationProperties(prefix = "spring.graphql.voyager")
+@ConfigurationProperties("spring.graphql.voyager")
 public class VoyagerConfigurationProperties {
 
     @Data

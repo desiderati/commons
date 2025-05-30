@@ -32,7 +32,7 @@ import org.atmosphere.cpr.BroadcasterFactory;
 // Cannot be singleton!
 @Slf4j
 @Getter
-@ManagedService(path = "/{notificationPath}/{broadcaster}")
+@ManagedService(path = "/{atmospherePath}/notification/{broadcaster}")
 public class NotificationController {
 
     /**
@@ -43,12 +43,12 @@ public class NotificationController {
     @Inject
     private BroadcasterFactory broadcasterFactory;
 
-    @PathParam("notificationPath")
-    @SuppressWarnings("unused")
-    private String notificationPath;
+    // In case we need to know the Atmosphere Path!
+    @PathParam("atmospherePath")
+    private String atmospherePath;
 
+    // In case we need to know the Broadcaster!
     @PathParam("broadcaster")
-    @SuppressWarnings("unused")
     private String broadcaster;
 
     /**

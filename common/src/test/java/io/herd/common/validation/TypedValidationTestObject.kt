@@ -25,8 +25,8 @@ data class TypedValidationTestObject(val name: String) : TypedValidationEntity {
 
     override fun isValid(): Either<TypedValidationException, Unit> = ensure {
         all(
-            { isValid(name == "Test") { "TestObject.invalidName" } },
-            { isValid(name.length == 4) { "TestObject.invalidNameLength" } }
+            { isValid(name == "Test") { "invalidName" } },
+            { isValid(name.length == 4) { "invalidNameLength" } }
         )
     }
 }

@@ -55,4 +55,10 @@ public class SpringDocProperties {
     @NotBlank
     private String wikiUrl;
 
+    @NotBlank
+    private String localServerUrl;
+
+    @NotBlank
+    private String localServerDescription;
+
 }

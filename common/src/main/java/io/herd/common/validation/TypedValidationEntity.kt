@@ -25,7 +25,6 @@ import arrow.core.Either
 import arrow.core.flatten
 import arrow.core.raise.Raise
 import arrow.core.raise.RaiseDSL
-import arrow.core.raise.either
 import arrow.core.raise.fold
 import com.natpryce.hamkrest.MatchResult
 import com.natpryce.hamkrest.Matcher
@@ -37,7 +36,6 @@ import kotlin.contracts.InvocationKind.AT_MOST_ONCE
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
 
-@Suppress("unused")
 interface TypedValidationEntity {
     fun isValid(): Either<TypedValidationException, Unit>
 }
@@ -152,10 +150,6 @@ inline fun TypedValidationException.isValidOnce(
     condition: Boolean,
     crossinline errorMessage: () -> String
 ): TypedValidationException.() -> List<TypedValidationError>? {
-    contract {
-        callsInPlace(errorMessage, AT_MOST_ONCE)
-        returns(null) implies condition
-    }
     return { isValid(condition, errorMessage) }
 }
 
@@ -176,9 +170,6 @@ inline fun <Entity : TypedValidationEntity?> TypedValidationException.isValidOnc
     @BuilderInference entity: Entity,
     crossinline prefix: () -> String = { "" }
 ): TypedValidationException.() -> List<TypedValidationError>? {
-    contract {
-        callsInPlace(prefix, AT_MOST_ONCE)
-    }
     return { isValid(entity, prefix) }
 }
 
@@ -187,9 +178,6 @@ inline fun <Entity : TypedValidationEntity?> TypedValidationException.isValid(
     @BuilderInference entity: Entity,
     crossinline prefix: () -> String = { "" }
 ): List<TypedValidationError>? {
-    contract {
-        callsInPlace(prefix, AT_MOST_ONCE)
-    }
     return entity?.isValid()?.fold(
         ifLeft = { left -> left.typedValidationErrors.map { "${prefix()}:${it.errorMessage}" } },
         ifRight = { null }
@@ -203,20 +191,14 @@ inline fun TypedValidationException.isValidOnce(
     validationEntities: Iterable<TypedValidationEntity>,
     crossinline prefix: () -> String = { "" }
 ): TypedValidationException.() -> List<TypedValidationError>? {
-    contract {
-        callsInPlace(prefix, AT_MOST_ONCE)
-    }
     return { isValid(validationEntities, prefix) }
 }
 
-@Suppress("unused", "UnusedReceiverParameter")
+@Suppress("UnusedReceiverParameter")
 inline fun TypedValidationException.isValid(
     validationEntities: Iterable<TypedValidationEntity>,
     crossinline prefix: () -> String = { "" }
 ): List<TypedValidationError>? {
-    contract {
-        callsInPlace(prefix, AT_MOST_ONCE)
-    }
     return validationEntities.mapIndexed { index, entity ->
         entity.isValid().fold(
             ifLeft = { left -> left.typedValidationErrors.map { "${prefix()}[$index]${it.errorMessage}" } },
@@ -229,7 +211,9 @@ inline fun TypedValidationException.isValid(
 
 // Auxiliary test functions to use with Hamkrest!
 
-abstract class HasErrorsMatcher(private vararg val expectedErrors: String) : Matcher<TypedValidationEntity> {
+abstract class HasValidationErrorsMatcher(
+    private vararg val expectedErrors: String
+) : Matcher<TypedValidationEntity> {
 
     override fun invoke(actual: TypedValidationEntity): MatchResult {
         return actual.isValid().fold(
@@ -251,23 +235,23 @@ abstract class HasErrorsMatcher(private vararg val expectedErrors: String) : Mat
     override val negatedDescription: String get() = "does not contain ${describe(expectedErrors.toList())}"
 }
 
-fun hasNoErrors(): Matcher<TypedValidationEntity> = object : HasErrorsMatcher() {
+fun hasNoValidationErrors(): Matcher<TypedValidationEntity> = object : HasValidationErrorsMatcher() {
 
     override fun invalid(actualErrors: MutableList<TypedValidationError>, vararg expectedErrors: String): Boolean =
         actualErrors.isEmpty() && expectedErrors.isEmpty()
 }
 
-fun hasErrors(
+fun hasValidationErrors(
     vararg expectedErrors: String
-): Matcher<TypedValidationEntity> = object : HasErrorsMatcher(*expectedErrors) {
+): Matcher<TypedValidationEntity> = object : HasValidationErrorsMatcher(*expectedErrors) {
 
     override fun invalid(actualErrors: MutableList<TypedValidationError>, vararg expectedErrors: String): Boolean =
         not { actualErrors.map { it.errorMessage }.containsAll(*expectedErrors) }
 }
 
-fun hasExactErrors(
+fun hasExactValidationErrors(
     vararg expectedErrors: String
-): Matcher<TypedValidationEntity> = object : HasErrorsMatcher(*expectedErrors) {
+): Matcher<TypedValidationEntity> = object : HasValidationErrorsMatcher(*expectedErrors) {
 
     override fun invalid(actualErrors: MutableList<TypedValidationError>, vararg expectedErrors: String): Boolean {
         return actualErrors.size != expectedErrors.size
@@ -275,119 +259,50 @@ fun hasExactErrors(
     }
 }
 
-// Only for local tests
+abstract class HasErrorsMatcher(
+    private vararg val expectedErrors: String
+) : Matcher<Either<TypedValidationException, *>> {
 
-data class Address(
-    private val name: String = "Default Address",
-    private val fullAddress: String
-) : TypedValidationEntity {
-    override fun isValid(): Either<TypedValidationException, Unit> = ensureOnce {
-        isValidOnce(fullAddress.isNotBlank()) { "BlankFullAddress" }
-    }
-}
-
-data class Author(
-    val name: String,
-    val addresses: Set<Address>
-) : TypedValidationEntity {
-    override fun isValid(): Either<TypedValidationException, Unit> = ensure {
-        all(
-            { isValid(name.isNotBlank()) { "BlankAuthorName" } },
-            { isValid(addresses) { "Addresses" } }
+    override fun invoke(actual: Either<TypedValidationException, *>): MatchResult {
+        return actual.fold(
+            ifLeft = { ex ->
+                if (invalid(ex.typedValidationErrors, *expectedErrors)) {
+                    MatchResult.Mismatch("was ${describe(ex.typedValidationErrors.map { it.errorMessage })}")
+                } else {
+                    MatchResult.Match
+                }
+            },
+            ifRight = { MatchResult.Match }
         )
     }
+
+    abstract fun invalid(actualErrors: MutableList<TypedValidationError>, vararg expectedErrors: String): Boolean
+
+    override val description: String get() = "contains ${describe(expectedErrors.toList())}"
+
+    override val negatedDescription: String get() = "does not contain ${describe(expectedErrors.toList())}"
 }
 
-// Faz mais sentido para classes onde suas propriedades são imutáveis.
-class Author2 private constructor(
-    val name: String,
-    val addresses: Set<Address>
-) {
-    companion object {
-        operator fun invoke(
-            name: String,
-            addresses: Set<Address>
-        ): Either<TypedValidationException, Author2> = either {
-            ensure(all(
-                { isValid(name.isNotBlank()) { "BlankAuthorName" } },
-                { isValid(addresses) { "Addresses" } }
-            ))
-            Author2(name, addresses)
-        }
+fun hasNoErrors(): Matcher<Either<TypedValidationException, *>> = object : HasErrorsMatcher() {
+
+    override fun invalid(actualErrors: MutableList<TypedValidationError>, vararg expectedErrors: String): Boolean =
+        actualErrors.isEmpty() && expectedErrors.isEmpty()
+}
+
+fun hasErrors(
+    vararg expectedErrors: String
+): Matcher<Either<TypedValidationException, *>> = object : HasErrorsMatcher(*expectedErrors) {
+
+    override fun invalid(actualErrors: MutableList<TypedValidationError>, vararg expectedErrors: String): Boolean =
+        not { actualErrors.map { it.errorMessage }.containsAll(*expectedErrors) }
+}
+
+fun hasExactErrors(
+    vararg expectedErrors: String
+): Matcher<Either<TypedValidationException, *>> = object : HasErrorsMatcher(*expectedErrors) {
+
+    override fun invalid(actualErrors: MutableList<TypedValidationError>, vararg expectedErrors: String): Boolean {
+        return actualErrors.size != expectedErrors.size
+            || not { actualErrors.map { it.errorMessage }.containsAll(*expectedErrors) }
     }
-}
-
-data class Book(
-    val title: String,
-    val authors: Set<Author>
-) : TypedValidationEntity {
-    override fun isValid(): Either<TypedValidationException, Unit> = ensure {
-        all(
-            { isValid(title.isNotBlank()) { "BlankBookTitle" } },
-            { isValid(authors.isNotEmpty()) { "EmptyAuthorsList" } },
-            { isValid(authors) { "Authors" } }
-        )
-    }
-}
-
-class Book2 private constructor(
-    val title: String,
-    val authors: Set<Author>
-) {
-    companion object {
-        operator fun invoke(
-            title: String,
-            authors: Set<Author>
-        ): Either<TypedValidationException, Book2> = either {
-            ensure(all(
-                { isValid(title.isNotBlank()) { "BlankBookTitle" } },
-                { isValid(authors.isNotEmpty()) { "EmptyAuthorsList" } },
-                { isValid(authors) { "Authors" } }
-            ))
-            Book2(title, authors)
-        }
-    }
-}
-
-fun main() {
-    val invalidAddress = Address(fullAddress = "")
-    println("Test Address with TypedValidationEntity!")
-    println(invalidAddress)
-    println(invalidAddress.isValid())
-
-    val validAddress = Address("Home", "Rua Abel Scuissiato, 429")
-    println(validAddress)
-    println(validAddress.isValid())
-
-    val invalidAuthor = Author("", setOf(Address(fullAddress = "")))
-    println("Test Author with TypedValidationEntity!")
-    println(invalidAuthor)
-    println(invalidAuthor.isValid())
-
-    val validAuthor = Author("Felipe Desiderati",
-        setOf(Address("Home", "Rua Abel Scuissiato, 429"))
-    )
-    println(validAuthor)
-    println(validAuthor.isValid())
-    println("-------------------")
-
-    val invalidAuthor2 = Author2("", setOf(Address(fullAddress = "")))
-    println("Test Author with validation directly on constructor!")
-    println(invalidAuthor2)
-
-    val validAuthor2 = Author2("Felipe Desiderati",
-        setOf(Address("Home", "Rua Abel Scuissiato, 429"))
-    )
-    println(validAuthor2)
-    println("-------------------")
-
-    val invalidBook = Book("", setOf(invalidAuthor))
-    println("Test Book with TypedValidationEntity!")
-    println(invalidBook)
-    println(invalidBook.isValid())
-    println("-------------------")
-
-    val invalidBook2 = Book2("", setOf(invalidAuthor))
-    println("Test Book with validation directly on constructor!")
-    println(invalidBook2)
 }

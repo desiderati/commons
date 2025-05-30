@@ -22,13 +22,16 @@ import io.herd.common.web.notification.domain.BroadcastMessage;
 import io.herd.common.web.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/v1/broadcast")
+/**
+ * When using the @Controller annotation, Spring does not automatically prefix routes with /api -
+ * that behavior typically applies to @RestController combined with a global request mapping.
+ */
+@Controller
+@ResponseBody
+@RequestMapping("${spring.web.atmosphere.url.mapping:/atm}/broadcast")
 public class BroadcastController {
 
     private final NotificationService notificationService;

@@ -21,7 +21,7 @@ package io.herd.common.web.security.oauth2
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User
 
-class P2fOAuth2User(
+class OAuth2User(
     val authorizationHeader: String,
     authorities: MutableCollection<out GrantedAuthority>,
     attributes: MutableMap<String, Any>,

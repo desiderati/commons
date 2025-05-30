@@ -2,7 +2,7 @@ Commons Herd.io
 ---------------
 
 [![Build Status](https://github.com/desiderati/commons/workflows/Build/badge.svg)](https://github.com/desiderati/commons/actions)
-[![Version](https://img.shields.io/badge/Version-4.0.0.RC2-red.svg)](https://github.com/desiderati/commons/releases)
+[![Version](https://img.shields.io/badge/Version-4.0.0.RC4-red.svg)](https://github.com/desiderati/commons/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/commons.svg?label=GitHub%20Stars)](https://github.com/desiderati/commons/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/commons/blob/master/LICENSE)
 
@@ -23,6 +23,29 @@ Changelog
 ---------
 
 All project changes will be documented in this file.
+
+#### [4.0.0.RC4] - 2025-04-15
+- Enhanced notification system in `common-web-notification` module:
+  * Improved BroadcastController and NotificationController
+  * Refactored NotificationService implementation
+  * Added SpringDoc properties configuration
+- Significant security improvements in `common-web-security` module:
+  * Added HttpClientsSecurityConfiguration for secure client connections
+  * Created WebSecurityCorsConfiguration for better CORS handling
+  * Added CsrfTokenController for CSRF protection
+  * Enhanced JWT service and security configurations
+- Web module enhancements:
+  * Updated OpenAPI configuration
+  * Improved SpringDoc properties
+  * Enhanced WebAutoConfiguration
+- Validation improvements:
+  * Enhanced TypedValidationEntity in `common module`
+  * Updated corresponding tests
+
+#### [4.0.0.RC3] - 2025-03-21
+- Introduced annotations and resolvers for handling `AuthenticatedUser` and user data in web and GraphQL contexts
+- Added stricter error handling in JWT authentication and improved maintainability by consolidating configurations
+  with Spring Security’s OAuth2 integration.
 
 #### [4.0.0.RC2] - 2025-03-17
 - Remove legacy JWT implementation in favor of Spring's OAuth2 support.

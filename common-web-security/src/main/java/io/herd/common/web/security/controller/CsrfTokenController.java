@@ -16,33 +16,29 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.herd.common.web.notification.domain;
+package io.herd.common.web.security.controller;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-/**
- * This class represents a message to be sent to the client.
- */
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@RequiredArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class NotificationMessage<M> implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+@Controller
+@ResponseBody
+@RequestMapping("/csrf")
+public class CsrfTokenController {
 
     /**
-     * AtmosphereResource UUID.
+     * When logging in for the first time using form-based authentication,
+     * the CSRF cookie is not set upon redirection to the main page.
+     * This happens because Spring Security hasn’t had the chance to include
+     * the CSRF token in a response body (HTML or JSON).
+     * The token is only sent in responses with a body—not in 302 Found redirects.
+     * By doing this, we force the CSRF token to be set right after login.
      */
-    private String uuid;
-
-    @NonNull
-    private M payload;
-
+    @GetMapping
+    public CsrfToken getCsrfToken(CsrfToken token) {
+        return token;
+    }
 }

@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils
 import org.springframework.web.client.RestTemplate
 
 @Slf4j
-class P2fOAuth2UserService : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+class OAuth2UserService : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     companion object {
         private const val MISSING_USER_INFO_URI_ERROR_CODE = "missing_user_info_uri"
@@ -100,7 +100,7 @@ class P2fOAuth2UserService : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
                         val delegateAuthentication =
                             jwtService.extractFromToken<JwtAuthenticationToken>(jwtToken)
 
-                        P2fOAuth2User(
+                        OAuth2User(
                             authorizationHeader,
                             delegateAuthentication.authorities,
                             mutableMapOf("principal" to delegateAuthentication.principal),

@@ -49,6 +49,6 @@ public class SignRequestSignerTest {
         String signedValue = SignRequestSigner.builder().httpServletRequest(servletRequest)
             .secret(secretKey).build().sign();
 
-        assertThat("z45Lk1HVCPZA1h7utQhBPaCdAeM=").isEqualTo(signedValue);
+        assertThat("A3OKTN3Yax7LgpdYyfPyUGkO+mgna1F/zfsrU3EC3UI=").isEqualTo(signedValue);
     }
 }

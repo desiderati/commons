@@ -20,12 +20,14 @@ package io.herd.common.web.notification;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.PropertySource;
 
 /**
- * We defined as a temporary application to get the OpenAPI documentation,
+ * We defined as a temporary application to get the OpenAPI documentation
  * while building the common-web-notification-client.
  */
 @SpringBootApplication
+@PropertySource("classpath:springdoc.properties")
 public class WebTempApplication {
 
     public static void main(String[] args) {

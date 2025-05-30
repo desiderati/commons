@@ -24,18 +24,40 @@ import lombok.Setter;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+/**
+ * This class holds the cryptographic keys used for JWT (JSON Web Token) operations.
+ * <p>
+ * JWT tokens can be signed and verified using either symmetric or asymmetric encryption:
+ * <ul>
+ *   <li>Symmetric encryption uses a single secret key for both signing and verification</li>
+ *   <li>Asymmetric encryption uses a key pair (private key for signing, public key for verification)</li>
+ * </ul>
+ * <p>
+ * The appropriate keys should be configured based on the security requirements of your application.
+ * Typically, these keys are loaded from configuration properties or secure key stores.
+ */
 @Getter
 @Setter // Never forget to put the setXXX (...) for configuration files!
 public class JwtKeys {
 
     /**
-     * Both used by Asymmetric Encryption.
+     * The RSA public key used for verifying JWT tokens when using asymmetric encryption.
+     * This key can be distributed to services that need to verify tokens.
+     * Typically loaded from a certificate, key file, or configuration.
      */
-    private RSAPrivateKey privateKey;
     private RSAPublicKey publicKey;
 
     /**
-     * Used by Symmetric Encryption.
+     * The RSA private key used for signing JWT tokens when using asymmetric encryption.
+     * This key should be kept secure and not shared publicly.
+     * Typically loaded from a keystore or secure configuration.
+     */
+    private RSAPrivateKey privateKey;
+
+    /**
+     * The secret key used for both signing and verifying JWT tokens when using symmetric encryption.
+     * This key should be kept secure and shared only with trusted services.
+     * For production environments, this should be a strong, randomly generated key.
      */
     private String secretKey;
 

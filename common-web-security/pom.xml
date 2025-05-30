@@ -56,6 +56,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

@@ -41,11 +41,12 @@ import static org.atmosphere.cpr.ApplicationConfig.*;
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
     excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class)
 )
+@PropertySource("classpath:application-common-web-notification.properties")
 @Import(WebAutoConfiguration.class) // To be used with @WebMvcTest
 public class WebNotificationAutoConfiguration extends ContainerInitializer
     implements WebApplicationInitializer, ServletContextInitializer {
 
-    @Value("${spring.web.atmosphere.url.mapping:/atmosphere}")
+    @Value("${spring.web.atmosphere.url.mapping:/atm}")
     private String atmosphereUrlMapping;
 
     private AtmosphereFramework atmosphereFramework;
@@ -55,7 +56,7 @@ public class WebNotificationAutoConfiguration extends ContainerInitializer
         AtmosphereServlet servlet = servletContext.createServlet(AtmosphereServlet.class);
         ServletRegistration.Dynamic registration = servletContext.addServlet("atmosphere", servlet);
         if (registration != null) { // If it is equal to null, it indicates that the Servlet has already been registered.
-            registration.addMapping(atmosphereUrlMapping);
+            registration.addMapping(atmosphereUrlMapping + "/notification");
             registration.setLoadOnStartup(0);
             registration.setAsyncSupported(true);
 
@@ -63,7 +64,7 @@ public class WebNotificationAutoConfiguration extends ContainerInitializer
             atmosphereFramework = (AtmosphereFramework) servletContext.getAttribute("atmosphere");
             atmosphereFramework.addInitParameter(BROADCASTER_SHARABLE_THREAD_POOLS, "true");
 
-            // It will ensure that CORS will be configured for Atmosphere.
+            // It will ensure that CORS will be configured for the Atmosphere.
             atmosphereFramework.addInitParameter(DROP_ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "false");
             atmosphereFramework.addInitParameter(ANNOTATION_PACKAGE, "io.herd.common.web.notification");
         }

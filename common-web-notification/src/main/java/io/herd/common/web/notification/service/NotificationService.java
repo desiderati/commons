@@ -18,12 +18,63 @@
  */
 package io.herd.common.web.notification.service;
 
-public interface NotificationService {
+import io.herd.common.web.UrlUtils;
+import io.herd.common.web.notification.domain.NotificationMessage;
+import lombok.extern.slf4j.Slf4j;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResourceFactory;
+import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.cpr.BroadcasterFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
-    <P> void broadcastToAll(P payload);
+@Slf4j
+@Service
+public class NotificationService {
 
-    <P> void broadcastToSpecificBroadcaster(String broadcasterId, P payload);
+    @Value("${spring.web.atmosphere.url.mapping:/atm}")
+    private String atmosphereUrlMapping;
 
-    <P> void broadcastToSpecificResource(String resourceId, P payload);
+    private final BroadcasterFactory atmosphereBroadcasterFactory;
 
+    private final AtmosphereResourceFactory atmosphereResourceFactory;
+
+    @Autowired
+    public NotificationService(
+        @Lazy BroadcasterFactory atmosphereBroadcasterFactory,
+        @Lazy AtmosphereResourceFactory atmosphereResourceFactory
+    ) {
+        this.atmosphereBroadcasterFactory = atmosphereBroadcasterFactory;
+        this.atmosphereResourceFactory = atmosphereResourceFactory;
+    }
+
+    public <P> void broadcastToAll(P payload) {
+        for (Broadcaster broadcaster : atmosphereBroadcasterFactory.lookupAll()) {
+            broadcaster.broadcast(new NotificationMessage<>(payload));
+        }
+    }
+
+    public <P> void broadcastToSpecificBroadcaster(String broadcasterId, P payload) {
+        String prefix = UrlUtils.appendSlash(atmosphereUrlMapping);
+        Broadcaster broadcaster = atmosphereBroadcasterFactory.lookup(prefix + broadcasterId);
+        if (broadcaster == null) {
+            log.warn("Atmosphere Broadcaster '{}' not found!", prefix + broadcasterId);
+            return;
+        }
+        broadcaster.broadcast(new NotificationMessage<>(payload));
+    }
+
+    public <P> void broadcastToSpecificResource(String resourceId, P payload) {
+        AtmosphereResource atmosphereResource = atmosphereResourceFactory.find(resourceId);
+        if (atmosphereResource == null) {
+            log.warn("Atmosphere Resource '{}' not found!", resourceId);
+            return;
+        }
+
+        for (Broadcaster broadcaster : atmosphereResource.broadcasters()) {
+            broadcaster.broadcast(new NotificationMessage<>(resourceId, payload), atmosphereResource);
+        }
+    }
 }

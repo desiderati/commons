@@ -54,7 +54,8 @@ public class JwtService {
         JwtKeys jwtKeys,
         Converter<Jwt, ?> jwtConverter,
         JwtEncryptionMethod jwtEncryptionMethod,
-        int expirationPeriod
+        int expirationPeriod,
+        boolean jwtAuthenticationDelegationEnabled
     ) {
         assert jwtKeys != null;
         this.jwtKeys = jwtKeys;
@@ -62,13 +63,13 @@ public class JwtService {
 
         if (jwtEncryptionMethod == JwtEncryptionMethod.ASYMMETRIC) {
             RSAPublicKey publicKey = loadPublicKey();
-            this.jwtDecoder = NimbusJwtDecoder.withPublicKey(loadPublicKey())
+            this.jwtDecoder = NimbusJwtDecoder.withPublicKey(publicKey)
                 // TODO Felipe Desiderati: Pegar os algoritmos da configuração do Resource Server.
                 .signatureAlgorithm(SignatureAlgorithm.RS512)
                 .build();
             jwtDecoder.setJwtValidator(JwtValidators.createDefault());
 
-            RSAPrivateKey privateKey = loadPrivateKey();
+            RSAPrivateKey privateKey = loadPrivateKey(jwtAuthenticationDelegationEnabled);
             if (privateKey != null) {
                 RSAKey rsaKey = new RSAKey.Builder(publicKey).privateKey(privateKey).build();
                 this.jwtEncoder = new NimbusJwtEncoder(new ImmutableJWKSet<>(new JWKSet(rsaKey)));
@@ -86,7 +87,10 @@ public class JwtService {
         this.expirationPeriod = expirationPeriod;
     }
 
-    private RSAPrivateKey loadPrivateKey() {
+    private RSAPrivateKey loadPrivateKey(boolean jwtAuthenticationDelegationEnabled) {
+        if (!jwtAuthenticationDelegationEnabled && jwtKeys.getPrivateKey() == null) {
+            throw new IllegalStateException("Empty private key.");
+        }
         return jwtKeys.getPrivateKey();
     }
 
@@ -104,7 +108,7 @@ public class JwtService {
             }
             return Keys.hmacShaKeyFor(jwtKeys.getSecretKey().getBytes());
         } catch (Exception e) {
-            throw new JwtException("Unable to load public key.", e);
+            throw new JwtException("Unable to load secret key.", e);
         }
     }
 
