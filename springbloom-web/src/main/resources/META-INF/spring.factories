@@ -1,0 +1,4 @@
+# Initializers
+org.springframework.context.ApplicationContextInitializer=\
+dev.springbloom.web.graphql.scalar.GraphQLExtendedScalarsInitializer,\
+dev.springbloom.web.graphql.scalar.GraphQLAliasedScalarsInitializer

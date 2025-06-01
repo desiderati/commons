@@ -1,3 +1,0 @@
-io.herd.common.web.configuration.WebAutoConfiguration
-io.herd.common.web.configuration.graphql.altair.AltairAutoConfiguration
-io.herd.common.web.configuration.graphql.voyager.VoyagerAutoConfiguration

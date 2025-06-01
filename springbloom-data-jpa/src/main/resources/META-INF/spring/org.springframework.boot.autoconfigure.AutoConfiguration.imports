@@ -1,0 +1,3 @@
+dev.springbloom.data.jpa.configuration.JpaAutoConfiguration
+dev.springbloom.data.multitenant.configuration.MultiTenantAutoConfiguration
+dev.springbloom.data.multitenant.configuration.MultiTenantLiquibaseAutoConfiguration

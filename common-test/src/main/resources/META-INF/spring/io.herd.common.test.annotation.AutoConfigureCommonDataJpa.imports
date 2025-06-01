@@ -1,3 +1,0 @@
-io.herd.common.data.jpa.configuration.JpaAutoConfiguration
-io.herd.common.data.multitenant.configuration.MultiTenantAutoConfiguration
-io.herd.common.data.multitenant.configuration.MultiTenantLiquibaseAutoConfiguration

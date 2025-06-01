@@ -1,3 +1,0 @@
-# TestExecutionListeners
-org.springframework.test.context.TestExecutionListener=\
-io.herd.common.test.CleanupDatabaseTestExecutionListener

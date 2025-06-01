@@ -1,0 +1,3 @@
+dev.springbloom.web.configuration.WebAutoConfiguration
+dev.springbloom.web.configuration.graphql.altair.AltairAutoConfiguration
+dev.springbloom.web.configuration.graphql.voyager.VoyagerAutoConfiguration

@@ -1,0 +1,73 @@
+{
+  "groups": [
+    {
+      "name": "google.calendar",
+      "type": "dev.springbloom.google.configuration.GoogleCalendarProperties"
+    },
+    {
+      "name": "google.captcha",
+      "type": "dev.springbloom.google.configuration.GoogleCaptchaProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "google.calendar.enabled",
+      "description": "It defines if the Google Calendar Service will be enabled.",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    },
+    {
+      "name": "google.calendar.application-name",
+      "description": "It defines the application name.",
+      "type": "java.lang.String",
+      "defaultValue": "Google Calendar Service"
+    },
+    {
+      "name": "google.calendar.credentials-folder",
+      "description": "Directory to store the user credentials.",
+      "type": "java.lang.String",
+      "defaultValue": "credentials/google-calendar-service"
+    },
+    {
+      "name": "google.calendar.api-secret-json",
+      "description": "JSON file holding the authentication configuration needed to connect to the Google Calendar API.",
+      "type": "java.lang.String",
+      "defaultValue": "/google-calendar-api-secret.json"
+    },
+    {
+      "name": "google.captcha.max-retries",
+      "description": "Maximum number of attempts to access the Google Captcha service.",
+      "type": "java.lang.Integer",
+      "defaultValue": 5
+    },
+    {
+      "name": "google.captcha.user-agent",
+      "description": "Default User Agent.",
+      "type": "java.lang.String",
+      "defaultValue": "Mozilla/5.0"
+    },
+    {
+      "name": "google.captcha.accept-language",
+      "description": "Indicates the natural language and locale that the client prefers.",
+      "type": "java.lang.String",
+      "defaultValue": "en-US,en;q=0.5"
+    },
+    {
+      "name": "google.captcha.site-verify-url",
+      "description": "Defines the API Url where the Google Captcha will be verified.",
+      "type": "java.lang.String",
+      "defaultValue": "https://www.google.com/recaptcha/api/siteverify"
+    },
+    {
+      "name": "google.captcha.timeout",
+      "description": "Request timeout in millis.",
+      "type": "java.lang.Integer",
+      "defaultValue": 60000
+    },
+    {
+      "name": "google.captcha.secret-key",
+      "description": "Google Captcha service secret key.",
+      "type": "java.lang.String"
+    }
+  ]
+}

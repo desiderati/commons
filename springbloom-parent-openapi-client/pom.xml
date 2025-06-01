@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025 - Felipe Desiderati
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction,
+  ~ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  ~ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+  ~ subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  ~ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.springbloom</groupId>
+        <artifactId>springbloom-parent</artifactId>
+        <version>${revision}</version>
+        <!--suppress MavenModelInspection-->
+        <relativePath>../springbloom-parent</relativePath>
+    </parent>
+    <artifactId>springbloom-parent-openapi-client</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!--
+            Each project can decide where to start or not the Thin Server to retrieve de JSON file.
+            By default, it is disabled! You must import the dependency which contains the Thin Server.
+        -->
+        <openapi.thin-server.disabled>true</openapi.thin-server.disabled>
+        <openapi.thin-server.start-class/>
+        <openapi.thin-server.jmx-port>9111</openapi.thin-server.jmx-port>
+        <openapi.thin-server.max-attempts>20</openapi.thin-server.max-attempts>
+        <openapi.thin-server.timeout-between-attempts>15000</openapi.thin-server.timeout-between-attempts>
+        <openapi.thin-server.arguments>--spring.main.banner-mode=off,--server.port=12345</openapi.thin-server.arguments>
+
+        <openapi.json-file.download.disabled>true</openapi.json-file.download.disabled>
+        <openapi.json-file.download.url>http://localhost:12345</openapi.json-file.download.url>
+        <openapi.json-file.download.api-docs-path>api-docs</openapi.json-file.download.api-docs-path>
+        <openapi.json-file/>
+
+        <!--
+            Each project can decide where to use or not the Open API.
+            By default, it is disabled!
+        -->
+        <openapi.generation.disabled>true</openapi.generation.disabled>
+
+        <!--
+            References:
+              * https://openapi-generator.tech/docs/generators/java/
+              * https://openapi-generator.tech/docs/generators/spring/
+        -->
+        <openapi.generation.language>java</openapi.generation.language>
+        <openapi.generation.keep-superfluous-files>false</openapi.generation.keep-superfluous-files>
+
+        <!-- Supported values: native, resttemplate, ... -->
+        <openapi.generation.library>okhttp-gson</openapi.generation.library>
+        <openapi.generation.date-library>java8</openapi.generation.date-library>
+
+        <openapi.generation.package.api>io.openapi.client.api</openapi.generation.package.api>
+        <openapi.generation.package.model>io.openapi.client.api.model</openapi.generation.package.model>
+        <openapi.generation.package.invoker>io.openapi.client</openapi.generation.package.invoker>
+        <openapi.generation.output-dir>generated-sources/openapi</openapi.generation.output-dir>
+        <openapi.generation.source-dir>src/main/java</openapi.generation.source-dir>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-generated-openapi-sources-dir</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${openapi.generation.output-dir}/${openapi.generation.source-dir}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+            It was created a profile just to generate the OPen API Files, avoiding this task
+            being executed on each build.
+        -->
+        <profile>
+            <id>generate-openapi-sources</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>download-openapi-json-file</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${openapi.json-file.download.disabled}</skip>
+                                    <target>
+                                        <get src="${openapi.json-file.download.url}/${openapi.json-file.download.api-docs-path}"
+                                             dest="${project.basedir}/src/main/resources/${openapi.json-file}"
+                                             verbose="false" usetimestamp="true"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.soebes.maven.plugins</groupId>
+                        <artifactId>iterator-maven-plugin</artifactId>
+                        <version>0.5.1</version>
+                        <executions>
+                            <execution>
+                                <id>generate-openapi-sources</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>iterator</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${openapi.generation.disabled}</skip>
+                                    <content>${openapi.json-file}</content>
+                                    <pluginExecutors>
+                                        <pluginExecutor>
+                                            <plugin>
+                                                <!-- Reference: https://github.com/OpenAPITools/openapi-generator/tree/master/modules/openapi-generator-maven-plugin -->
+                                                <groupId>org.openapitools</groupId>
+                                                <artifactId>openapi-generator-maven-plugin</artifactId>
+                                                <version>6.4.0</version>
+                                            </plugin>
+                                            <goal>generate</goal>
+                                            <configuration>
+                                                <!--suppress MavenModelInspection-->
+                                                <inputSpec>${project.basedir}/src/main/resources/@item@</inputSpec>
+                                                <output>${project.basedir}/${openapi.generation.output-dir}</output>
+                                                <generatorName>${openapi.generation.language}</generatorName>
+                                                <!--
+                                                    Complete list of options:
+                                                     * https://generator.swagger.io/api/gen/clients/java
+                                                     * https://github.com/swagger-api/swagger-codegen/issues/7795
+                                                -->
+                                                <configOptions>
+                                                    <dateLibrary>${openapi.generation.date-library}</dateLibrary>
+                                                    <library>${openapi.generation.library}</library>
+                                                    <sourceFolder>${openapi.generation.source-dir}</sourceFolder>
+
+                                                    <!-- Use Java 11 classes instead of third party equivalents. -->
+                                                    <java11>true</java11>
+
+                                                    <!--
+                                                        Adds @JsonIgnoreProperties(ignoreUnknown = true) annotation
+                                                        to model classes.
+                                                    -->
+                                                    <ignoreUnknownJacksonAnnotation>true</ignoreUnknownJacksonAnnotation>
+                                                </configOptions>
+                                                <apiPackage>${openapi.generation.package.api}</apiPackage>
+                                                <modelPackage>${openapi.generation.package.model}</modelPackage>
+                                                <invokerPackage>${openapi.generation.package.invoker}</invokerPackage>
+                                                <generateApiTests>false</generateApiTests>
+                                                <generateModelTests>false</generateModelTests>
+                                            </configuration>
+                                        </pluginExecutor>
+                                    </pluginExecutors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-thin-server-application</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-thin-server-application</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <profiles>
+                                <!--
+                                    Specifying a different profile is useful because you can run
+                                    a thin version of your application and extract the Open API,
+                                    without the need to load all resources.
+                                -->
+                                <profile>openapi</profile>
+                            </profiles>
+                            <skip>${openapi.thin-server.disabled}</skip>
+                            <mainClass>${openapi.thin-server.start-class}</mainClass>
+                            <arguments>${openapi.thin-server.arguments}</arguments>
+                            <maxAttempts>${openapi.thin-server.max-attempts}</maxAttempts>
+                            <wait>${openapi.thin-server.timeout-between-attempts}</wait>
+                            <jmxPort>${openapi.thin-server.jmx-port}</jmxPort>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>clear-old-openapi-generated-files</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <configuration>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${project.basedir}/${openapi.generation.output-dir}</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <followSymlinks>false</followSymlinks>
+                                        </fileset>
+                                    </filesets>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>clear-superfluous-openapi-generated-files</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${openapi.generation.keep-superfluous-files}</skip>
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${project.basedir}/${openapi.generation.output-dir}</directory>
+                                            <excludes>
+                                                <exclude>.openapi-generator-ignore</exclude>
+                                                <exclude>.openapi-generator/**</exclude>
+                                                <exclude>docs/**</exclude>
+                                                <exclude>src/main/java/**</exclude>
+                                                <exclude>SwaggerClient-php/docs/**</exclude>
+                                                <exclude>SwaggerClient-php/lib/**</exclude>
+                                            </excludes>
+                                            <followSymlinks>false</followSymlinks>
+                                        </fileset>
+                                    </filesets>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <!-- Needed if we are going to run the Thin Server to download the JSON file. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+
+        <!-- To run OpenAPI Client Api. Only if choose 'okhttp-gson' library. -->
+        <dependency>
+            <!-- @Nullable annotation -->
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.gsonfire</groupId>
+            <artifactId>gson-fire</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>logging-interceptor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>

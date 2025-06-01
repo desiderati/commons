@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025 - Felipe Desiderati
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction,
+  ~ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  ~ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+  ~ subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  ~ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.springbloom</groupId>
+        <artifactId>springbloom-parent-info</artifactId>
+        <version>${revision}</version>
+        <!--suppress MavenModelInspection-->
+        <relativePath>../springbloom-parent-info</relativePath>
+    </parent>
+    <artifactId>springbloom-parent-static</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- NPM Default Environment. -->
+        <node.version>v20.15.0</node.version>
+        <npm.version>10.7.0</npm.version>
+
+        <npm.build-environment>build</npm.build-environment>
+        <npm.dist-dir>dist</npm.dist-dir>
+        <npm.dist-environment-dir/>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!--
+                    A Maven plugin that downloads/installs Node and NPM locally runs NPM install.
+                -->
+                <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <version>1.12.1</version>
+                    <executions>
+                        <execution>
+                            <id>install-node-and-npm</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>install-node-and-npm</goal>
+                            </goals>
+                            <configuration>
+                                <nodeVersion>${node.version}</nodeVersion>
+                                <npmVersion>${npm.version}</npmVersion>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>run-npm-install</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>npm</goal>
+                            </goals>
+                            <configuration>
+                                <arguments>install</arguments>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>run-npm-build</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>npm</goal>
+                            </goals>
+                            <configuration>
+                                <arguments>run ${npm.build-environment}</arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <installDirectory>node_config</installDirectory>
+                    </configuration>
+                </plugin>
+
+                <!--
+                    It assembles the dist directory.
+                -->
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <descriptors>
+                            <descriptor>assembly.xml</descriptor>
+                        </descriptors>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!--
+                It cleans the static output directory.
+            -->
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean-static-output-directory</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${npm.dist-dir}</directory>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>assemble-static-content-to-dev</id>
+            <properties>
+                <!-- NPM Default Environment. -->
+                <npm.build-environment>build:dev</npm.build-environment>
+                <npm.dist-environment-dir>dev</npm.dist-environment-dir>
+            </properties>
+        </profile>
+        <profile>
+            <id>assemble-static-content-to-qa</id>
+            <properties>
+                <!-- NPM Default Environment. -->
+                <npm.build-environment>build:qa</npm.build-environment>
+                <npm.dist-environment-dir>qa</npm.dist-environment-dir>
+            </properties>
+        </profile>
+        <profile>
+            <id>assemble-static-content-to-prod</id>
+            <properties>
+                <!-- NPM Default Environment. -->
+                <npm.build-environment>build:prod</npm.build-environment>
+                <npm.dist-environment-dir>prod</npm.dist-environment-dir>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

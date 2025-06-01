@@ -1,0 +1,44 @@
+{
+  "groups": [
+    {
+      "name": "app.database.config",
+      "type": "dev.springbloom.data.DatabaseProperties"
+    },
+    {
+      "name": "app.database.multitenant",
+      "type": "dev.springbloom.data.multitenant.configuration.MultiTenantProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.database.config.table-prefix",
+      "description": "The prefix to be used by all system tables.",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "app.database.config.ddl-create-schema",
+      "description": "The DDL for schema creation.",
+      "type": "java.lang.String",
+      "defaultValue": "CREATE SCHEMA IF NOT EXISTS ${schemaName}"
+    },
+    {
+      "name": "app.database.config.ddl-change-schema",
+      "description": "The DDL for schema change.",
+      "type": "java.lang.String",
+      "defaultValue": "SET SCHEMA ''${schemaName}''"
+    },
+    {
+      "name": "app.database.multitenant.default-tenant",
+      "description": "Default Tenant.",
+      "type": "java.lang.String",
+      "defaultValue": "public"
+    },
+    {
+      "name": "app.database.multitenant.strategy",
+      "description": "Multi Tenant Strategy.",
+      "type": "dev.springbloom.data.multitenant.configuration.MultiTenantProperties$Strategy",
+      "defaultValue": "NONE"
+    }
+  ]
+}
+

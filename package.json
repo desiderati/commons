@@ -1,6 +1,6 @@
 {
-  "name": "commons-herd.io",
-  "version": "3.0.0",
+  "name": "pringbloom",
+  "version": "4.0.0.RC6",
   "scripts": {
     "mvn:deploy": "mvn -B -e -fn -Dmaven.wagon.http.pool=false clean deploy"
   },

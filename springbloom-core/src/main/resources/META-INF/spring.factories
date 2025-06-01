@@ -1,0 +1,3 @@
+# Initializers
+org.springframework.context.ApplicationContextInitializer=\
+dev.springbloom.core.configuration.ExternalPropertiesFileValidationInitializer

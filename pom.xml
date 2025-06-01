@@ -22,44 +22,44 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.herd.common</groupId>
-        <artifactId>common-parent-info</artifactId>
+        <groupId>dev.springbloom</groupId>
+        <artifactId>springbloom-parent-info</artifactId>
         <version>${revision}</version>
         <!--suppress MavenModelInspection-->
-        <relativePath>./common-parent-info</relativePath>
+        <relativePath>./springbloom-parent-info</relativePath>
     </parent>
-    <artifactId>commons</artifactId>
+    <artifactId>springbloom</artifactId>
     <packaging>pom</packaging>
 
     <scm>
-        <url>${github.server-url}/commons.git</url>
-        <connection>scm:git:${github.server-url}/commons.git</connection>
-        <developerConnection>scm:git:${github.server-url}/commons.git</developerConnection>
+        <url>${github.server-url}/springbloom.git</url>
+        <connection>scm:git:${github.server-url}/springbloom.git</connection>
+        <developerConnection>scm:git:${github.server-url}/springbloom.git</developerConnection>
     </scm>
 
     <modules>
-        <module>./common</module>
-        <module>./common-data-jpa</module>
-        <module>./common-data-mongodb</module>
-        <module>./common-google</module>
-        <module>./common-jms</module>
-        <module>./common-logging</module>
-        <module>./common-logging-test</module>
-        <module>./common-parent</module>
-        <module>./common-parent-info</module>
-        <module>./common-parent-static</module>
-        <module>./common-parent-openapi-client</module>
-        <module>./common-scanner</module>
-        <module>./common-web</module>
-        <module>./common-web-client</module>
-        <module>./common-web-notification</module>
-        <module>./common-web-notification-client</module>
-        <module>./common-web-security</module>
-        <module>./common-starter</module>
-        <module>./common-starter-openapi-client</module>
-        <module>./common-starter-web</module>
-        <module>./common-starter-web-openapi-client</module>
-        <module>./common-test</module>
+        <module>./springbloom-core</module>
+        <module>./springbloom-data-jpa</module>
+        <module>./springbloom-data-mongodb</module>
+        <module>./springbloom-google</module>
+        <module>./springbloom-jms</module>
+        <module>./springbloom-logging</module>
+        <module>./springbloom-logging-test</module>
+        <module>./springbloom-parent</module>
+        <module>./springbloom-parent-info</module>
+        <module>./springbloom-parent-static</module>
+        <module>./springbloom-parent-openapi-client</module>
+        <module>./springbloom-scanner</module>
+        <module>./springbloom-web</module>
+        <module>./springbloom-web-client</module>
+        <module>./springbloom-web-notification</module>
+        <module>./springbloom-web-notification-client</module>
+        <module>./springbloom-web-security</module>
+        <module>./springbloom-starter</module>
+        <module>./springbloom-starter-openapi-client</module>
+        <module>./springbloom-starter-web</module>
+        <module>./springbloom-starter-web-openapi-client</module>
+        <module>./springbloom-test</module>
     </modules>
 
 </project>

@@ -1,3 +1,0 @@
-# Initializers
-org.springframework.context.ApplicationContextInitializer=\
-io.herd.common.configuration.ExternalPropertiesFileValidationInitializer
