@@ -241,6 +241,8 @@
                             </ignoredClassPatterns>
                             <ignoredResourcePatterns>
                                 <ignoredResourcePattern>application.properties</ignoredResourcePattern>
+                                <ignoredResourcePattern>springdoc.properties</ignoredResourcePattern>
+                                <ignoredResourcePattern>jms.properties</ignoredResourcePattern>
                                 <ignoredResourcePattern>banner.txt</ignoredResourcePattern>
                                 <ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
                                 <ignoredResourcePattern>com/amazonaws/xray/sdk.properties</ignoredResourcePattern>
@@ -258,6 +260,8 @@
                                 <ignoredResourcePattern>nativeMain/default/manifest</ignoredResourcePattern>
                                 <ignoredResourcePattern>nonJvmMain/default/linkdata/module</ignoredResourcePattern>
                                 <ignoredResourcePattern>nonJvmMain/default/manifest</ignoredResourcePattern>
+                                <ignoredResourcePattern>concurrentMain/default/linkdata/module</ignoredResourcePattern>
+                                <ignoredResourcePattern>concurrentMain/default/manifest</ignoredResourcePattern>
                             </ignoredResourcePatterns>
                             <!-- TODO Felipe Desiderati: Revalidate if we still need this!
                             <ignoredDependencies>

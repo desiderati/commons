@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="springbloom-web-notification" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="springbloom-web-notification" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" folderName="springbloom">
     <module name="springbloom-web-notification" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="dev.springbloom.web.notification.WebTempApplication" />
     <extension name="coverage">

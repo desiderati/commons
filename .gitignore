@@ -204,3 +204,4 @@ generated-resources/
 generated-sources/
 activemq-data/
 activemq/
+/springbloom-google/src/test/resources/google-calendar-api-secret.json

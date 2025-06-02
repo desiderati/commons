@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="springbloom-test" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="springbloom-test" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" folderName="springbloom">
     <module name="springbloom-test" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="dev.springbloom.test.TestWebApplication" />
     <extension name="coverage">

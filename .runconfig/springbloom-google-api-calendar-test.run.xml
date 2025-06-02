@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="springbloom-google-api-calendar-test" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="springbloom-google-api-calendar-test" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" folderName="springbloom">
     <module name="springbloom-google" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="dev.springbloom.google.GoogleCalendarServiceTestApplication" />
     <extension name="coverage">
