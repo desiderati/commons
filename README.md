@@ -41,40 +41,46 @@ Spring Bloom embraces the “convention over configuration” mindset, aiming to
 
 All project changes will be documented in this file.
 
+#### [4.0.0.RC6] - 2025-65-01
+- Rebranding to **SpringBloom.dev**.
+- Migrate project structure, packages, and identifiers from `io.herd.common` to `dev.springbloom`,
+  ensuring consistent naming across modules, resources, and configurations.
+- Removed legacy files and improved project clarity and organization.
+
 #### [4.0.0.RC5] - 2025-05-30
 - Improved documentation in `common-web-security` module:
-  * Added documentation for JWT authentication
-  * Added documentation for sign request functionality
-  * Added documentation for user data resolver
+  * Added documentation for JWT authentication.
+  * Added documentation for sign request functionality.
+  * Added documentation for user data resolver.
 - Enhanced security components in `common-web-security` module:
-  * Renamed **SignRequestAuthorizationException** to **SignRequestException**
-  * Renamed **SignRequestAuthorizedClientRepository** to **SignRequestAuthorizationClientRepository**
-  * Improved **JwtService** implementation
+  * Renamed **SignRequestAuthorizationException** to **SignRequestException**.
+  * Renamed **SignRequestAuthorizedClientRepository** to **SignRequestAuthorizationClientRepository**.
+  * Improved **JwtService** implementation.
 - Improved notification system in `common-web-notification` module:
-  * Enhanced **NotificationService** implementation
-  * Updated SpringDoc properties configuration
-- Moved Google Calendar API secret from main resources to test resources in `common-google` module
+  * Enhanced **NotificationService** implementation.
+  * Updated SpringDoc properties configuration.
+- Moved Google Calendar API secret from main resources to test resources in `common-google` module.
 
 #### [4.0.0.RC4] - 2025-04-15
 - Enhanced notification system in `common-web-notification` module:
-  * Improved **BroadcastController** and **NotificationController**
-  * Refactored **NotificationService** implementation
-  * Added SpringDoc properties configuration
+  * Improved **BroadcastController** and **NotificationController**.
+  * Refactored **NotificationService** implementation.
+  * Added SpringDoc properties configuration.
 - Significant security improvements in `common-web-security` module:
-  * Added **HttpClientsSecurityConfiguration** for secure client connections
-  * Created **WebSecurityCorsConfiguration** for better CORS handling
-  * Added **CsrfTokenController** for CSRF protection
-  * Enhanced JWT service and security configurations
+  * Added **HttpClientsSecurityConfiguration** for secure client connections.
+  * Created **WebSecurityCorsConfiguration** for better CORS handling.
+  * Added **CsrfTokenController** for CSRF protection.
+  * Enhanced JWT service and security configurations.
 - Web module enhancements:
-  * Updated OpenAPI configuration
-  * Improved SpringDoc properties
-  * Enhanced **WebAutoConfiguration**
+  * Updated OpenAPI configuration.
+  * Improved SpringDoc properties.
+  * Enhanced **WebAutoConfiguration**.
 - Validation improvements:
-  * Enhanced **TypedValidationEntity** in `common module`
-  * Updated corresponding tests
+  * Enhanced **TypedValidationEntity** in `common` module.
+  * Updated corresponding tests.
 
 #### [4.0.0.RC3] - 2025-03-21
-- Introduced annotations and resolvers for handling `AuthenticatedUser` and user data in web and GraphQL contexts
+- Introduced annotations and resolvers for handling user authentication and user data in web and GraphQL contexts
 - Added stricter error handling in JWT authentication and improved maintainability by consolidating configurations
   with Spring Security’s OAuth2 integration.
 
@@ -93,13 +99,13 @@ All project changes will be documented in this file.
 - Created a class which provides static access to the Spring application context.
 - Defined a mechanism for context propagation when working with asynchronous tasks our suspended methods.
 - Defined a way of retrieving (statically) an internationalized message.
-- Defined a way to validate entities using typed errors and **ArrowKt**.
+- Defined a way to validate entities using typed errors and _ArrowKt_.
 - Added an ability to verify if the authenticated used is an administrator.
 - Updated Copyright
 - Migrated to Spring GraphQL.
   * Configured the Altair and Voyager for GraphQL.
   * Defined a way of registering custom scalars automatically.
-  * Better configuration for **@Pageable** directive.
+  * Better configuration for `@Pageable` directive.
 
 #### [3.3.0.RELEASE] - 2025-01-23
 - Added support to retrieve the authorities passed by the delegated authentication provider.
@@ -119,7 +125,7 @@ All project changes will be documented in this file.
 - Fixed the input in `pageable.graphqls`.
 - Better Liquibase Maven Plugin integration.
 - Updated the dependencies. Fixed some typos. Fixed minor warnings.
-- Enabled a way of setting custom properties for a test annotated with **@ServiceJpaTest**.
+- Enabled a way of setting custom properties for a test annotated with `@ServiceJpaTest`.
 - Created a class which provides static access to the Spring application context.
 - Defined a mechanism for context propagation when working with asynchronous tasks our suspended methods.
 - Defined a way of retrieving (statically) an internationalized message.
@@ -150,7 +156,7 @@ All project changes will be documented in this file.
 - Added support for JWT Authentication Delegation.
 - Added the class **GoogleCaptchaService**.
 
-#### [4.0.0.RC6] - 2023-08-02
+#### [3.0.1.RELEASE] - 2023-08-02
 - Fixed a minor bug involving the CORS configuration and circular dependencies.
 
 #### [3.0.0.RELEASE] - 2023-04-03
@@ -169,28 +175,29 @@ All project changes will be documented in this file.
 - Fixed a Bug with the **ID** property on **AbstractEntity** class.
 
 #### [2.5.1] - 2022-10-05
-- Fixed a Bug in the **equals(...)** method on **AbstractEntity** class.
+- Fixed a Bug in the `equals(...)` method on **AbstractEntity** class.
 
 #### [2.5.0] - 2022-10-04
 - Fixed a Bug involving the auto-configuration order between **WebAutoConfiguration**
   and **HibernateJpaAutoConfiguration**.
-- Created the modules: **common-data-jpa**, **common-data-multitenant**, **common-web**,
-  **common-web-notification** and **common-web-security**.
+- Created the modules: `common-data-jpa`, `common-data-multitenant`, `common-web`,
+  `common-web-notification` and `common-web-security`.
 
 #### [2.4.5] - 2022-09-22
 - Configured a new exception handler for GraphQL.
-- Moved some classes to package: **io.herd.common.web**.
-- Renamed package from **io.herd.common.tenant**, to: **io.herd.common.data.multitenant**.
+- Moved some classes to package: `io.herd.common.web`.
+- Renamed package from `io.herd.common.tenant`, to: `io.herd.common.data.multitenant`.
 - Fixed a bug while compiling both Kotlin and Java files in the same module.
 
 #### [2.4.4] - 2021-09-17
-- Fixed a bug in the **ExceptionHandlingController** related to 'shouldLogAsWarning' functionality.
+- Fixed a bug in the **ExceptionHandlingController** related to `shouldLogAsWarning` functionality.
 
 #### [2.4.3] - 2021-09-15
 - Improvements in better logging while using AWS.
 
 #### [2.4.2] - 2021-09-14
-- Added the extra args to ResponseExceptionDTO. Fixed a bug in the **ExceptionHandlingController** related to **ApiException** handling.
+- Added the extra args to **ResponseExceptionDTO**.
+  Fixed a bug in the **ExceptionHandlingController** related to **ApiException** handling.
 
 #### [2.4.1] - 2021-08-18
 - Added support to Spring + Kotlin. Changed the GraphQL version.
@@ -199,7 +206,7 @@ All project changes will be documented in this file.
 - Enabled the support to asynchronous processing.
 
 #### [2.3.23] - 2021-08-11
-- Enabled the option to use the Log Pattern when configured through application.properties.
+- Enabled the option to use the Log Pattern when configured through `application.properties`.
 
 #### [2.3.22] - 2021-08-05
 - Now it's possible to define the exception message which should be recorded in the log as a warning.
@@ -212,7 +219,7 @@ All project changes will be documented in this file.
 - SpringFox v3.0.0.
 
 #### [2.3.19] - 2020-07-01
-- Replaced the annotation @EnableSwagger2WebMvc by @EnableOpenApi.
+- Replaced the annotation `@EnableSwagger2WebMvc` by `@EnableOpenApi`.
 
 #### [2.3.18] - 2020-06-30
 - Created the class **AutoConfigureCommonWeb**, which would be used mostly during tests.
@@ -231,7 +238,7 @@ All project changes will be documented in this file.
 - Now the Thymeleaf configuration uses the same **MessageSource** defined by default.
 
 #### [2.3.13] - 2020-06-15
-- Added the property: ${swagger.generation.keep-superfluous-files}
+- Added the property: `${swagger.generation.keep-superfluous-files}`
 
 #### [2.3.12] - 2020-06-11
 - Reverting version: 2.3.11.
@@ -249,21 +256,21 @@ All project changes will be documented in this file.
 - Created a new converter to handle messages while logging on AWS CloudWatch.
 
 #### [2.3.8] - 2020-05-21
-- Added handling for UndeclaredThrowableException.
+- Added handling for **UndeclaredThrowableException**.
 
 #### [2.3.7] - 2020-05-19
 - Some code review.
 
 #### [2.3.6] - 2020-05-14
-- Fixed a bug related to the banner.txt file creation. There's a bug with the Maven Flatten Plugin,
-  which replaces the placeholders when defined inside the <profile> tag.
+- Fixed a bug related to the `banner.txt` file creation.
+  There's a bug with the Maven Flatten Plugin, which replaces the placeholders when defined inside the `<profile>` tag.
 
 #### [2.3.5] - 2020-05-08
-- Configured the Maven Flatten Plugin. The ${revision} placeholder will only work if you use this plugin.
+- Configured the Maven Flatten Plugin. The `${revision}` placeholder will only work if you use this plugin.
   See: https://blog.soebes.de/blog/2017/04/02/maven-pom-files-without-a-version-in-it/
 
 #### [2.3.4] - 2020-05-08 (Do not use this version, it will not work!)
-- Configured the ${revision} placeholder.
+- Configured the `${revision}` placeholder.
 - Configured the Maven Version Plugin, which will be responsible for updating the POM version.
 
 #### [2.3.3] - 2020-04-30
@@ -279,7 +286,7 @@ All project changes will be documented in this file.
 - Spring 5.3.5 and Spring Boot 2.2.6. Other dependencies update.
 - Node 12.16.2 and NPM 6.14.4.
 - Fixed a bug related to Swagger configuration. It was not taking into account the fact that the context path
-  could be different from /.
+  could be different from `/`.
 - Fixed a bug related to Commons Herd.io Notification's auto-configuration.
 - Fixed a bug when the table prefix was configured blank. See: **DefaultPhysicalNamingStrategy**.
 - Created class **MongoContainer**.
@@ -302,13 +309,13 @@ All project changes will be documented in this file.
 - Fully translated to English.
 
 #### [2.2.6] - 2020-04-01
-- Fixed a bug related to **ComponentScan** annotation while using it with **WebMvcTest** annotation.
+- Fixed a bug related to `@ComponentScan` annotation while using it with **WebMvcTest** annotation.
 
 #### [2.2.5] - 2020-04-01
-- Fixed a bug related to **ComponentScan** annotation.
+- Fixed a bug related to `@ComponentScan` annotation.
 
 #### [2.2.4] - 2020-04-01
-- Fixed a problem while generating the file **spring-configuration-metadata.json**.
+- Fixed a problem while generating the file `spring-configuration-metadata.json`.
   Custom properties weren't being recognized.
 
 #### [2.2.3] - 2020-03-31
@@ -343,7 +350,7 @@ All project changes will be documented in this file.
 #### [2.1.16] - 2020-03-20
 - Fixed a bug related when an exception was thrown before the **ExceptionHandlingFilter**, generating
   this way a response message not readable by the **ExceptionHandlingController**. Now if the response body
-  could not be deserialized into a **ResponseExceptionDTO**, it will be deserialized using a **Map<String, Object>**.
+  could not be deserialized into a **ResponseExceptionDTO**, it will be deserialized using a `Map<String, Object>`.
 - Now it is possible to disable the default authentication.
 
 #### [2.1.15] - 2020-03-19
@@ -357,7 +364,7 @@ All project changes will be documented in this file.
 - Fixed a bug related to how the default behavior was managed by the customized **WebSecurityAutoConfiguration**.
 
 #### [2.1.13] - 2020-03-04
-- Added support to CORS configuration through the **application.properties** file.
+- Added support to CORS configuration through the `application.properties` file.
 
 #### [2.1.12] - 2020-02-21
 - Now there is no need to add the Commons Herd.io version in children's projects.
@@ -369,7 +376,7 @@ All project changes will be documented in this file.
 #### [2.1.10] - 2020-02-20
 - Changed the **ExceptionHandlingController** class to add support to **HttpStatusCodeException**.
 - Better logger information while printing exceptions handled by the Swagger Client.
-- Fixed a Bug while reading the **swagger-client.properties** file. Prefix was not specified.
+- Fixed a Bug while reading the `swagger-client.properties` file. Prefix was not specified.
 - Now the class **SignRequestAuthorizationService** is enabled by default, as it can be used to sign requests
   when used by a Swagger client.
 - Now it is possible to add additional properties to the **SignRequestAuthorizedClient**.
@@ -385,7 +392,7 @@ All project changes will be documented in this file.
 
 #### [2.1.7] - 2020-01-30
 - Fixed some **Sonarlint** issues. Better **Hikari** configuration.
-- Better name for property: **commons-herd.io.version**.
+- Better name for property: `commons-herd.io.version`.
 
 #### [2.1.6] - 2020-01-27
 - Added support to the use of profiles with **LogBack**.
@@ -397,7 +404,7 @@ All project changes will be documented in this file.
 - Better Swagger Thin Server configuration.
 
 #### [2.1.3] - 2020-01-24
-- Added an empty **application.properties** file.
+- Added an empty `application.properties` file.
 
 #### [2.1.2] - 2020-01-22
 - Fixed a bug related to refreshing properties and local validation.
@@ -440,21 +447,21 @@ All project changes will be documented in this file.
 - CRC16 calculation feature.
 - Improvements in the class **ExceptionHandlingController**: handling of new exceptions.
 - MIT license added.
-- Creation of **the CustomRepositoryRestConfiguration** class.
+- Creation of the **CustomRepositoryRestConfiguration** class.
 - Spring Data Rest support.
 - Support for Java 11.
 - Creation of **ThrowingRunnable** class.
 - Creating the annotation for tests in the service layer.
 - Implementation of the _Multi Tenancy_ feature.
 - Creation of **ThrowingConsumer**, **ThrowingSupplier** and **ThrowingFunction** classes.
-- Creation of a **common-parent-static** module.
+- Creation of a `common-parent-static` module.
 - Addition of standard error pages. (**40X.html** and **50X.html**)
 - Improvements in the way we treat null parameters in **Repository** classes.
 - Improvements in the **ExceptionHandlingController** class: corrections related to the way we handle exceptions.
   Separation between exceptions for controllers and services.
 - Migration to Spring 5 and SpringBoot 2. Including dependencies.
 - Application configuration improvements (Auto Configuration).
-- Improvements in POM.xml.
+- Improvements in `pom.xml`.
 - Improvements in the notification component. It will now be possible to handle more than one broadcast
   per resource. And vice versa!
 
