@@ -61,7 +61,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @ReportAsSingleViolation
 public @interface CpfOrCnpj {
 
-    String message() default "{CpfOrCnpj.message}";
+    String message() default "{jakarta.validation.constraints.CpfOrCnpj.message}";
 
     Class<?>[] groups() default {};
 

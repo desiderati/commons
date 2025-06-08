@@ -1,5 +1,5 @@
 [![Build Status](https://github.com/desiderati/springbloom/workflows/Build/badge.svg)](https://github.com/desiderati/springbloom/actions)
-[![Version](https://img.shields.io/badge/Version-4.0.0.RC6-red.svg)](https://github.com/desiderati/springbloom/releases)
+[![Version](https://img.shields.io/badge/Version-4.0.0.RC7-red.svg)](https://github.com/desiderati/springbloom/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/springbloom.svg?label=GitHub%20Stars)](https://github.com/desiderati/springbloom/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/springbloom/blob/master/LICENSE)
 
@@ -41,7 +41,12 @@ Spring Bloom embraces the “convention over configuration” mindset, aiming to
 
 All project changes will be documented in this file.
 
-#### [4.0.0.RC6] - 2025-65-01
+#### [4.0.0.RC7] - 2025-06-08
+- Added `DefaultEmail` validation annotation and validator.
+- Updated copyright headers across files.
+- Enhanced Javadoc/comments for clarity.
+
+#### [4.0.0.RC6] - 2025-05-01
 - Rebranding to **SpringBloom.dev**.
 - Migrate project structure, packages, and identifiers from `io.herd.common` to `dev.springbloom`,
   ensuring consistent naming across modules, resources, and configurations.

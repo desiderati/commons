@@ -140,7 +140,7 @@ public class JwtAuthenticationConfiguration implements WebMvcConfigurer {
     @Value("${spring.web.security.jwt.authentication.authorities.parameter:authorities}")
     private String jwtAuthenticationAuthoritiesParameter;
 
-    @Value("${spring.web.security.jwt.authentication.delegation.base-path-url}")
+    @Value("${spring.web.security.jwt.authentication.delegation.base-path-url:}")
     private String jwtDelegateAuthenticationBasePathUrl;
 
     @Value("${spring.web.security.jwt.authentication.delegation.base-path-login:/authenticate}")

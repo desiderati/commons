@@ -107,14 +107,14 @@ class TypedValidationMethodInterceptor : MethodInterceptor {
     }
 
     /**
-     * Invoke the validator, and return the resulting typed validation exceptions.
+     * Invoke the validator and return the resulting typed validation exceptions.
      */
     private fun invokeValidatorForArguments(entities: List<TypedValidationEntity>): TypedValidationException? {
         return entities.map { entity -> invokeValidatorForReturnValue(entity) }.firstOrNull()
     }
 
     /**
-     * Invoke the validator, and return the resulting violations.
+     * Invoke the validator and return the resulting violations.
      */
     private fun invokeValidatorForReturnValue(entity: TypedValidationEntity): TypedValidationException? {
         return entity.isValid().fold(ifLeft = { it }, ifRight = { null })
@@ -123,7 +123,7 @@ class TypedValidationMethodInterceptor : MethodInterceptor {
     private fun isFactoryBeanMetadataMethod(method: Method): Boolean {
         val clazz = method.declaringClass
 
-        // Call from interface-based proxy handle, allowing for an efficient check?
+        // Call from an interface-based proxy handle, allowing for an efficient check?
         if (clazz.isInterface) {
             return ((clazz == FactoryBean::class.java || clazz == SmartFactoryBean::class.java) &&
                 method.name != "getObject")

@@ -47,7 +47,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Repeatable(Cnpj.List.class)
 public @interface Cnpj {
 
-    String message() default "{Cnpj.message}";
+    String message() default "{jakarta.validation.constraints.Cnpj.message}";
 
     Class<?>[] groups() default {};
 

@@ -59,7 +59,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Repeatable(Cpf.List.class)
 public @interface Cpf {
 
-    String message() default "{Cpf.message}";
+    String message() default "{jakarta.validation.constraints.Cpf.message}";
 
     Class<?>[] groups() default {};
 
