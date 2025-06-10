@@ -18,7 +18,7 @@
   -->
 
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="springbloom [mvn:deploy]" type="js.build_tools.npm">
+  <configuration default="false" name="springbloom [mvn:deploy]" type="js.build_tools.npm" folderName="🧰 springbloom">
     <package-json value="$PROJECT_DIR$/springbloom/package.json" />
     <command value="run" />
     <scripts>
