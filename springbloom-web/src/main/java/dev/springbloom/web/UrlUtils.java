@@ -21,6 +21,9 @@ package dev.springbloom.web;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 /**
  * Utility class for URL manipulation and standardization.
  * <p>
@@ -49,8 +52,18 @@ public class UrlUtils {
         if (StringUtils.isBlank(path)) {
             path = URL_PATH_SEPARATOR;
         } else {
-            // Some sanitization. (Replace all duplicated)
-            path = path.replaceAll(URL_PATH_SEPARATOR + "+", URL_PATH_SEPARATOR);
+            try {
+                URI uri = new URI(path);
+                String normalizedPath = uri.normalize().toString();
+
+                // `(?<!:)` - Negative Lookbehind
+                // The regular expression is applied only if there is no `:` Immediately before the URL separator.
+                path = normalizedPath.replaceAll("(?<!:)" + URL_PATH_SEPARATOR + "+", URL_PATH_SEPARATOR);
+            } catch (URISyntaxException e) {
+                // Some sanitization. (Replace all duplicated)
+                path = path.replaceAll(URL_PATH_SEPARATOR + "+", URL_PATH_SEPARATOR);
+            }
+
             if (path.endsWith(URL_PATH_SEPARATOR)) {
                 path = path.substring(0, path.length() - 1);
             }
@@ -68,7 +81,7 @@ public class UrlUtils {
      * @return the sanitized URL path
      */
     public String sanitize(String path) {
-        if (StringUtils.isBlank(path)) {
+        if (StringUtils.isBlank(path) || path.equals(URL_PATH_SEPARATOR)) {
             path = URL_PATH_SEPARATOR;
         } else {
             // Some sanitization. (Replace all duplicated)

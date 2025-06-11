@@ -1,5 +1,5 @@
 [![Build Status](https://github.com/desiderati/springbloom/workflows/Build/badge.svg)](https://github.com/desiderati/springbloom/actions)
-[![Version](https://img.shields.io/badge/Version-4.0.0.RC7-red.svg)](https://github.com/desiderati/springbloom/releases)
+[![Version](https://img.shields.io/badge/Version-4.0.0.RC8-red.svg)](https://github.com/desiderati/springbloom/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/springbloom.svg?label=GitHub%20Stars)](https://github.com/desiderati/springbloom/)
 [![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/springbloom/blob/master/LICENSE)
 
@@ -40,6 +40,14 @@ Spring Bloom embraces the “convention over configuration” mindset, aiming to
 ## Changelog
 
 All project changes will be documented in this file.
+
+#### [4.0.0.RC8] - 2025-07-15
+- Added `UrlUtils` class with comprehensive URL manipulation and standardization methods:
+  * `sanitizeUrl()` - Removes duplicate separators and trailing separators
+  * `sanitize()` - Ensures URLs start with a separator and removes duplicates
+  * `appendDoubleAsterisk()` - Adds "/**" to paths for wildcard URL matching
+  * `appendSlash()` - Ensures URLs end with a trailing slash
+- Added comprehensive test suite for URL utilities
 
 #### [4.0.0.RC7] - 2025-06-08
 - Added `DefaultEmail` validation annotation and validator.

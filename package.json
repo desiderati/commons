@@ -1,6 +1,6 @@
 {
   "name": "pringbloom",
-  "version": "4.0.0.RC7",
+  "version": "4.0.0.RC8",
   "scripts": {
     "mvn:deploy": "mvn -B -e -fn -Dmaven.wagon.http.pool=false clean deploy"
   },
