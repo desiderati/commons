@@ -1,7 +1,7 @@
 [![Build Status](https://github.com/desiderati/springbloom/workflows/Build/badge.svg)](https://github.com/desiderati/springbloom/actions)
 [![Version](https://img.shields.io/badge/Version-4.0.0.RC8-red.svg)](https://github.com/desiderati/springbloom/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/springbloom.svg?label=GitHub%20Stars)](https://github.com/desiderati/springbloom/)
-[![LICENSE](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://github.com/desiderati/springbloom/blob/master/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
@@ -36,6 +36,10 @@ Spring Bloom embraces the “convention over configuration” mindset, aiming to
 * [springbloom-logging-test](springbloom-logging-test/README.md)
 * [springbloom-web](springbloom-web/README.md)
 * [springbloom-web-security](springbloom-web-security/README.md)
+
+## Author
+
+Felipe Desiderati <felipedesiderati@springbloom.dev> (https://github.com/desiderati)
 
 ## Changelog
 
