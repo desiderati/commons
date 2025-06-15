@@ -1,5 +1,5 @@
 [![Build Status](https://github.com/desiderati/springbloom/workflows/Build/badge.svg)](https://github.com/desiderati/springbloom/actions)
-[![Version](https://img.shields.io/badge/Version-4.0.0.RC8-red.svg)](https://github.com/desiderati/springbloom/releases)
+[![Version](https://img.shields.io/badge/Version-4.0.0.RC9-red.svg)](https://github.com/desiderati/springbloom/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/desiderati/springbloom.svg?label=GitHub%20Stars)](https://github.com/desiderati/springbloom/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -44,6 +44,18 @@ Felipe Desiderati <felipedesiderati@springbloom.dev> (https://github.com/desider
 ## Changelog
 
 All project changes will be documented in this file.
+
+#### [4.0.0-RC9] - 2025-08-01
+- Reorganized security module structure for better organization and clarity:
+  * Moved authentication-related classes to `dev.springbloom.web.security.auth` package
+  * Grouped JWT, OAuth2, and sign request components in dedicated subpackages
+  * Relocated GraphQL security components to `dev.springbloom.web.security.graphql` package
+- Added new security features:
+  * Created `IsAdministrator` annotation for admin authorization checks
+  * Added `AuthenticatedUsernameArgumentResolver` for resolving usernames in controllers
+  * Implemented `SecurityGraphQLExceptionHandlerController` for GraphQL security exception handling
+- Added internationalization support for security exceptions:
+  * Added English (US) and Portuguese (BR) translations
 
 #### [4.0.0.RC8] - 2025-07-15
 - Added `UrlUtils` class with comprehensive URL manipulation and standardization methods:

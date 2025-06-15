@@ -18,13 +18,12 @@
  */
 package dev.springbloom.web.configuration;
 
-import graphql.schema.GraphQLScalarType;
 import dev.springbloom.data.jpa.configuration.JpaAutoConfiguration;
 import dev.springbloom.web.UrlUtils;
 import dev.springbloom.web.configuration.async.AsyncWebConfiguration;
 import dev.springbloom.web.graphql.NameSchemaDirectiveWiring;
-import dev.springbloom.web.graphql.PageableGraphQLArgumentResolver;
 import dev.springbloom.web.rest.exception.ResponseExceptionDTOHttpMessageConverter;
+import graphql.schema.GraphQLScalarType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.Type;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +33,7 @@ import org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource;
 import org.springdoc.webmvc.api.OpenApiActuatorResource;
 import org.springdoc.webmvc.api.OpenApiWebMvcResource;
 import org.springdoc.webmvc.ui.SwaggerConfigResource;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,12 +43,15 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.graphql.GraphQlAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.annotation.*;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.graphql.data.method.HandlerMethodArgumentResolver;
 import org.springframework.graphql.data.method.annotation.support.AnnotatedControllerConfigurer;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -67,6 +70,8 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 import static dev.springbloom.web.UrlUtils.URL_PATH_SEPARATOR;
 
@@ -116,6 +121,7 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
     private final String apiBasePath;
     private final Validator validator;
     private final EntityManager entityManager;
+    private final ListableBeanFactory beanFactory;
     private CorsProperties webCorsProperties;
 
     /**
@@ -130,13 +136,15 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
     public WebAutoConfiguration(
         @Value("${app.api-base-path:/api}") String apiBasePath,
         @Qualifier("customValidator") Validator validator,
-        ObjectProvider<EntityManager> entityManager
+        ObjectProvider<EntityManager> entityManager,
+        ListableBeanFactory beanFactory
     ) {
         this.apiBasePath = UrlUtils.sanitize(apiBasePath);
         log.info("Configuring RESTful API base path as: {}", this.apiBasePath);
 
         this.validator = validator;
         this.entityManager = entityManager.getIfAvailable();
+        this.beanFactory = beanFactory;
     }
 
     /**
@@ -394,20 +402,23 @@ public class WebAutoConfiguration implements WebMvcRegistrations, WebMvcConfigur
      * configuration, allowing GraphQL queries to use Spring Data's Pageable parameter for
      * pagination.
      * <p>
-     * The resolver is added to the AnnotatedControllerConfigurer if available.
-     *
-     * @param pageableArgumentResolver              The custom resolver for Pageable arguments in GraphQL queries.
-     * @param annotatedControllerConfigurerProvider Provider for the GraphQL controller configurer.
+     * If other modules define a {@link HandlerMethodArgumentResolver}, it will be registered here.
      */
-    @Autowired
-    public void configureArgumentResolvers(
-        PageableGraphQLArgumentResolver pageableArgumentResolver,
-        ObjectProvider<AnnotatedControllerConfigurer> annotatedControllerConfigurerProvider
+    @Bean
+    public AnnotatedControllerConfigurer annotatedControllerConfigurer(
+        @Qualifier(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
+        ObjectProvider<Executor> executorProvider,
+        List<HandlerMethodArgumentResolver> graphqlHandlerMethodArgumentResolvers
     ) {
-        var annotatedControllerConfigurer = annotatedControllerConfigurerProvider.getIfAvailable();
-        if (annotatedControllerConfigurer != null) {
-            annotatedControllerConfigurer.addCustomArgumentResolver(pageableArgumentResolver);
-            annotatedControllerConfigurer.afterPropertiesSet(); // Just to reload the argument resolvers list.
-        }
+        AnnotatedControllerConfigurer annotatedControllerConfigurer = new AnnotatedControllerConfigurer();
+        annotatedControllerConfigurer.addFormatterRegistrar(
+            (registry) -> ApplicationConversionService.addBeans(registry, this.beanFactory)
+        );
+        executorProvider.ifAvailable(annotatedControllerConfigurer::setExecutor);
+        graphqlHandlerMethodArgumentResolvers.forEach(it -> {
+            log.info("Registering graphqlHandlerMethodArgumentResolver: {}", it);
+            annotatedControllerConfigurer.addCustomArgumentResolver(it);
+        });
+        return annotatedControllerConfigurer;
     }
 }

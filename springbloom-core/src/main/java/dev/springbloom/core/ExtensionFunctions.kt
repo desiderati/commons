@@ -45,7 +45,7 @@ inline fun not(block: () -> Boolean): Boolean = !block()
 infix fun CharSequence?.contentNotEquals(other: CharSequence?): Boolean = not { contentEquals(other) }
 
 /**
- * Obtains the annotation which can be directly on the [MethodParameter] or on a custom annotation that
+ * Gets the annotation which can be directly on the [MethodParameter] or on a custom annotation that
  * is meta-annotated with it.
  */
 @Nullable

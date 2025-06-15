@@ -50,7 +50,7 @@ class GraphQLExceptionHandlerController(private val messageSource: MessageSource
     companion object {
         private val logNotSafe: Logger = LogKit.getNotPrivacySafeLogger(GraphQLExceptionHandlerController::class.java)
 
-        private const val DEFAULT_ERROR_CODE = "internal_server_error"
+        private const val DEFAULT_ERROR_CODE = "unexpected_condition_exception"
         private const val DEFAULT_ERROR_MESSAGE =
             "The server encountered an unexpected condition that prevented it from fulfilling the request!"
     }
@@ -60,12 +60,22 @@ class GraphQLExceptionHandlerController(private val messageSource: MessageSource
         undeclaredThrowableException: UndeclaredThrowableException,
         environment: DataFetchingEnvironment
     ): GraphQLError {
-        return generateGraphQLError(undeclaredThrowableException, environment)
+        return generateGraphQLError(
+            undeclaredThrowableException,
+            unwrapException(undeclaredThrowableException).message,
+            ErrorType.BAD_REQUEST,
+            environment
+        )
     }
 
     @GraphQlExceptionHandler(Throwable::class)
     fun handleException(throwable: Throwable, environment: DataFetchingEnvironment): GraphQLError {
-        return generateGraphQLError(throwable, environment)
+        return generateGraphQLError(
+            throwable,
+            unwrapException(throwable).message,
+            ErrorType.BAD_REQUEST,
+            environment
+        )
     }
 
     @GraphQlExceptionHandler(ApplicationException::class)
@@ -73,7 +83,12 @@ class GraphQLExceptionHandlerController(private val messageSource: MessageSource
         applicationException: ApplicationException,
         environment: DataFetchingEnvironment
     ): GraphQLError {
-        return generateGraphQLError(applicationException, environment)
+        return generateGraphQLError(
+            applicationException,
+            unwrapException(applicationException).message,
+            ErrorType.BAD_REQUEST,
+            environment
+        )
     }
 
     @GraphQlExceptionHandler(TypedValidationException::class)
@@ -81,60 +96,81 @@ class GraphQLExceptionHandlerController(private val messageSource: MessageSource
         typedValidationException: TypedValidationException,
         environment: DataFetchingEnvironment
     ): GraphQLError {
-        return generateGraphQLTypedValidationError(typedValidationException, environment)
+        return generateGraphQLTypedValidationError(
+            typedValidationException,
+            typedValidationException.message,
+            ErrorType.BAD_REQUEST,
+            environment
+        )
     }
 
-    private fun unwrapException(throwable: Throwable): Throwable =
+    fun unwrapException(throwable: Throwable): Throwable =
         if ((throwable is IllegalStateException || throwable is UndeclaredThrowableException) && throwable.cause != null)
-            throwable.cause!! else throwable
+            throwable.cause!!
+        else
+            throwable
 
-    protected fun generateGraphQLTypedValidationError(
+    fun generateGraphQLTypedValidationError(
         typedValidationException: TypedValidationException,
+        errorMsg: String?,
+        errorType: ErrorType,
         environment: DataFetchingEnvironment,
         extensions: Map<String, Any?> = mapOf()
     ): GraphQLError {
-        val exceptionParameters = DataFetcherExceptionHandlerParameters.newExceptionParameters()
-            .dataFetchingEnvironment(environment)
-            .exception(typedValidationException)
-            .build()
+        val exceptionParameters =
+            DataFetcherExceptionHandlerParameters.newExceptionParameters()
+                .dataFetchingEnvironment(environment)
+                .exception(typedValidationException)
+                .build()
 
-        val internalExtensions = mapOf("originalMessage" to typedValidationException.message.trim()).let {
-            if (typedValidationException.typedValidationErrors.isEmpty()) it else {
-                it.plus(Pair("typedValidationErrors", typedValidationException.typedValidationErrors))
+        val internalExtensions =
+            mapOf("originalMessage" to typedValidationException.message.trim()).let {
+                if (typedValidationException.typedValidationErrors.isEmpty()) it else {
+                    it.plus(Pair("typedValidationErrors", typedValidationException.typedValidationErrors))
+                }
             }
-        }
 
         return generateGraphQLErrorInternal(
             typedValidationException,
+            errorMsg,
+            errorType,
             exceptionParameters,
             extensions,
             internalExtensions
         )
     }
 
-    protected fun generateGraphQLError(
+    fun generateGraphQLError(
         throwable: Throwable,
+        errorMsg: String?,
+        errorType: ErrorType,
         environment: DataFetchingEnvironment,
         extensions: Map<String, Any?> = mapOf()
     ): GraphQLError {
         val unwrappedException = unwrapException(throwable)
 
-        val exceptionParameters = DataFetcherExceptionHandlerParameters.newExceptionParameters()
-            .dataFetchingEnvironment(environment)
-            .exception(unwrappedException)
-            .build()
+        val exceptionParameters =
+            DataFetcherExceptionHandlerParameters.newExceptionParameters()
+                .dataFetchingEnvironment(environment)
+                .exception(unwrappedException)
+                .build()
 
-        val internalExtensions = mapOf("originalMessage" to unwrappedException.message?.trim()).let {
-            if (exceptionParameters.argumentValues.isEmpty()) it else {
-                it.plus(Pair("argumentValues", exceptionParameters.argumentValues))
+        val internalExtensions =
+            mapOf("originalMessage" to unwrappedException.message?.trim()).let {
+                if (exceptionParameters.argumentValues.isEmpty()) it else {
+                    it.plus(Pair("argumentValues", exceptionParameters.argumentValues))
+                }
             }
-        }
 
-        return generateGraphQLErrorInternal(unwrappedException, exceptionParameters, extensions, internalExtensions)
+        return generateGraphQLErrorInternal(
+            unwrappedException, errorMsg, errorType, exceptionParameters, extensions, internalExtensions
+        )
     }
 
     private fun generateGraphQLErrorInternal(
         throwable: Throwable,
+        errorMsg: String?,
+        errorType: ErrorType,
         exceptionParameters: DataFetcherExceptionHandlerParameters,
         extensions: Map<String, Any?> = mapOf(),
         internalExtensions: Map<String, Any?> = mapOf(),
@@ -142,25 +178,30 @@ class GraphQLExceptionHandlerController(private val messageSource: MessageSource
         val internalServerError =
             getMessage(LocaleContextHolder.getLocale(), DEFAULT_ERROR_CODE, DEFAULT_ERROR_MESSAGE)
 
-        val errorMsg = getMessage(
+        val localizedErrorMessage = getMessage(
             LocaleContextHolder.getLocale(),
-            throwable.message ?: DEFAULT_ERROR_CODE,
+            errorMsg ?: DEFAULT_ERROR_CODE,
             internalServerError
         )
 
-        logException(errorMsg, throwable)
+        logException(localizedErrorMessage, throwable)
         return GraphqlErrorBuilder.newError()
-            .message(errorMsg)
+            .message(localizedErrorMessage)
             // Is this really necessary?
             //.locations(listOf(exceptionParameters.sourceLocation))
             .path(exceptionParameters.path)
             .extensions(extensions.plus(internalExtensions))
-            .errorType(ErrorType.BAD_REQUEST)
+            .errorType(errorType)
             .build()
     }
 
     @Suppress("SameParameterValue")
-    private fun getMessage(locale: Locale, code: String, defaultMessage: String, vararg args: Serializable): String {
+    private fun getMessage(
+        locale: Locale,
+        code: String,
+        defaultMessage: String,
+        vararg args: Serializable
+    ): String {
         return messageSource.getMessage(code, args, defaultMessage, locale)!!
     }
 
@@ -170,7 +211,7 @@ class GraphQLExceptionHandlerController(private val messageSource: MessageSource
      * @param errorMsg  the graphql error message.
      * @param exception the exception that happened.
      */
-    protected fun logException(errorMsg: String, exception: Throwable?) {
+    fun logException(errorMsg: String, exception: Throwable?) {
         logNotSafe.error(errorMsg, exception)
     }
 }

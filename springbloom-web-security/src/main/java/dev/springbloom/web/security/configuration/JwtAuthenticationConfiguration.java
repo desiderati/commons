@@ -21,29 +21,43 @@ package dev.springbloom.web.security.configuration;
 import dev.springbloom.data.multitenant.MultiTenantSupport;
 import dev.springbloom.web.UrlUtils;
 import dev.springbloom.web.configuration.CorsProperties;
-import dev.springbloom.web.security.jwt.JwtEncryptionMethod;
-import dev.springbloom.web.security.jwt.JwtKeys;
-import dev.springbloom.web.security.jwt.JwtService;
-import dev.springbloom.web.security.jwt.authentication.*;
+import dev.springbloom.web.security.auth.jwt.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationManagerResolver;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AbstractOAuth2Token;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestClient;
@@ -51,6 +65,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -63,9 +79,55 @@ import java.util.stream.Collectors;
  * for token generation, validation, and security context management.
  */
 @Configuration
-@ConditionalOnClass(org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter.class)
+@ConditionalOnClass(JwtClaimsSet.class)
 @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
 public class JwtAuthenticationConfiguration implements WebMvcConfigurer {
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnMissingBean(value = {
+        AuthenticationManager.class,
+        AuthenticationProvider.class,
+        UserDetailsService.class,
+        AuthenticationManagerResolver.class
+    })
+    @ConditionalOnProperty(name = "spring.web.security.jwt.authentication.enabled", havingValue = "true")
+    public static class InMemoryUserDetailsConfiguration {
+
+        private static final String NOOP_PASSWORD_PREFIX = "{noop}";
+
+        private static final Pattern PASSWORD_ALGORITHM_PATTERN = Pattern.compile("^\\{.+}.*$");
+
+        private static final Log logger = LogFactory.getLog(InMemoryUserDetailsConfiguration.class);
+
+        @Bean
+        public InMemoryUserDetailsManager inMemoryUserDetailsManager(
+            SecurityProperties properties,
+            ObjectProvider<PasswordEncoder> passwordEncoder
+        ) {
+            SecurityProperties.User user = properties.getUser();
+            List<String> roles = user.getRoles();
+            return new InMemoryUserDetailsManager(User.withUsername(user.getName())
+                .password(getOrDeducePassword(user, passwordEncoder.getIfAvailable()))
+                .roles(org.springframework.util.StringUtils.toStringArray(roles))
+                .build());
+        }
+
+        private String getOrDeducePassword(SecurityProperties.User user, PasswordEncoder encoder) {
+            String password = user.getPassword();
+            if (user.isPasswordGenerated()) {
+                logger.warn(String.format(
+                    "%n%nUsing generated security password: %s%n%nThis generated password is for development use only. "
+                        + "Your security configuration must be updated before running your application in "
+                        + "production.%n",
+                    user.getPassword()));
+            }
+
+            if (encoder != null || PASSWORD_ALGORITHM_PATTERN.matcher(password).matches()) {
+                return password;
+            }
+            return NOOP_PASSWORD_PREFIX + password;
+        }
+    }
 
     /**
      * Configuration class for HTTP clients security.
@@ -80,6 +142,7 @@ public class JwtAuthenticationConfiguration implements WebMvcConfigurer {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnProperty(value = {
+        "spring.web.security.jwt.authentication.enabled",
         "spring.web.http.clients.enabled",
         "spring.web.http.clients.decorate-with-auth-header",
     }, havingValue = "true")
@@ -185,11 +248,15 @@ public class JwtAuthenticationConfiguration implements WebMvcConfigurer {
         @Value("${spring.web.security.jwt.authentication.issuer:https://springbloom.dev/issuer}")
         String jwtIssuer,
 
-        @Value("${spring.web.security.jwt.authentication.audience}")
+        @Value("${spring.web.security.jwt.authentication.audience:}")
         String jwtAudience,
 
+        @Autowired
         JwtKeys jwtKeys,
-        org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter jwtConverter,
+
+        @Autowired(required = false)
+        @Qualifier("getJwtAuthenticationConverter")
+        Converter<Jwt, ?> jwtConverter,
 
         @Value("${spring.web.security.jwt.authentication.encryption-method:asymmetric}")
         JwtEncryptionMethod jwtEncryptionMethod,

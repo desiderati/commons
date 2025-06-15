@@ -74,7 +74,7 @@ To generate a signature for a request, the client needs to:
 Here's one of the possible examples of how to use the request signer with Spring's RestTemplate:
 
 ```java
-import dev.springbloom.web.security.sign.SignRequestService;
+import dev.springbloom.web.security.auth.sign.SignRequestService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

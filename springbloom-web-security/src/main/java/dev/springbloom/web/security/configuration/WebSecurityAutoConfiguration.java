@@ -20,21 +20,23 @@ package dev.springbloom.web.security.configuration;
 
 import dev.springbloom.web.UrlUtils;
 import dev.springbloom.web.configuration.WebAutoConfiguration;
-import dev.springbloom.web.security.jwt.authentication.JwtAuthenticationFilter;
-import dev.springbloom.web.security.sign.SignRequestAuthorizationFilter;
-import dev.springbloom.web.security.support.*;
+import dev.springbloom.web.security.*;
+import dev.springbloom.web.security.auth.jwt.JwtAuthenticationFilter;
+import dev.springbloom.web.security.auth.sign.SignRequestAuthorizationFilter;
+import dev.springbloom.web.security.graphql.UserDataGraphQLArgumentResolver;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.graphql.GraphQlAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.context.annotation.*;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.graphql.data.method.annotation.support.AnnotatedControllerConfigurer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -90,6 +92,7 @@ import static org.springframework.security.core.context.SecurityContextHolder.MO
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
+@AutoConfigureBefore(GraphQlAutoConfiguration.class)
 @PropertySource("classpath:application-springbloom-web-security.properties")
 @ComponentScan(basePackages = "dev.springbloom.web.security",
     // Do not add the auto-configured classes, otherwise the auto-configuration will not work as expected.
@@ -100,6 +103,64 @@ import static org.springframework.security.core.context.SecurityContextHolder.MO
     JwtAuthenticationConfiguration.class
 }) // To be used with @WebMvcTest
 public class WebSecurityAutoConfiguration {
+
+    @Configuration(proxyBeanMethods = false)
+    @AutoConfigureBefore(GraphQlAutoConfiguration.class)
+    public static class CustomArgumentResolversConfiguration {
+
+        /**
+         * Creates a service for retrieving the authenticated username.
+         * This bean provides a standardized way to access the current user's username
+         * across different parts of the application.
+         */
+        @Bean
+        @ConditionalOnMissingBean(AuthenticatedUsernameGetter.class)
+        public AuthenticatedUsernameGetter authenticatedUsernameGetter() {
+            return new AuthenticatedUsernameGetterImpl();
+        }
+
+        /**
+         * Creates a REST controller argument resolver for user data objects.
+         * <p>
+         * This resolver enables REST controllers to automatically inject complete user data
+         * objects into method parameters annotated with the appropriate annotation.
+         * Similar to the GraphQL version, but for standard Spring MVC controllers.
+         * <p>
+         * Only created when a UserDataRetriever implementation is available.
+         *
+         * @param authenticatedUsernameGetter The service for retrieving authenticated usernames
+         * @param userDataRetriever           The service for retrieving user data by username
+         */
+        @Bean
+        @ConditionalOnBean(UserDataRetriever.class)
+        public UserDataArgumentResolver userDataArgumentResolver(
+            AuthenticatedUsernameGetter authenticatedUsernameGetter,
+            UserDataRetriever<? extends UserData> userDataRetriever
+        ) {
+            return new UserDataArgumentResolver(authenticatedUsernameGetter, userDataRetriever);
+        }
+
+        /**
+         * Creates a GraphQL argument resolver for user data objects.
+         * <p>
+         * This resolver enables GraphQL operations to automatically inject complete user data
+         * objects into method parameters annotated with the appropriate annotation.
+         * It uses the authenticated username to retrieve the corresponding user data.
+         * <p>
+         * Only created when a UserDataRetriever implementation is available.
+         *
+         * @param authenticatedUsernameGetter The service for retrieving authenticated usernames
+         * @param userDataRetriever           The service for retrieving user data by username
+         */
+        @Bean
+        @ConditionalOnBean(UserDataRetriever.class)
+        public UserDataGraphQLArgumentResolver userDataGraphQLArgumentResolver(
+            AuthenticatedUsernameGetter authenticatedUsernameGetter,
+            UserDataRetriever<? extends UserData> userDataRetriever
+        ) {
+            return new UserDataGraphQLArgumentResolver(authenticatedUsernameGetter, userDataRetriever);
+        }
+    }
 
     @Value("${spring.web.security.form-based.authentication.enabled:false}")
     private boolean formBasedAuthenticationEnabled;
@@ -557,94 +618,5 @@ public class WebSecurityAutoConfiguration {
         @Qualifier(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME) AsyncTaskExecutor taskExecutor
     ) {
         return new DelegatingSecurityContextAsyncTaskExecutor(taskExecutor);
-    }
-
-    /**
-     * Creates a service for retrieving the authenticated username.
-     * This bean provides a standardized way to access the current user's username
-     * across different parts of the application.
-     */
-    @Bean
-    @ConditionalOnMissingBean(AuthenticatedUsernameGetter.class)
-    public AuthenticatedUsernameGetter authenticatedUsernameGetter() {
-        return new AuthenticatedUsernameGetterImpl();
-    }
-
-    /**
-     * Creates and registers a GraphQL argument resolver for authenticated usernames.
-     * <p>
-     * This resolver enables GraphQL operations to automatically inject the current username
-     * into method parameters annotated with the appropriate annotation.
-     * It also registers any available UserDataGraphQLArgumentResolver to support
-     * injecting complete user data objects.
-     * <p>
-     * The resolver is automatically registered with the GraphQL controller configurer.
-     *
-     * @param authenticatedUsernameGetter             The service for retrieving authenticated usernames
-     * @param userDataGraphQLArgumentResolverProvider Provider for user data resolver (if available)
-     * @param annotatedControllerConfigurerProvider   Provider for the GraphQL controller configurer
-     */
-    @Bean
-    public AuthenticatedUsernameGraphQLArgumentResolver authenticatedUsernameGraphQLArgumentResolver(
-        AuthenticatedUsernameGetter authenticatedUsernameGetter,
-        ObjectProvider<UserDataGraphQLArgumentResolver> userDataGraphQLArgumentResolverProvider,
-        ObjectProvider<AnnotatedControllerConfigurer> annotatedControllerConfigurerProvider
-    ) {
-        var authenticatedUsernameGraphQLArgumentResolver =
-            new AuthenticatedUsernameGraphQLArgumentResolver(authenticatedUsernameGetter);
-        var annotatedControllerConfigurer = annotatedControllerConfigurerProvider.getIfAvailable();
-        if (annotatedControllerConfigurer != null) {
-            annotatedControllerConfigurer.addCustomArgumentResolver(authenticatedUsernameGraphQLArgumentResolver);
-
-            var userDataGraphQLArgumentResolver = userDataGraphQLArgumentResolverProvider.getIfAvailable();
-            if (userDataGraphQLArgumentResolver != null) {
-                annotatedControllerConfigurer.addCustomArgumentResolver(userDataGraphQLArgumentResolver);
-            }
-
-            annotatedControllerConfigurer.afterPropertiesSet(); // Just to reload the argument resolvers list.
-        }
-        return authenticatedUsernameGraphQLArgumentResolver;
-    }
-
-    /**
-     * Creates a GraphQL argument resolver for user data objects.
-     * <p>
-     * This resolver enables GraphQL operations to automatically inject complete user data
-     * objects into method parameters annotated with the appropriate annotation.
-     * It uses the authenticated username to retrieve the corresponding user data.
-     * <p>
-     * Only created when a UserDataRetriever implementation is available.
-     *
-     * @param authenticatedUsernameGetter The service for retrieving authenticated usernames
-     * @param userDataRetriever           The service for retrieving user data by username
-     */
-    @Bean
-    @ConditionalOnBean(UserDataRetriever.class)
-    public UserDataGraphQLArgumentResolver userDataGraphQLArgumentResolver(
-        AuthenticatedUsernameGetter authenticatedUsernameGetter,
-        UserDataRetriever<? extends UserData> userDataRetriever
-    ) {
-        return new UserDataGraphQLArgumentResolver(authenticatedUsernameGetter, userDataRetriever);
-    }
-
-    /**
-     * Creates a REST controller argument resolver for user data objects.
-     * <p>
-     * This resolver enables REST controllers to automatically inject complete user data
-     * objects into method parameters annotated with the appropriate annotation.
-     * Similar to the GraphQL version, but for standard Spring MVC controllers.
-     * <p>
-     * Only created when a UserDataRetriever implementation is available.
-     *
-     * @param authenticatedUsernameGetter The service for retrieving authenticated usernames
-     * @param userDataRetriever           The service for retrieving user data by username
-     */
-    @Bean
-    @ConditionalOnBean(UserDataRetriever.class)
-    public UserDataArgumentResolver userDataArgumentResolver(
-        AuthenticatedUsernameGetter authenticatedUsernameGetter,
-        UserDataRetriever<? extends UserData> userDataRetriever
-    ) {
-        return new UserDataArgumentResolver(authenticatedUsernameGetter, userDataRetriever);
     }
 }

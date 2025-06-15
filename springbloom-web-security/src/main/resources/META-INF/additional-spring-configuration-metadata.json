@@ -6,7 +6,7 @@
     },
     {
       "name": "spring.web.security.sign-request.client",
-      "type": "dev.springbloom.web.security.sign.SignRequestClientProperties"
+      "type": "dev.springbloom.web.security.auth.sign.SignRequestClientProperties"
     }
   ],
   "properties": [
@@ -89,7 +89,7 @@
     {
       "name": "spring.web.security.jwt.authentication.encryption-method",
       "description": "It defines the encryption method to be used to encrypt/decrypt the JWT Token. Possible values: asymmetric, symmetric.",
-      "type": "dev.springbloom.web.security.jwt.JwtEncryptionMethod",
+      "type": "dev.springbloom.web.security.auth.jwt.JwtEncryptionMethod",
       "defaultValue": "asymmetric"
     },
     {
